@@ -28,7 +28,10 @@ import {
   validateRestoredRecords,
 } from "../contracts/records.js";
 import { checkpointWriteKind } from "./write-kind.js";
-import { validateChange } from "../contracts/transitions.js";
+import {
+  validateChange,
+  validateGenerationAuditPreservation,
+} from "../contracts/transitions.js";
 import { listAll, preflight } from "../storage/preflight.js";
 import {
   encode,
@@ -464,10 +467,16 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
       proposed[key] = value;
     }
     Object.assign(proposed, change.records ?? {});
+    validateGenerationAuditPreservation(
+      handle.records,
+      proposed,
+      change.reason,
+    );
     this.options.record_validator?.(
       proposed,
       handle.execution_scope,
       handle.workspace_id,
+      { previous_records: handle.records, reason: change.reason },
     );
     this.writing.add(handle.workspace_id);
     try {

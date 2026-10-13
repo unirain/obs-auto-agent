@@ -21,6 +21,7 @@ export class StageExecutor {
     if(input.semantic_policy_hash&&check.semantic_policy_hash!==input.semantic_policy_hash)throw new Error('semantic_policy_changed');
     if(prior?.status==='succeeded'){const result=await this.journal.result?.(prior.invocation_id);if(result===undefined)throw new Error('completed_result_missing_requires_reconciliation');return {invocation_id:prior.invocation_id,result};}
     await this.model.preflight?.(); // Capacity/G1 admission rejection proves SDK never started; do not create an ambiguous paid intent.
+    input.deadline.requireStart();
     const invocation_id=`inv_${randomUUID()}`;
     await this.journal.prepare({schema_version:1,invocation_id,execution_scope:input.task.execution_scope,subject_id:input.subject.subject_ref,capability:input.task.capability,
       input_hash:expected,context_hash:input.task.context_id,policy_hash:check.policy_hash!,model:input.model,sdk_version:SDK_VERSION,status:'prepared',messages:[],
@@ -40,7 +41,7 @@ export class StageExecutor {
       await this.journal.finish(invocation_id,success?'succeeded':'failed');if(!success)throw new Error('model_failed_known');if(policyFailed)throw new Error('policy_blocked');return {invocation_id,result:final};
     }catch(error){const wasAborted=controller.signal.aborted;controller.abort();
       if(error instanceof QueryNotStartedError&&!observedSdkMessage){await this.journal.observe(invocation_id,{message_id:`not_started_${invocation_id}`,summary:true,usage:{input_tokens:0,output_tokens:0,cost_usd:0,cost_status:'known'}},{request_started:false,reason:error.reason});await this.journal.finish(invocation_id,'failed');throw error;}
-      if(!terminal)await this.journal.finish(invocation_id,'unknown');throw error;}
+      if(!terminal){await this.journal.finish(invocation_id,'unknown');if(wasAborted&&input.deadline.abort_signal?.aborted)throw new Error('request_unknown:run_cancelled',{cause:error});}throw error;}
     finally{stopped=true;clearInterval(refresh);cancellation.close();}
   }
 }

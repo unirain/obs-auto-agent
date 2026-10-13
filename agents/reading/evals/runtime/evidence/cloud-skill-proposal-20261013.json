@@ -1,0 +1,37 @@
+{
+  "status": "linux_tool_verified",
+  "environment": "Linux Docker with network none, read-only root, no controller secrets",
+  "image_id": "sha256:66bc2e4d14f732be1da3e685e0337844c8c1dce01cbf3014094489e6561d1a7a",
+  "skill_commit": "38589ebab14db0156ae51d3d7c9fec90402fcaef",
+  "skill_bundle_hash": "18ac94df1f7952cd686ffe7f4367521e3bd925c8a66687dd12347dad6c1d5c28",
+  "skill_read": true,
+  "playbook_read": true,
+  "cloud_skill_adapted": true,
+  "isolation": {
+    "controller_secrets_absent": true,
+    "readonly_root_enforced": true,
+    "outbound_network_denied": true,
+    "host_filesystem_absent": true
+  },
+  "sdk_skill_activation": "not_exercised",
+  "model_review": "not_exercised",
+  "human_visual_review": "pending",
+  "g2": "not_passed",
+  "observed_at": "2026-10-13T14:13:48.335713+00:00",
+  "proposal_status": "local_review_proposal_not_published",
+  "base_commit": "edb8abf75690dae7fb9244c46cfe6d09babfe912",
+  "rendered": {
+    "source_hash": "94a14765c0164164001b6498f6cb58be13ac3095bdc4ab58d66a2d1cb4200a6d",
+    "png_hash": "41c8cd3fb49bf9f88ef54260156c0d6e932bd56f8439abe08e87c651a48e2d90",
+    "width": 1920,
+    "height": 1440,
+    "structural_check": "{\n  \"checks\": {\n    \"collisions\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"composition\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"geometry\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"markers\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"xml\": {\n      \"details\": [],\n      \"ok\": true\n    }\n  },\n  \"ok\": true\n}\n"
+  },
+  "agent_visual_review": {
+    "status": "passed",
+    "image_hash": "41c8cd3fb49bf9f88ef54260156c0d6e932bd56f8439abe08e87c651a48e2d90",
+    "observed": "Chinese labels and title are readable, no clipping or collisions, all arrows connect expected fixture nodes with legible legend. Technical fixture only; real article/model/human quality not exercised."
+  },
+  "optional_motion": "not_available_not_exercised",
+  "source_report": ".reading-local/linux-cloud-skill-proposal/report.json"
+}

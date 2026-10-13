@@ -196,7 +196,7 @@ describe("immutable workspace persistent protocol", () => {
         ...step(h),
         event: {
           type: "stage_completed",
-          from: "reviewing",
+          from: "validated",
           to: "ready_for_delivery",
         },
       }),

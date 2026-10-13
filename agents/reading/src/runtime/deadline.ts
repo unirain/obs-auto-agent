@@ -1,12 +1,12 @@
 import {effectiveRuntimeLimits,type ResolvedRuntimeLimits} from './limits.js';
 export class RunDeadline {
   readonly started_at:number;readonly deadline:number;readonly generation_deadline:number;
-  constructor(started_at=Date.now(),duration_ms=60*60_000,close_ms=5*60_000){if(!Number.isSafeInteger(started_at)||!Number.isSafeInteger(duration_ms)||!Number.isSafeInteger(close_ms)||duration_ms<=0||close_ms>=duration_ms||close_ms<0)throw new Error('invalid_deadline');this.started_at=started_at;this.deadline=started_at+duration_ms;this.generation_deadline=this.deadline-close_ms;}
-  mayStart(now=Date.now()):boolean{return now<this.generation_deadline;}
-  requireStart(now=Date.now()):void {if(!this.mayStart(now))throw new Error('run_deadline');}
+  constructor(started_at=Date.now(),duration_ms=60*60_000,close_ms=5*60_000,readonly abort_signal?:AbortSignal){if(!Number.isSafeInteger(started_at)||!Number.isSafeInteger(duration_ms)||!Number.isSafeInteger(close_ms)||duration_ms<=0||close_ms>=duration_ms||close_ms<0)throw new Error('invalid_deadline');this.started_at=started_at;this.deadline=started_at+duration_ms;this.generation_deadline=this.deadline-close_ms;}
+  mayStart(now=Date.now()):boolean{return !this.abort_signal?.aborted&&now<this.generation_deadline;}
+  requireStart(now=Date.now()):void {if(!this.mayStart(now))throw new Error(this.abort_signal?.aborted?'run_cancelled':'run_deadline');}
   signal(parent?:AbortSignal):{signal:AbortSignal;close:()=>void}{const controller=new AbortController();const timer=setTimeout(()=>controller.abort('run_deadline'),Math.max(0,this.generation_deadline-Date.now()));timer.unref();
-    const cancel=()=>controller.abort(parent?.reason);parent?.addEventListener('abort',cancel,{once:true});if(parent?.aborted)cancel();
-    return {signal:controller.signal,close:()=>{clearTimeout(timer);parent?.removeEventListener('abort',cancel);}};}
+    const sources=[parent,this.abort_signal].filter((value):value is AbortSignal=>!!value);const cancel=()=>controller.abort(sources.find(value=>value.aborted)?.reason);for(const source of sources){source.addEventListener('abort',cancel,{once:true});if(source.aborted)cancel();}
+    return {signal:controller.signal,close:()=>{clearTimeout(timer);for(const source of sources)source.removeEventListener('abort',cancel);}};}
 }
 export type Counters={tool_calls:number;supplementary_materials:number;revisions:number;stalled_batches:number;total_tool_calls:number;total_materials:number;download_bytes?:number;download_resources?:number;total_download_bytes?:number};
 export class BatchBudget {

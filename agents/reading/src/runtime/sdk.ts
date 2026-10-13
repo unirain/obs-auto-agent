@@ -53,7 +53,7 @@ export function sdkOptions(request:QueryRequest,secrets:SdkSecrets,home:string):
     {input:z.record(z.string(),z.unknown())},async({input})=>mcpToolContent(await definition.run(input))))});
   const allowed=request.tools.map(definition=>`mcp__reading__${definition.name}`);
   const skillActivation=request.tools.find(definition=>definition.name==='activate_skill');
-  return {cwd:request.cwd,model:request.model,env:{...sdkEnvironment(secrets,home),CLAUDE_CODE_MAX_OUTPUT_TOKENS:String(maxOutput)},abortController:controller,
+  return {cwd:request.cwd,model:request.model,env:{...sdkEnvironment(secrets,home),VAULT_ROOT:request.cwd,CLAUDE_CODE_MAX_OUTPUT_TOKENS:String(maxOutput)},abortController:controller,
     tools:request.skills?.length?['Skill']:[],allowedTools:request.skills?.length?[...allowed,'Skill']:allowed,disallowedTools:['Bash','Read','Write','Edit','Glob','Grep','WebFetch','WebSearch','Agent','Task','NotebookEdit'],
     mcpServers:{reading:mcp},settingSources:request.skills?.length?['project']:[],skills:request.skills??[],persistSession:false,permissionMode:'default',
     ...(request.skills?.length?{hooks:{PreToolUse:[{matcher:'Skill',hooks:[async hook=>{

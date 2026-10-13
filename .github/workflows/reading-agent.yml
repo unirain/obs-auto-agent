@@ -102,6 +102,25 @@ jobs:
       - run: npm run typecheck && npm test && npm run build
       - name: Validate scope without secrets
         run: npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/preview.json
+      - name: Verify trusted checked-in G1 evidence before generation
+        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
+        env:
+          READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
+          READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}
+        run: |
+          node --import tsx --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {readFile,realpath} from 'node:fs/promises';
+          import {resolve} from 'node:path';
+          import {assertG1Evidence} from './agents/reading/src/storage/gates.ts';
+          const path=process.env.READING_G1_EVIDENCE_PATH;
+          if(!path || !/^agents\/reading\/evals\/[A-Za-z0-9_./-]+\.json$/.test(path) || path.split('/').some(p=>!p || p==='.' || p==='..')) throw new Error('G1 evidence must be a checked-in non-secret eval JSON');
+          execFileSync('git',['ls-files','--error-unmatch','--',path],{stdio:'pipe'});
+          if(await realpath(path)!==resolve(path)) throw new Error('G1 evidence symlinks are forbidden');
+          const committed=execFileSync('git',['show',`HEAD:${path}`],{maxBuffer:4000000});
+          if(!committed.equals(await readFile(path))) throw new Error('G1 evidence must match trusted checkout HEAD');
+          await assertG1Evidence(path,process.env.READING_G1_EVIDENCE_SHA256);
+          NODE
       - name: Checkout quality examples and skills with readonly credential
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -111,17 +130,20 @@ jobs:
           token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           persist-credentials: false
       - name: Build fixed tool container without credentials
+        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
         run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
       - name: Run isolated preview
         run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/preview.json
         env:
           OSS_PREVIEW_CREDENTIALS: ${{ secrets.OSS_PREVIEW_CREDENTIALS }}
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ inputs.mode != 'publish-only' && secrets.DEEPSEEK_API_KEY || '' }}
           READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
           GITHUB_TOKEN: ${{ github.token }}
           READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
-          READING_TOOLS_IMAGE: reading-tools:local
+          READING_TOOLS_IMAGE: ${{ inputs.mode != 'publish-only' && 'reading-tools:local' || '' }}
+          READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
+          READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}
   production:
     needs: validate
     if: >-
@@ -153,6 +175,25 @@ jobs:
       - run: npm run typecheck && npm test && npm run build
       - name: Validate scope without secrets
         run: npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/production.json
+      - name: Verify trusted checked-in G1 evidence before generation
+        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
+        env:
+          READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
+          READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}
+        run: |
+          node --import tsx --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {readFile,realpath} from 'node:fs/promises';
+          import {resolve} from 'node:path';
+          import {assertG1Evidence} from './agents/reading/src/storage/gates.ts';
+          const path=process.env.READING_G1_EVIDENCE_PATH;
+          if(!path || !/^agents\/reading\/evals\/[A-Za-z0-9_./-]+\.json$/.test(path) || path.split('/').some(p=>!p || p==='.' || p==='..')) throw new Error('G1 evidence must be a checked-in non-secret eval JSON');
+          execFileSync('git',['ls-files','--error-unmatch','--',path],{stdio:'pipe'});
+          if(await realpath(path)!==resolve(path)) throw new Error('G1 evidence symlinks are forbidden');
+          const committed=execFileSync('git',['show',`HEAD:${path}`],{maxBuffer:4000000});
+          if(!committed.equals(await readFile(path))) throw new Error('G1 evidence must match trusted checkout HEAD');
+          await assertG1Evidence(path,process.env.READING_G1_EVIDENCE_SHA256);
+          NODE
       - name: Checkout quality examples and skills with readonly credential
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -162,19 +203,22 @@ jobs:
           token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           persist-credentials: false
       - name: Build fixed tool container without credentials
+        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
         run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
       - name: Run trusted production host
         run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/production.json
         env:
           OSS_WORKSPACE_CREDENTIALS: ${{ secrets.OSS_WORKSPACE_CREDENTIALS }}
-          OSS_IMAGE_CREDENTIALS: ${{ secrets.OSS_IMAGE_CREDENTIALS }}
+          OSS_IMAGE_CREDENTIALS: ${{ inputs.mode != 'publish-only' && secrets.OSS_IMAGE_CREDENTIALS || '' }}
           READING_GITHUB_APP: ${{ secrets.READING_GITHUB_APP }}
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ inputs.mode != 'publish-only' && secrets.DEEPSEEK_API_KEY || '' }}
           READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
           GITHUB_TOKEN: ${{ github.token }}
           READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
-          READING_TOOLS_IMAGE: reading-tools:local
+          READING_TOOLS_IMAGE: ${{ inputs.mode != 'publish-only' && 'reading-tools:local' || '' }}
+          READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
+          READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}
   integration:
     needs: validate
     if: >-
@@ -206,6 +250,25 @@ jobs:
       - run: npm run typecheck && npm test && npm run build
       - name: Validate scope without secrets
         run: npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/integration.json
+      - name: Verify trusted checked-in G1 evidence before generation
+        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
+        env:
+          READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
+          READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}
+        run: |
+          node --import tsx --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {readFile,realpath} from 'node:fs/promises';
+          import {resolve} from 'node:path';
+          import {assertG1Evidence} from './agents/reading/src/storage/gates.ts';
+          const path=process.env.READING_G1_EVIDENCE_PATH;
+          if(!path || !/^agents\/reading\/evals\/[A-Za-z0-9_./-]+\.json$/.test(path) || path.split('/').some(p=>!p || p==='.' || p==='..')) throw new Error('G1 evidence must be a checked-in non-secret eval JSON');
+          execFileSync('git',['ls-files','--error-unmatch','--',path],{stdio:'pipe'});
+          if(await realpath(path)!==resolve(path)) throw new Error('G1 evidence symlinks are forbidden');
+          const committed=execFileSync('git',['show',`HEAD:${path}`],{maxBuffer:4000000});
+          if(!committed.equals(await readFile(path))) throw new Error('G1 evidence must match trusted checkout HEAD');
+          await assertG1Evidence(path,process.env.READING_G1_EVIDENCE_SHA256);
+          NODE
       - name: Checkout quality examples and skills with readonly credential
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -215,16 +278,19 @@ jobs:
           token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           persist-credentials: false
       - name: Build fixed tool container without credentials
+        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
         run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
       - name: Run isolated production-scope acceptance
         run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/integration.json
         env:
           OSS_TEST_CREDENTIALS: ${{ secrets.OSS_TEST_CREDENTIALS }}
-          OSS_TEST_IMAGE_CREDENTIALS: ${{ secrets.OSS_TEST_IMAGE_CREDENTIALS }}
+          OSS_TEST_IMAGE_CREDENTIALS: ${{ inputs.mode != 'publish-only' && secrets.OSS_TEST_IMAGE_CREDENTIALS || '' }}
           TEST_GITHUB_APP: ${{ secrets.TEST_GITHUB_APP }}
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ inputs.mode != 'publish-only' && secrets.DEEPSEEK_API_KEY || '' }}
           READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
           GITHUB_TOKEN: ${{ github.token }}
           READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
-          READING_TOOLS_IMAGE: reading-tools:local
+          READING_TOOLS_IMAGE: ${{ inputs.mode != 'publish-only' && 'reading-tools:local' || '' }}
+          READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
+          READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}

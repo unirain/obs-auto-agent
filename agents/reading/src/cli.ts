@@ -7,6 +7,7 @@ import { parseCli, safeError } from "./app/cli-options.js";
 import { loadOssCredentials } from "./config/credentials.js";
 import { createObjectStore } from "./storage/oss.js";
 import { preflight } from "./storage/preflight.js";
+import {processCancellation} from './app/signals.js';
 
 async function main(): Promise<void> {
   const started_at = Date.now();
@@ -171,10 +172,13 @@ async function main(): Promise<void> {
     dispatch = { ...dispatch, preview_id: randomUUID() };
   await mkdir(resolve(options.local_root), { recursive: true });
   const { buildApplication } = await import("./app/bootstrap.js");
+  const cancellation=processCancellation();
+  try {
   const application = await buildApplication({
     deployment,
     dispatch,
     started_at,
+    abort_signal:cancellation.signal,
     local: options.local,
     local_root: resolve(options.local_root),
     notes_repository: resolve(options.notes_repository),
@@ -191,6 +195,8 @@ async function main(): Promise<void> {
     ["failed_collection", "partial", "deferred_work"].includes(report.outcome)
   )
     process.exitCode = 2;
+  if(cancellation.signal.aborted)process.exitCode=130;
+  }finally{cancellation.close();}
 }
 await main().catch((error) => {
   console.error(safeError(error));

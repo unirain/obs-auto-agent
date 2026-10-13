@@ -28,6 +28,12 @@ READING_SUBMISSION_ID=<stable-manual-submission-id-or-empty>
 
 所有 preview、production、integration writer 与清理使用固定全仓库 concurrency `reading-workspace-writer`，`cancel-in-progress: false`。watchdog 使用独立 `reading-watchdog-issues`。OSS 同序号禁止覆盖依旧是最终并发防护；Actions 等待队列不能替代持久候选队列。运行只接受默认分支可信代码；PR 和评论不触发付费或写入工作流。60 分钟 job 在最后五分钟收尾／中止 SDK，取消后进程停止，只能恢复最后成功提交的快照。
 
+生成前的 G1 证据来自 `reading-preview`／`reading-integration`／`reading-production` GitHub Environment 的两个非秘密 Variables：`READING_G1_EVIDENCE_PATH` 与 `READING_G1_EVIDENCE_SHA256`。路径须为默认分支检入的 `agents/reading/evals/.../*.json` 相对路径，不能包含 `.`／`..` 路径段或符号链接；hash 为该已审验文件原始字节的 SHA-256。应先提交完整真实隔离验收证据并人工核对，再配置这些变量。当前 `storage/fixtures/oss-live-evidence.json` 仍 incomplete，不能配置为通过证据。
+
+workflow 在注入模型／写凭据之前核对文件已跟踪、内容与可信 checkout HEAD 一致，并调用 `storage/gates.ts` 检查所有 G1 真实断言。读取模型输出、OSS 下载文件或仅修改 verified 标志均不能代替这一步；即使下载文件 hash 匹配，未被当前 HEAD 检入也会拒绝。host query admission 再用同一 Variables 校验。未配置或证据不完整时，生成任务停止是预期状态。
+
+`publish-only` 跳过 G1 生成门槛和工具镜像构建，并不注入模型或图床上传密钥；仍保留当前 workspace、目标 GitHub App、只读容量及 notes 读取能力用于交付对账。恢复出需要重分类／来源重验的项目时，应返回 needs_resume，再显式运行 resume，不能在 publish-only 内调用模型。
+
 ## Watchdog 事实
 
 `npm run reading -- watchdog --deployment <trusted-json>` 使用只读 OSS 和实现仓库 Issues 身份。来源事件必须来自候选与游标同一个提交；读取完整持久事件序列。Issue 以 `workspace|source_id|reason_code` 哈希标识，body 机器元数据保存 last_position；不写 workspace。创建／更新／评论响应不明时先分页查询已有机器标识，禁止重复 Issue 或重复事件评论。

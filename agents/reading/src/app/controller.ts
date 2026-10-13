@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Usage } from "../contracts/index.js";
 import type { Dispatch } from "../config/dispatch.js";
+import {dailyLogicalKey} from '../config/dispatch.js';
 import { intakeManual } from "../collect/intake.js";
 import {
   addCandidate,
@@ -98,6 +99,7 @@ export interface ControllerPorts {
 export type RunReport = {
   schema_version: 1;
   run_id: string;
+  logical_key:string;
   workspace_id: string;
   execution_scope: "preview" | "production";
   mode: Dispatch["mode"];
@@ -304,13 +306,16 @@ export class ReadingController {
     const scope = this.ports.journal.handle.execution_scope;
     if ((dispatch.mode === "preview") !== (scope === "preview"))
       throw new Error("controller_scope_mismatch");
+    const started=new Date(this.ports.deadline.started_at);
+    const logicalKey=`${this.ports.journal.handle.workspace_id.split('/')[0]}:reading:${dailyLogicalKey(started)}${scope==='preview'?':preview:'+this.ports.journal.handle.workspace_id.split('/').at(-1):''}`;
     const report: RunReport = {
       schema_version: 1,
       run_id: this.ports.journal.run_id,
+      logical_key:logicalKey,
       workspace_id: this.ports.journal.handle.workspace_id,
       execution_scope: scope,
       mode: dispatch.mode,
-      started_at: this.now().toISOString(),
+      started_at: started.toISOString(),
       finished_at: "",
       outcome: "deferred_work",
       source_results: [],
@@ -320,6 +325,9 @@ export class ReadingController {
       delivery_results: [],
       blocked_projects: [],
     };
+    const logicalRecordKey='logical-runs/'+digest(logicalKey);
+    const priorLogical=await this.ports.journal.load<{run_ids:string[]}>(logicalRecordKey);
+    await this.ports.journal.commit(logicalRecordKey,{schema_version:1,logical_key:logicalKey,workspace_id:this.ports.journal.handle.workspace_id,execution_scope:scope,run_ids:[...new Set([...(priorLogical?.run_ids??[]),report.run_id])]});
     // Reconcile before any new generation, freshness assessment or policy-dependent remote writing.
     if (scope === "production")
       for (const project of await this.projects())
@@ -472,7 +480,8 @@ export class ReadingController {
         reason: string,
       ) => {
         const priorCapability = project.pending_query?.capability;
-        project = { ...project, ...updated };
+        const committedState=project.state;
+        project = { ...project, ...updated,state:committedState };
         if (reason === "selection_result" && project.selection) {
           project.state =
             project.selection.decision === "research"
@@ -910,6 +919,10 @@ export class ReadingController {
         previous.project_id +
         "/g" +
         previous.generation_version]: {
+          schema_version:1,
+          project_id:previous.project_id,
+          workspace_revision:this.ports.journal.handle.revision,
+          counters:previous.counters,
           context_id: previous.context.context_id,
           generation_version: previous.generation_version,
           delivery_id: previous.delivery_id,

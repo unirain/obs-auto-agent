@@ -193,6 +193,10 @@ export type ScopedRecordValidator = (
   records: Record<string, JsonValue | null>,
   execution_scope: ExecutionScope,
   workspace_id: string,
+  context?: {
+    previous_records: Readonly<Record<string, JsonValue>>;
+    reason: string;
+  },
 ) => void;
 export type CheckpointResult =
   | {

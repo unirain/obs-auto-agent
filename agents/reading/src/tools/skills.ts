@@ -8,21 +8,25 @@ import {safeRelative,toolEnvironment} from './files.js';
 import {SandboxRunner,type SandboxMount,type ToolRuntimeBinding} from './sandbox.js';
 const exec=promisify(execFile);
 const skills=['obsidian-note','fireworks-tech-graph'] as const;
+export const READING_CLOUD_CONTRACT={schema_version:1,contract:'obs-reading-agent-cloud',version:1,documentation_marker:'reading-agent-cloud-contract: obs-reading-agent-cloud/v1',writing_tools:['activate_skill','read_skill_resource','render_diagram','download_source_image','read_image','record_visual_check'],review_tools:['read_image'],writing_material_access:'fixed_research_packet_only',outputs:['svg','png'],model_writes:false,model_uploads:false,runtime_installation:false,publication:'controller_only',preview_images:'relative'} as const;
+export const CLOUD_CONTRACT_PATH='.agents/skills/obsidian-note/references/reading-agent-cloud-contract.json';
+export function cloudSkillAdapted(contents:Record<string,string>):boolean{try{if(canonicalJson(JSON.parse(contents[CLOUD_CONTRACT_PATH]??'null'))!==canonicalJson(READING_CLOUD_CONTRACT))return false;const marker=`<!-- ${READING_CLOUD_CONTRACT.documentation_marker} -->`;return ['.agents/skills/obsidian-note/SKILL.md','.agents/skills/obsidian-note/references/diagram-playbook.md','.agents/skills/fireworks-tech-graph/SKILL.md'].every(path=>contents[path]?.includes(marker));}catch{return false;}}
+
 export type SkillBundle={commit:string;hash:string;files:Record<string,string>;root:string;adapted:boolean};
 export async function materializeSkills(repository:string,commit:string,root:string):Promise<SkillBundle>{
   if(!/^[a-f0-9]{40}$/.test(commit))throw new Error('skill_commit_not_fixed');
   const listing=await exec('git',['-C',repository,'ls-tree','-rz','--full-tree',commit,'--',...skills.map(skill=>`.agents/skills/${skill}`)],{maxBuffer:20_000_000});
-  const entries=listing.stdout.split('\0').filter(Boolean);if(!entries.length)throw new Error('skill_bundle_missing');const files:Record<string,string>={};let adapted=false;
+  const entries=listing.stdout.split('\0').filter(Boolean);if(!entries.length)throw new Error('skill_bundle_missing');const files:Record<string,string>={};const contents:Record<string,string>={};
   for(const entry of entries){const match=/^(\d+) blob ([a-f0-9]+)\t(.+)$/.exec(entry);if(!match||!['100644','100755'].includes(match[1]!))throw new Error('skill_symlink_or_type_denied');const relative=safeRelative(match[3]!);
     const result=await exec('git',['-C',repository,'show',`${commit}:${relative}`],{encoding:'buffer',maxBuffer:20_000_000});const bytes=result.stdout as Buffer;files[relative]=digest(bytes);
-    if(relative.endsWith('obsidian-note/SKILL.md'))adapted=bytes.toString().includes('VAULT_ROOT');
+    if(relative.endsWith('.md')||relative===CLOUD_CONTRACT_PATH)contents[relative]=bytes.toString();
     for(const view of ['.agents/skills','.claude/skills']){const dest=path.join(root,relative.replace('.agents/skills',view));await mkdir(path.dirname(dest),{recursive:true});await writeFile(dest,bytes,{mode:0o444});await chmod(dest,0o444);}
   }
   for(const skill of skills)if(!files[`.agents/skills/${skill}/SKILL.md`])throw new Error('skill_entry_missing');
   // Lock directories after every trusted file has been materialized. Restored OSS artifacts never supply these files.
   const dirs=new Set<string>();for(const relative of Object.keys(files))for(const view of ['.agents/skills','.claude/skills']){let directory=path.dirname(path.join(root,relative.replace('.agents/skills',view)));while(directory!==root){dirs.add(directory);directory=path.dirname(directory);}}
   for(const directory of [...dirs].sort((a,b)=>b.length-a.length))await chmod(directory,0o555);
-  return {commit,hash:digest(canonicalJson(files)),files,root,adapted};
+  return {commit,hash:digest(canonicalJson(files)),files,root,adapted:cloudSkillAdapted(contents)};
 }
 export async function readSkill(bundle:SkillBundle,skill:string,resource='SKILL.md'):Promise<string>{
   if(!skills.includes(skill as typeof skills[number]))throw new Error('skill_not_allowed');const relative=safeRelative(`.agents/skills/${skill}/${resource}`);const expected=bundle.files[relative];if(!expected)throw new Error('skill_resource_not_trusted');

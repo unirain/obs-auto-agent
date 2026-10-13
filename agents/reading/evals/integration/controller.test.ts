@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect,vi } from "vitest";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -238,6 +238,21 @@ describe("host lifecycle and durable mode boundaries", () => {
       expect(projects.find(p=>p.candidate.url.endsWith('/blocked'))).toMatchObject({state:'deferred',resume_policy:'manual',reason:'fixed_runtime_version_unavailable',counters:{revisions:0}});
       expect(projects.find(p=>p.candidate.url.endsWith('/allowed'))?.state).toBe('preview_ready');
     }finally{await f.cleanup();}
+  });
+  it('same Beijing daily key groups separate physical runs without discarding a newly submitted URL',async()=>{
+    const clock=vi.spyOn(Date,'now').mockReturnValue(Date.parse('2026-10-12T17:01:00Z'));
+    const f=await fixture('preview');try{
+      f.ports.now=()=>new Date('2026-10-12T17:01:00Z');
+      const first=await new ReadingController(f.ports).run(parseDispatch({input_urls:['https://example.org/first']}),'user');
+      const journal=new WorkspaceJournal(f.manager,await f.manager.restore(f.journal.handle.workspace_id),'run2');
+      const gate=new PolicyGate(async()=>policy,check=>journal.commit(`policy-checks/${check.check_id}`,check));
+      const environment=f.ports.environment;
+      const second=await new ReadingController({...f.ports,journal,gate,environment:async(project,commit)=>({...await environment(project,commit),gate})}).run(parseDispatch({input_urls:['https://example.org/second']}),'user');
+      expect(first.logical_key).toBe('obs-notes-hub:reading:2026-10-13:preview:test');expect(second.logical_key).toBe(first.logical_key);
+      const restored=await f.manager.restore(journal.handle.workspace_id);
+      const logical=Object.entries(restored.records).find(([key])=>key.startsWith('logical-runs/'))![1];expect(logical).toMatchObject({logical_key:first.logical_key,run_ids:['run1','run2']});
+      const projects=Object.entries(restored.records).filter(([key])=>key.startsWith('projects/'));expect(projects).toHaveLength(2);expect(projects.every(([,p])=>(p as unknown as HostProject).state==='preview_ready')).toBe(true);
+    }finally{await f.cleanup();clock.mockRestore();}
   });
   it("runs preview stages, seals private output and never calls Publisher", async () => {
     const f = await fixture("preview");

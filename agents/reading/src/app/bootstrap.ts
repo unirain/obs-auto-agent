@@ -146,6 +146,7 @@ export interface BuildApplicationOptions {
   runtime_versions_provider?:()=>Promise<Omit<RuntimeVersions,'model_version_status'>>;
   run_id?: string;
   started_at?: number;
+  abort_signal?:AbortSignal;
   capacity_provider?: () => Promise<GlobalCapacityInventory>;
   env?: NodeJS.ProcessEnv;
   allow_initialize?: boolean;
@@ -395,6 +396,7 @@ export async function buildApplication(
     model_base_url: deployment.model_base_url ?? "https://api.anthropic.com",
   } as const;
   const env = options.env ?? process.env;
+  if(!options.local&&env.READING_SHARED_MUTEX_HELD!=='true')throw new Error('storage_writer_mutex_unverified');
   const startedAt = env.READING_JOB_STARTED_AT
     ? Number(env.READING_JOB_STARTED_AT)
     : (options.started_at ?? Date.now());
@@ -540,6 +542,7 @@ export async function buildApplication(
     startedAt,
     Number(runtime.max_run_minutes ?? 60) * 60_000,
     Number(runtime.shutdown_reserve_minutes ?? 5) * 60_000,
+    options.abort_signal,
   );
   const gitCommit = await fixedGitCommit(options.notes_repository);
   const index = await gitNotes(options.notes_repository, gitCommit, deadline);

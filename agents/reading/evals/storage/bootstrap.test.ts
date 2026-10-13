@@ -1,4 +1,5 @@
 import { readInstalledSdkVersion } from "../../src/runtime/versions.js";
+import {READING_CLOUD_CONTRACT} from '../../src/tools/skills.js';
 import { FileObjectStore } from "../../src/storage/filesystem.js";
 import { ImmutableWorkspaceManager } from "../../src/workspace/manager.js";
 import { verifyContext, type ContextBundle } from "../../src/context/index.js";
@@ -67,12 +68,15 @@ async function fixture() {
   });
   await writeFile(
     join(notes, ".agents/skills/obsidian-note/SKILL.md"),
-    "Use VAULT_ROOT to read fixed note guidelines.",
+    "<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->\nUse VAULT_ROOT to read fixed note guidelines.",
   );
   await writeFile(
     join(notes, ".agents/skills/fireworks-tech-graph/SKILL.md"),
-    "Fixed diagrams.",
+    "<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->\nFixed diagrams.",
   );
+  await mkdir(join(notes,'.agents/skills/obsidian-note/references'),{recursive:true});
+  await writeFile(join(notes,'.agents/skills/obsidian-note/references/diagram-playbook.md'),'<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->\nFixed diagram rules.');
+  await writeFile(join(notes,'.agents/skills/obsidian-note/references/reading-agent-cloud-contract.json'),JSON.stringify(READING_CLOUD_CONTRACT));
   await mkdir(join(notes, "Organize Notes By AI"), { recursive: true });
   await writeFile(
     join(notes, "Organize Notes By AI/261013-Reference.md"),
@@ -296,9 +300,13 @@ it("local mode cannot acquire production capabilities and live preview requires 
         preview_id: "required",
       },
       notes_repository: f.notes,
-      env: {},
+      env: {READING_SHARED_MUTEX_HELD:'true'},
     }),
   ).rejects.toThrow("capacity_broker_credentials_unconfigured");
+});
+it('live host refuses a writer before reading credentials or initializing a workspace without the shared mutex',async()=>{
+ const f=await fixture();const env=new Proxy({} as NodeJS.ProcessEnv,{get(_target,key){if(key==='READING_SHARED_MUTEX_HELD')return undefined;throw new Error('must_not_read_credentials');}});
+ await expect(buildApplication({deployment:f.deployment,dispatch:{mode:'preview',input_urls:[],project_id:null,submission_id:null,preview_id:'mutex'},notes_repository:f.notes,env})).rejects.toThrow('storage_writer_mutex_unverified');
 });
 it("persistent G1 evidence requires every actual live assertion and trusted hash; partial probe cannot authorize generation", async () => {
   const root = await mkdtemp(join(tmpdir(), "gate-eval-"));
@@ -373,6 +381,7 @@ it("publish-only restores an isolated production-scope chain without loading mod
   const before = sandbox.providers.length;
   const env = new Proxy(
     {
+      READING_SHARED_MUTEX_HELD:'true',
       [deployment.workspace.credential_ref]: JSON.stringify({
         accessKeyId: "isolated-id",
         accessKeySecret: "isolated-secret",
@@ -442,6 +451,7 @@ it("real SDK adapter composition binds trusted DeepSeek provider and endpoint an
       reservations: [],
     }),
     env: {
+      READING_SHARED_MUTEX_HELD:'true',
       [f.deployment.workspace.credential_ref]: JSON.stringify({
         accessKeyId: "isolated-id",
         accessKeySecret: "isolated-secret",

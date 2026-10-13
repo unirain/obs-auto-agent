@@ -1,5 +1,15 @@
 # Reading Agent implementation log
 
+## 2026-10-13 Continuation: contract audit, cancellation and cloud skill proposal
+
+- The previous turn changed authoritative state: implementation 95be532 and evidence bae2cbb were pushed; both Linux CI runs passed. This turn found concrete G0/O5/A7 gaps and retained all external gates.
+- Actual reading-project states now share transition validation. Scoped checkpoints compare previous records, enforce stage outcomes, reject unexplained budget resets and preserve invocation facts plus archives for new generations. The controller preserves its committed state when later runtime budget callbacks arrive, avoiding a regression to the runtime's older stage value.
+- Live host construction rejects a missing shared mutex before credential reads or workspace initialization. Daily logical keys use job-origin time and Beijing date; physical runs remain distinct audit entries, and a cold second run with a new URL processes it despite the same daily key. SIGINT/SIGTERM propagate through the job deadline to the active SDK; persistent cancellation tests preserve observed unknown fees and prevent a new paid query after restart.
+- Actions generation now binds G1 evidence to trusted tracked default-branch bytes and the configured digest. Incomplete evidence still blocks. Publish-only receives no model/image write secrets and skips image-tool construction. Actual reading Actions concurrency/cancellation is still unverified.
+- A fixed local target-skill proposal 38589ebab14db0156ae51d3d7c9fec90402fcaef, based on latest target commit edb8abf, preserves existing long-form/local rules. Its versioned cloud contract replaces keyword detection; trusted prompts declare cloud mode. Real Linux materialization/rendering/browser/isolation and agent inspection passed. Native SDK activation and real article/human quality did not run. Original notes HEAD remains unchanged and proposal was not published; see docs/notes/cloud-skill-proposal.md.
+- Independent review now reads exact registered image pixels, persists a resource-manifest-bound receipt and rejects fabricated reuse/hash drift. Writing image receipts alone cannot validate independent review.
+- Final local checkpoint at 22:18 Asia/Shanghai: 62 files / 374 tests, typecheck, build, mapping and diff checks passed. Three live tests skipped; all 87 complete-layer acceptance cases remain pending. G0 foundation has local evidence, with five exact DTO/UTC/schema/combined-fixture follow-ups recorded in docs/notes/g0-contract-audit.md. Required restricted identities, test delivery resources and human labels remain unconfigured here; requested non-secret configuration while continuing local work.
+
 ## 2026-10-13 Continuation: persisted bodies and explicit generation input
 
 - Final local checkpoint at 21:44 Asia/Shanghai: 60 files / 360 tests passed; typecheck, build, acceptance mapping and diff checks passed. Three opt-in live tests remain skipped, and all 87 acceptance cases still lack complete layered proof. The prior implementation commit 1df6dfc passed Linux CI.
