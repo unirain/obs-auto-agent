@@ -58,3 +58,5 @@ Latest continuation: actual project transitions and fee/archive preservation are
 Continuation implementation 65cffd9 passed Linux CI (https://github.com/unirain/obs-auto-agent/actions/runs/38412794310). Follow-up explicitly binds SDK VAULT_ROOT to the existing project draft directory, rejects escape outside the trusted model view, and has SDK options/active-query wiring checks. Follow-up b49ab0a passed Linux Node 24 CI: https://github.com/unirain/obs-auto-agent/actions/runs/38413545670.
 
 2026-10-13 23:16: G0 contract gate passed locally. Exact RunReport records unknown provenance rather than inventing commits, preserves all 11 usage fields and closes policy references. GitHub readonly environment metadata reports zero configured environments; no reading Actions/native delivery verification was performed. All 87 full layered cases remain pending and G1–G5 remain unpassed.
+
+Implementation ec366b7 pushed to master and passed Linux Node 24 CI: https://github.com/unirain/obs-auto-agent/actions/runs/38421910653.
