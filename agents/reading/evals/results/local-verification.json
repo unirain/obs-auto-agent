@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-13T15:23:19.721645+00:00",
-  "implementation_sha256": "9c1c12c140ba2903526cea6dbdfd2159fbfff5ada9c66ee09b52eb122b32a1b6",
-  "fingerprint_files": 280,
+  "recorded_at": "2026-10-13T16:08:35.262012+00:00",
+  "implementation_sha256": "dbda3e1f4a52f501d140f43d0f5866d8e76de723cdc1be532228017edcf7df94",
+  "fingerprint_files": 287,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 69,
-    "passed": 394,
+    "files": 71,
+    "passed": 398,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "ec366b7d87e50a4ae9e9db143286188c7d137b4f",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38421910653",
     "environment": "Linux / Node 24.10.0",
     "scope": "G0/local contract replay only; no native model, RAM, GitHub/image or human quality acceptance"
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "b49ab0a04990aaedaaeda0867cf73f24c3d8feb2",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38413545670",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local contract/replay suite only; no live model/IAM/delivery/human acceptance"
   },
   "schema_documents": {
     "count": 38,
@@ -48,5 +44,12 @@
   "contract_gate": {
     "G0": "complete",
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
-  }
+  },
+  "local_case_audit": {
+    "covered": 30,
+    "partial": 54,
+    "missing": 3,
+    "cases_with_local_remaining": 57
+  },
+  "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance."
 }

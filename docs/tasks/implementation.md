@@ -22,7 +22,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | A6 | runtime/root | live_unverified | Bounded reading, material closure, retrieved-note versions, semantic progress and Docker JS fallback locally verified; actual model/research evidence pending |
 | A7 | runtime/root | in_progress | Versioned cloud contract and independent image review locally verified; fixed local proposal 38589eb passed real Linux rendering/isolation; target review/publication and live SDK/article quality pending |
 | A8 | runtime/root | live_unverified | Actual driver replay, independent manual barriers and source/policy recovery locally verified; five varied real previews pending |
-| A9 | runtime/root | blocked_external | Evaluation set and human quality confirmation |
+| A9 | runtime/root | in_progress | Frozen corpus/result binding and inspect/freeze/report locally verified; 30 labels and fixed body versions missing; real eval runner/model/human calibration pending |
 | O1 | operations | live_unverified | Trusted deployments and permissions |
 | O2 | operations | live_unverified | Immutable resource upload |
 | O3 | operations | live_unverified | Publisher and reconciliation |
@@ -43,7 +43,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 External configuration: implementation repository unirain/obs-auto-agent is connected on default branch master, preserving the initial Apache License. obs-agent in Beijing supplied and native OSS core probe passed. DEEPSEEK_API_KEY is visible to host; read-only model catalog confirms deepseek-flash. Distinct restricted RAM identities, separate GitHub test repository/App and public image test prefix remain unprepared. Human dataset labels and quality confirmation remain required. No secret values belong in this document.
 
-Evidence checkpoint: 394 local tests in 69 files passed at 2026-10-13 23:16 Asia/Shanghai; typecheck/build, mapping and diff checks passed. Sanitized command results and implementation fingerprint: agents/reading/evals/results/local-verification.json. Three opt-in live tests remain skipped. SDK child isolation and Docker JS/render probes are actual local evidence only. Core OSS evidence is partial; RAM/transport evidence and full service/human gates are still missing. All 87 spec cases remain pending complete layered proof.
+Evidence checkpoint: 398 local tests in 71 files passed at 2026-10-13 23:55 Asia/Shanghai; typecheck/build, mapping and diff checks passed. Sanitized command results and implementation fingerprint: agents/reading/evals/results/local-verification.json. Three opt-in live tests remain skipped. SDK child isolation and Docker JS/render probes are actual local evidence only. Core OSS evidence is partial; RAM/transport evidence and full service/human gates are still missing. All 87 spec cases remain pending complete layered proof.
 
 Implementation commit `95be532` is pushed to `origin/master`; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38407803369). The implementation repository is still separate from the missing delivery test repository/App.
 
@@ -51,7 +51,7 @@ Implemented in this continuation: audited fixed-input manual invocation recovery
 
 Implemented in the latest continuation: logical file chunking above the physical blob limit; project-body references and bounded lazy loading; authenticated history GC; scoped control DTO validation; explicit changed-input generation and atomic feedback; actual installed SDK/native binary and tool-image binding; trusted runtime limits, freshness/watchdog durations and storage declarations; RSS/Atom and unsupported media receipts. Final local command evidence is recorded above; these changes do not prove live gates.
 
-Implementation follow-ups before full acceptance: deliver and consume a fixed cloud-adapted skill commit; exercise full host fault cases and attach concrete evidence to individual acceptance cases. External service/human gates above remain unchanged. Completion is still unproven.
+Implementation follow-ups before full acceptance: deliver and consume a fixed cloud-adapted skill commit; close the 57 explicitly identified local scenario gaps in docs/notes/spec-case-audit.md, then re-audit their assertions; run the frozen evaluation through real model execution and human calibration. Per-case evidence now records actual test names/proved scope and missing layers. External service/human gates above remain unchanged. Completion is still unproven.
 
 Latest continuation: actual project transitions and fee/archive preservation are enforced before checkpoint; daily logical keys group physical runs without skipping new URLs; cancellation persists unknown outcomes; workflow G1 evidence is pinned to tracked default-branch bytes, and publish-only excludes model/image credentials. Cloud skill proposal and evidence: docs/notes/cloud-skill-proposal.md. The five G0 contract follow-ups are now closed; fuller plan-level host fault evidence and case-by-case layered acceptance mapping remain; external gates remain unchanged.
 
@@ -60,3 +60,5 @@ Continuation implementation 65cffd9 passed Linux CI (https://github.com/unirain/
 2026-10-13 23:16: G0 contract gate passed locally. Exact RunReport records unknown provenance rather than inventing commits, preserves all 11 usage fields and closes policy references. GitHub readonly environment metadata reports zero configured environments; no reading Actions/native delivery verification was performed. All 87 full layered cases remain pending and G1–G5 remain unpassed.
 
 Implementation ec366b7 pushed to master and passed Linux Node 24 CI: https://github.com/unirain/obs-auto-agent/actions/runs/38421910653.
+
+87-case audit: local covered 30, partial 54, missing 3; 57 cases have explicit local remaining requirements. These are scope assessments of actual assertions, not executed live passes. All full-layer statuses remain pending. Evaluation readiness inspected the actual candidate document: 30 samples, 10 holdout, 30 unlabeled, 30 lacking frozen source body versions.

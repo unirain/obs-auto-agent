@@ -1,0 +1,891 @@
+{
+  "schema_version": 1,
+  "case_indices_range": [
+    58,
+    86
+  ],
+  "cases": [
+    {
+      "id": "C059",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/recovery.test.ts",
+          "test_name": "unchanged expired sources refresh immutable delivery atomically and reuse existing expected commit/branch",
+          "proves": "MemoryJournal保存d1 superseded/d2，恢复Publisher沿用generation_version=1；写调用恰为objects/branch/pr各一次，没有再推旧分支。"
+        },
+        {
+          "file": "agents/reading/evals/storage/reading-transitions.test.ts",
+          "test_name": "only explicit changed inputs produce g+1; operator preserves source allowance and source changes reset it with registered evidence",
+          "proves": "直接检查source_changed_new_generation允许g+1并拒绝用普通stage_completed重置；这是转换规则测试，不是实际来源变化的controller重审。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺完整controller冷恢复回放：过期后真实verifySources返回变化，归档旧交付、建立g+1、完成重新研究/审校，并断言旧Git分支未写入。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "在隔离测试仓库验证旧分支/commit与PR状态核对后续建或新版本交付，保持旧分支字节不变。"
+        }
+      ]
+    },
+    {
+      "id": "C060",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/tools.test.ts",
+          "test_name": "truncated or oversized download never becomes evidence",
+          "proves": "受限网关对声明50字节实际tiny的下载抛truncated_download，未形成MaterialSnapshot。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "hash corruption of referenced blob stops restoration instead of dropping the file",
+          "proves": "对已提交blob注入corrupt读后restore拒绝；取消故障后同一不可变HEAD恢复原record，没有初始化或丢弃文件。"
+        },
+        {
+          "file": "agents/reading/evals/storage/chunks.test.ts",
+          "test_name": "a crash after physical chunks cannot expose a partial logical file; retry and missing/corrupt-chunk restart are strict",
+          "proves": "物理chunk已写而manifest失败不暴露逻辑文件；重试及冷恢复对缺失/损坏chunk严格拒绝。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实OSS传输截断、内容损坏及同一稳定blob/chunk重新读取必须重现拒绝与恢复，不能由FileObjectStore故障替身证明。"
+        }
+      ]
+    },
+    {
+      "id": "C061",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "rejects preview, modified hashes, illegal paths, symlinks and stale validation",
+          "proves": "validateDelivery实际拒绝.github/workflows/pwn.yml和symlink声明，重新计算validated_hash仍不能掩盖文件字节hash/size冲突。"
+        },
+        {
+          "file": "agents/reading/evals/operations/workflows.test.ts",
+          "test_name": "preview only receives preview/model/read capability and validates before secret injection",
+          "proves": "解析真实workflow并断言Validate scope先于Run isolated preview；未执行恶意交付manifest的独立Actions校验。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺执行Actions交付校验入口的恶意manifest回放；已有直接validateDelivery拒绝不能独自证明独立job实际拒绝该输入。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "隔离Actions运行传入workflow/非法路径交付manifest，确认无Git对象/分支/PR写入。"
+        }
+      ]
+    },
+    {
+      "id": "C062",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/context/context.test.ts",
+          "test_name": "new generation version changes context id; original context remains reproducible",
+          "proves": "旧Context仍verify成功，新skill_commit改变context_id；未覆盖真实Git默认分支更新时两个项目同时选择不同固定版本。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/limits-versions.test.ts",
+          "test_name": "SDK fixed version comes from installed executable bytes; runtime versions bind context and incompatibility refuses restoration",
+          "proves": "读取安装SDK/native字节hash；固定runtime缺失或SDK/image identity改变时verifyRuntimeVersions拒绝。"
+        },
+        {
+          "file": "agents/reading/evals/integration/controller.test.ts",
+          "test_name": "unavailable fixed runtime stops only its project and cold restart preserves the manual barrier",
+          "proves": "环境port注入fixed_runtime_version_unavailable后仅该项目manual暂停；真实FileStore冷恢复保留原因/计数，其他项目达到preview_ready。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺真实Git skill/正例/提示词更新后：旧活跃项目继续原bytes，新项目取新bytes，同时最新限制生效的完整bootstrap回放。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK读取旧固定skill/提示词视图与新项目视图，验证没有默默替换。"
+        }
+      ]
+    },
+    {
+      "id": "C063",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/policy/gate.test.ts",
+          "test_name": "disabled provenance cannot be repackaged as manual, redirect cannot expand allowance",
+          "proves": "停用claude_resources后manual身份的同源请求仍被拒绝，不因人工入口洗掉provenance。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "cached success still rechecks current revoked permission",
+          "proves": "已成功query的缓存也在global pause后被最新PolicyGate拒绝。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "changed semantic rules archive a known old outcome, classify again, and only then resume research with the fixed generation",
+          "proves": "semantic hash变化经过settlement并仅重新受限分类，allowed后才恢复research；并非排除结果/停用来源的完整交付阻断回放。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺已积压项目命中新主题排除/停用核心来源，冷恢复后同时断言research调用、image.create、Git写入均为0的组合测试。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实供应方验证撤销后没有新深入研究请求。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "停用/暂停期间的实际图床和GitHub写权限拒绝/控制边界仍需真实资源验证。"
+        }
+      ]
+    },
+    {
+      "id": "C064",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/collect/sources.test.ts",
+          "test_name": "normal pagination yields never create false source incidents, while mid-run policy revocation suppresses read",
+          "proves": "fetch抛source_disabled后结果disabled、attempted_at=null，未制造来源读取故障。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/resources.test.ts",
+          "test_name": "policy revocation and hash conflicts prevent upload",
+          "proves": "第二次权限检查撤销时image writes=0且保留预留。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "stops at every write boundary after current policy is revoked",
+          "proves": "materialize后撤销只留下objects一次；下次Publisher仅返回policy_blocked，不创建分支/PR。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "没有把active_query_refresh计时器触发的策略撤销跑到进行中ModelAdapter并断言abort、未知回执和冷恢复不重付；SIGTERM测试不能替代策略刷新场景。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK多步query刷新后取消/停止工具与provider实际回执行为。"
+        },
+        {
+          "layer": "image_live",
+          "requirement": "真实图床撤销时的上传边界。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "真实GitHub每次写边界撤销及只读对账。"
+        }
+      ]
+    },
+    {
+      "id": "C065",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "stops at every write boundary after current policy is revoked",
+          "proves": "已保存写入意图/objects后撤销，后续Publisher返回policy_blocked，写调用不增加。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
+          "proves": "已存在PR时permission恒抛paused，仍只读观察open/closed/merged事实，写调用长度不变。"
+        },
+        {
+          "file": "agents/reading/evals/integration/controller.test.ts",
+          "test_name": "keeps publishing after an uncertain PR result and only reconciles on the next run",
+          "proves": "FileStore保存publishing，下一实例effects仅reconcile，无publish。该测试的不确定回执与暂停测试分别覆盖两条边界。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "隔离仓库持久publishing意图后全局暂停，实际branch/PR读取可用而所有创建/补推次数为0。"
+        }
+      ]
+    },
+    {
+      "id": "C066",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/policy/gate.test.ts",
+          "test_name": "unreadable latest policy and failed policy checkpoint never grant an effect",
+          "proves": "最新load失败返回unavailable，政策提交unknown时require抛错，不回退旧许可。"
+        },
+        {
+          "file": "agents/reading/evals/policy/gate.test.ts",
+          "test_name": "two queries include one format repair and attempts persist across resume",
+          "proves": "reserveClassification第三次调用被policy_review_required拒绝，计数不会因相同binding恢复归零。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "unknown old calls survive changed semantics and block every next run without another model request",
+          "proves": "跨两个恢复轮次request_unknown阻塞，保留旧语义绑定且模型调用不增加；此处测试的是unknown账本，不是unresolved内容分类。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺真实driver连续两次返回content_eligibility=unresolved后的持久manual barrier、第三次恢复无模型/上传/发布，以及policy读失败对这些effects的组合断言。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实模型未决分类和策略读取失败时无隐式重试。"
+        }
+      ]
+    },
+    {
+      "id": "C067",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
+          "proves": "新暂停命中已建PR只记录远端状态，不修改或关闭。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "changed semantic rules archive a known old outcome, classify again, and only then resume research with the fixed generation",
+          "proves": "重分类后context_id不变，classified allowed后才有research调用。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺先暂停活跃项目再解除相同限制、冷恢复原证据/skill/sample bytes与计数，并继续原阶段而不重做已完成阶段的完整回放。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "限制命中真实既有PR时不自动重写/关闭。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "解除后真实SDK仍载入原固定生成版本。"
+        }
+      ]
+    },
+    {
+      "id": "C068",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/contracts/cli.test.ts",
+          "test_name": "defaults manual URL work to preview and treats URLs as data",
+          "proves": "真实CLI parser缺省输入URL时mode=preview。"
+        },
+        {
+          "file": "agents/reading/evals/storage/bootstrap.test.ts",
+          "test_name": "wired local preview uses real durable manager, controlled source/classifier and no remote publication on next run",
+          "proves": "真实buildApplication+FileStore+受控正文/分类回放保存preview scope和skipped项目；冷启动不再分类且delivery键为空。"
+        },
+        {
+          "file": "agents/reading/evals/integration/controller.test.ts",
+          "test_name": "runs preview stages, seals private output and never calls Publisher",
+          "proves": "controller替身阶段跑完selection/research/writing/review，私有outputs提交、success_preview持久；seen不含publisher。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实隔离preview workspace和私有产物读取。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "preview身份不能访问正式写前缀/图床/Publisher。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "单URL真实四阶段preview，不能把stage/model回放当质量结果。"
+        }
+      ]
+    },
+    {
+      "id": "C069",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects hostile persistence paths, symlinks and unauthorized scope",
+          "proves": "production manager不能恢复preview_id；改变handle.execution_scope不能提交。"
+        },
+        {
+          "file": "agents/reading/evals/collect/intake.test.ts",
+          "test_name": "commits receipt and candidate atomically; lost reply replay never resets skipped/pending",
+          "proves": "同一scope提交重放保留既有closed/project/PR状态；不证明两个scope对同URL独立判断。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺同URL preview skip和preview_ready两个分支之后分别正式scheduled入队的双workspace测试，逐项断言正式游标、identity与项目状态没有读到preview结果。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实preview/production前缀的同URL独立状态。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "实际IAM不能跨前缀回写控制记录。"
+        }
+      ]
+    },
+    {
+      "id": "C070",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/modes.test.ts",
+          "test_name": "preview capabilities remain absent even if a production manifest is forged",
+          "proves": "preview executionTarget拒绝publisher/image/watchdog credentials，拒绝scheduled和伪造production deployment/image配置。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects malformed JSON schema and illegal preview state transitions",
+          "proves": "preview不能通过非法控制状态晋升交付能力。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "rejects preview, modified hashes, illegal paths, symlinks and stale validation",
+          "proves": "production Publisher validator拒绝preview交付manifest。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "ram_live",
+          "requirement": "实际preview凭据缺失/拒绝正式OSS和图床写入。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "隔离Actions验证伪造发布参数不能取得App写凭据或创建PR。"
+        }
+      ]
+    },
+    {
+      "id": "C071",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/modes.test.ts",
+          "test_name": "manual defaults preview; four modes reject scope crossings and new URLs on resume",
+          "proves": "publish-only携带preview_id明确throw，resume/publish-only不接受新URL。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects hostile persistence paths, symlinks and unauthorized scope",
+          "proves": "production恢复preview namespace被scope拒绝；只能preview manager对应身份恢复。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实已有preview_id经正式resume/publish-only入口仍拒绝，preview续跑成功。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "实际namespace权限验证不能以参数切换scope。"
+        }
+      ]
+    },
+    {
+      "id": "C072",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "seals only committed reviewed scope files and detects mutation",
+          "proves": "sealPreviewIfReviewPassed的publish_checks为not_exercised且sealDelivery拒绝preview。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "independent review receives native pixels and persistent receipts; lost final checkpoint reuses the same known paid reply without a new query",
+          "proves": "使用实际PNG fixture/native image block和模型回放，独立review后preview validated；丢失最终CP复用同query/image receipt。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺对controller提交的previews/<id>.checks三个not_exercised字段及PNG相对Markdown引用的同时断言；现seal字段不是整份preview报告的完整证明。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实供应方收到图片像素并完成独立审校。"
+        },
+        {
+          "layer": "human_quality",
+          "requirement": "用户核对相对图片渲染、内容与图文深度；不宣称正式上传/PR链路通过。"
+        }
+      ]
+    },
+    {
+      "id": "C073",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/workflows.test.ts",
+          "test_name": "keeps production cron absent and serializes every writer under one fixed group",
+          "proves": "真实workflow production/preview/integration共用reading-workspace-writer、cancel-in-progress=false。"
+        },
+        {
+          "file": "agents/reading/evals/storage/broker.test.ts",
+          "test_name": "capacity broker requires explicit all-scope bindings and never falls back to account credential file",
+          "proves": "缺production+preview全scope库存绑定和图床库存时broker拒绝，未回退账号凭据。"
+        },
+        {
+          "file": "agents/reading/evals/storage/usage-ledger.test.ts",
+          "test_name": "FileStore restart preserves one query, deduplicates message replay, uses cumulative summary once and partitions run/day/project/scope",
+          "proves": "冷恢复费用记录按scope/run/day/project分组，摘要不双计。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺两个真实FileStore manager模拟preview/production同时申请的统一预留互斥及不交叉改控制状态回放；workflow静态group与纯费用汇总不能代替该竞争场景。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实共享库存与预留竞争下50GB合计边界。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "broker/两个writer的最小权限和scope隔离。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "Actions实际并发排队互斥验证。"
+        }
+      ]
+    },
+    {
+      "id": "C074",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects hostile persistence paths, symlinks and unauthorized scope",
+          "proves": "提交.claude/skills/bad、.env、scratch和可执行shell文件全部拒绝，不能进入恢复清单。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/cloud-skill-patch.test.ts",
+          "test_name": "mentions of VAULT_ROOT or partially advertised tool support do not count as a valid cloud adapter",
+          "proves": "单关键词、不完整marker和model_uploads=true伪声明不获adapted能力。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "review lacks validation authority without fixed skill text, and filename sanitization happens before binding",
+          "proves": "缺固定规范文本不能启动review模型或获得validated。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实篡改恢复输入与固定Git注入不能覆盖skill/code；实际恢复链仍严格拒绝不允许路径。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "Native Skill真正从固定只读Git视图加载，不能用OSS文件取代。"
+        }
+      ]
+    },
+    {
+      "id": "C075",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "protects HEAD blobs and permanent commits; confirmed lost delete response is idempotent",
+          "proves": "老时间下GC删orphan、保留HEAD提交，restore原record仍正确；第二次删操作不重复。"
+        },
+        {
+          "file": "agents/reading/evals/storage/chunks.test.ts",
+          "test_name": "reassembles large exact control JSON after restart and retains all chunks through historical reads and GC",
+          "proves": "明确protected_revisions包含旧revision时全部chunk被retain；解除保护才删除且历史读此前可用。"
+        },
+        {
+          "file": "agents/reading/evals/storage/maintenance.test.ts",
+          "test_name": "actual delivery references must be complete and terminal before source detachment, irrespective of saved closed state",
+          "proves": "缺实际PR事实/实际open时不detach源，confirmed closed才detach，不相信本地closed状态。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实HEAD/待审版本的manifest和全部chunk保护及删除范围。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "实际待审PR引用完整核对，不能用保存的closed状态替代。"
+        }
+      ]
+    },
+    {
+      "id": "C076",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/schema.test.ts",
+          "test_name": "includes every managed historical image version and rejects incomplete providers",
+          "proves": "两历史版本分别计20字节，重复同version去重，库存incomplete拒绝。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "does not double count pending upload already in inventory and preserves hard/control boundaries",
+          "proves": "49GB库存匹配pending预留不双计；generation拒绝而控制保留区允许，超过50GB仍拒。"
+        },
+        {
+          "file": "agents/reading/evals/storage/broker.test.ts",
+          "test_name": "capacity broker requires explicit all-scope bindings and never falls back to account credential file",
+          "proves": "broker要求production/preview及managed image完整视图而非每scope单给额度。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实workspace与图床含历史version的完整分页库存及稳定键预留合计。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "容量broker能够只读所需全scope库存且不获得额外写权限。"
+        }
+      ]
+    },
+    {
+      "id": "C077",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/control-reserve.test.ts",
+          "test_name": "at49GB control receipts/detach fit last1GB but freshcandidate/artifact and unknown event admission are refused",
+          "proves": "manager实际拒新candidate/artifact、50GB下也拒control；保留的maintenance记录冷恢复仍在。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "storage/G1 admission denial happens before prepared and can be reevaluated without unknown paid state",
+          "proves": "容量拒绝在prepared前发生；恢复允许后可重新admit，不产生unknown付费意图。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "GC refuses to act with incomplete knowledge or missing protected revisions",
+          "proves": "不完整引用/缺protected revision下delete次数0。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺所有对象均受保护导致GC无法释放、仍保留实际候选queue并报告storage_capacity，随后空间释放后恢复同项目的完整controller冷启动回放。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实共享容量低于/高于阈值的暂停恢复和保护对象零删除。"
+        }
+      ]
+    },
+    {
+      "id": "C078",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/resources.test.ts",
+          "test_name": "lost response reconciles stable keys without double accounting in next run",
+          "proves": "create写成功丢回执、URL未验时保留预留；下一publisher相同key writes仍1，确认后预留0、receipt1。"
+        },
+        {
+          "file": "agents/reading/evals/storage/reservation-envelope.test.ts",
+          "test_name": "metadata response loss keeps the persisted reservation pending and the next process confirms the same stable key",
+          "proves": "FileStore stat丢失后pending持久；新manager确认同key，未create同图像key，恢复得到confirmed。"
+        },
+        {
+          "file": "agents/reading/evals/storage/schema.test.ts",
+          "test_name": "unknown upload into a versioned image bucket is counted once before its version receipt is persisted",
+          "proves": "尚未保存version回执的pending对象在真实库存集合中只计一次。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "image_live",
+          "requirement": "真实图床create或HEAD回执丢失后稳定键/版本对账及可访问性验证。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实容量预留跨scope持久并未双计/提前释放。"
+        }
+      ]
+    },
+    {
+      "id": "C079",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/resources.test.ts",
+          "test_name": "lost response reconciles stable keys without double accounting in next run",
+          "proves": "同input新字节产生第二个不可覆盖对象和第二receipt；旧stable key未再次写入。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/regeneration.test.ts",
+          "test_name": "a matched expected branch may be retained, while unknown writes, human changes and untracked old branches are refused",
+          "proves": "新生成前核对全部旧branch/PR事实，human修改或unknown不得获得再生成许可。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺完整重生成后新URL与已存在旧PR/已合并笔记中的旧URL、旧远端字节同时保持不变的组合断言；当前上传测试仅断言两个对象/receipt数量。"
+        },
+        {
+          "layer": "image_live",
+          "requirement": "真实图床hash新URL和旧字节不可覆盖。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "实际旧PR和已合并Markdown引用在再生成中保持不变。"
+        }
+      ]
+    },
+    {
+      "id": "C080",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects hostile persistence paths, symlinks and unauthorized scope",
+          "proves": ".env/scratch/.claude等同步路径实际拒绝，且符号链接无法进入允许路径。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/sdk-spawn.test.ts",
+          "test_name": "installed SDK hands its actual subprocess a replacement environment without inherited controller credentials",
+          "proves": "真实SDK spawn hook启动无模型Node子进程，OSS/GitHub/DeepSeek controller等sentinel env均不继承，仅指定模型token与VAULT_ROOT存在。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺针对credentials/auth.json/cookies、浏览器profile/cache文件的逐项同步清单断言；现测试未证明任意allowed文件内容中的凭据会被识别/排除（paths.ts主要按路径/扩展名过滤）。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK/浏览器落盘日志和缓存清单核对，确保未进入OSS。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实私有workspace对象清单没有敏感缓存/凭据。"
+        }
+      ]
+    },
+    {
+      "id": "C081",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/tools.test.ts",
+          "test_name": "source instructions remain text and links/figure captions extracted without script execution",
+          "proves": "Ignore policies文本保留为材料，script fetch内容不进入正文；实际link与caption映射精确。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "SDK replacement env omits controller secrets; builtin shells/files/network are denied",
+          "proves": "canUseTool拒绝Bash，SDK无工具/项目设置时能力列表为空且env无controller密钥。"
+        },
+        {
+          "file": "agents/reading/evals/context/operator-input.test.ts",
+          "test_name": "only tagged validated fixed generation guidance is consumed; arbitrary evidence-version text never becomes an instruction",
+          "proves": "普通Ignore policy证据version文本只散列进入提示词，不能冒充可信operator指导。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "sdk_live",
+          "requirement": "真实模型在网页/代码/历史笔记注入样本下仍只使用受限工具，不能获得执行或外泄能力。"
+        },
+        {
+          "layer": "human_quality",
+          "requirement": "人工检视输出没有把注入内容当可信规范或事实。"
+        }
+      ]
+    },
+    {
+      "id": "C082",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects hostile persistence paths, symlinks and unauthorized scope",
+          "proves": "实际磁盘projects/p符号链接被checkpoint拒绝，未提交到有效HEAD。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "rejects preview, modified hashes, illegal paths, symlinks and stale validation",
+          "proves": "交付manifest的symlink标志和.github/workflows路径均拒绝。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "隔离Publisher实际Git对象/commit中没有workflow或symlink生成文件。"
+        }
+      ]
+    },
+    {
+      "id": "C083",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/tools.test.ts",
+          "test_name": "missing sandbox never silently executes tool on host",
+          "proves": "未配置镜像时拒绝执行，不能静默转宿主运行。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "a text-only passing review cannot validate images and restored receipt reuse refuses a changed image hash before another model call",
+          "proves": "有core PNG但review不读像素时manual/validated=false；变更bytes后resource hash mismatch且无新review query。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺renderer实际报错后符合skill的HTML/Mermaid降级并在笔记/PR披露，以及非core skipped可交付、core skipped不可交付的driver/publisher完整分支测试；目前validation.ts有条件检查但这些路径未被断言。"
+        },
+        {
+          "layer": "image_live",
+          "requirement": "固定Linux渲染失败和provider图像输入失败的真实回执。"
+        },
+        {
+          "layer": "human_quality",
+          "requirement": "用户确认允许降级仍清晰；中心解释损失确实阻止交付。"
+        }
+      ]
+    },
+    {
+      "id": "C084",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "budgets and stall/revision limits survive batches and restart",
+          "proves": "revisions=2的Budget.revise明确quality_blocked，无归零；stalled保护也写入CP。"
+        },
+        {
+          "file": "agents/reading/evals/storage/reading-transitions.test.ts",
+          "test_name": "only explicit changed inputs produce g+1; operator preserves source allowance and source changes reset it with registered evidence",
+          "proves": "普通stage_completed不能重置耗尽计数，明确输入变更才g+1。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺真实driver/model回放连续事实错误blocking review→两轮修订→持久quality_blocked、冷恢复模型/上传/PR零新增的完整链路；当前只证明计数保护和转换。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实模型重复事实错误的可定位审校回执与修订上限。"
+        },
+        {
+          "layer": "human_quality",
+          "requirement": "用户确认错误被准确识别且不合格笔记没有交付。"
+        }
+      ]
+    },
+    {
+      "id": "C085",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/bootstrap.test.ts",
+          "test_name": "wired local preview uses real durable manager, controlled source/classifier and no remote publication on next run",
+          "proves": "单URL被受控分类回放正确excluded后report=success_no_selection、delivery keys为空；下一实例不重复模型。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/feed.test.ts",
+          "test_name": "the existing two configured source IDs can parse RSS atomically with stable bookmarks; genuine empty feeds remain healthy",
+          "proves": "明确空RSS被识别为success而非解析故障，不伪造候选。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "缺scheduled模式两来源完整空/全不合格且无合格积压的真实controller回放，确认零产出run记录、无空PR与正确success_no_selection；当前端到端仅preview excluded。"
+        },
+        {
+          "layer": "source_live",
+          "requirement": "两真实来源无新增/无合格内容时区分健康为空与读取失败。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "正式受控零产出轮次报告和零PR实际观察。"
+        }
+      ]
+    },
+    {
+      "id": "C086",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/monitor.test.ts",
+          "test_name": "publish-only does not hide a missed scheduled run",
+          "proves": "无scheduled事实时即便publish-only成功仍missed_schedule，不依赖阅读任务自报。"
+        },
+        {
+          "file": "agents/reading/evals/operations/run-events.test.ts",
+          "test_name": "runner consumes trusted custom gap and deduplicates the same persistent incident on the next poll",
+          "proves": "独立runWatchdog读取Actions替身，门槛时点写入missed_schedule事件，同一下一poll Issue仍1、notices为空。"
+        },
+        {
+          "file": "agents/reading/evals/operations/workflows.test.ts",
+          "test_name": "watchdog independently holds only readonly reports and implementation Issue capability",
+          "proves": "真实watchdog workflow独立cron 47 2,14、actions read/issues write，无阅读模型/正式写密钥。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "真实Actions阅读未触发但watchdog成功轮询，超过默认36h仅一个Issue/通知；读取历史attempt与报告缺失要实际验证。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "生产启用后独立监控首次漏跑演练；目前正式cron仍未启用。"
+        }
+      ]
+    },
+    {
+      "id": "C087",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/monitor.test.ts",
+          "test_name": "offline occurred+recovered events remain recorded even when final outcome healthy",
+          "proves": "occurred/recovered历史同一Issue保留且closed。"
+        },
+        {
+          "file": "agents/reading/evals/operations/run-events.test.ts",
+          "test_name": "watchdog API/read failure is visible as a deduplicated monitoring incident and never healthy",
+          "proves": "policy read故障连续两poll仅一个open incident；恢复后closed、notice1。这是API仍可用的假Issue服务，不是GitHub整体不可用。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "代码和reading-operations runbook明确同平台限制，但缺GitHub Actions/API/Issue全部不可用时无法保证通知的专门故障回放；不能拿可用Issue服务的read_failed测试替代。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "真实来源/运行故障恢复关闭对应Issue且不重发通知。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "明确记录同平台全部停摆无法通知的运行手册及外部人工观察边界，不宣称同平台watchdog能自保。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-13 Continuation: case-by-case scope audit and evaluation binding
+
+- Previous turn changed authoritative state: G0 contract closure and commits ec366b7/91edd85 passed Linux CI. This turn inspected every one of the 87 expected scenarios against actual test bodies, rather than treating the green suite or file existence as broad proof.
+- Three frozen audit documents cover exact disjoint case ranges. Each names the test and its proved scope plus remaining local/service/human layers. Local coverage is 30 covered / 54 partial / 3 missing, and 57 cases still need explicit local scenarios or entrypoints. Mapping remains 87 pending full-layer proof. The verifier checks range/ID/test pointers and rejects unsupported local coverage or complete cases with remaining requirements.
+- A9 had weak freeze/report binding: evaluation accepted independent version metadata without verifying the frozen corpus. The new binding fixes sample identity, normalized URL, source/body version, title, split, human label and corresponding note paths while allowing measured results to be added later. Invalid observations, source versions, price/claim/aggregate inconsistencies and changed holdout facts are rejected.
+- Added inspect/freeze/report CLI with protected immutable output creation and byte hashes, plus known/unknown cost/time and unchecked-observation counters. Human/model/feedback remain separate, and the output explicitly requires user quality confirmation. This is evaluation preparation/import/statistics, not a live model evaluation runner.
+- Actual readiness inspection: 30 candidates (15 per source), 10 holdout; zero human labels and zero fixed body versions. Freeze stays unavailable until those facts exist. No model, cloud resource or human label was fabricated. Setup questions remain pending while local work proceeds.
+- Final local check at 23:55 Asia/Shanghai: 71 files / 398 tests, typecheck/build, 38 schema checks, evidence mapping and diff checks passed. The original full goal and G1–G5 requirements remain intact; next local work is the named 57 scenario gaps, including the missing trusted coverage-gap resolution entrypoint.
+
 ## 2026-10-13 Continuation: G0 contract closure
 
 - The prior turn changed authoritative state through commits 65cffd9/b49ab0a/af9f374 and their passing Linux CI. This continuation closed the five specific G0 audit follow-ups without reducing G1–G5 or the 87 layered acceptance cases.

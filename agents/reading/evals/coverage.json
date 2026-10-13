@@ -800,5 +800,10 @@
       "status": "pending",
       "evidence": []
     }
+  ],
+  "local_audit_files": [
+    "agents/reading/evals/case-audits/storage.json",
+    "agents/reading/evals/case-audits/operations.json",
+    "agents/reading/evals/case-audits/runtime.json"
   ]
 }

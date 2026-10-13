@@ -1,10 +1,11 @@
+import {loadCaseAudits} from './case-audit.js';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 
 const spec=await readFile(resolve('docs/specs/reading-agent-spec.md'),'utf8');
 const mapping=JSON.parse(await readFile(resolve('agents/reading/evals/coverage.json'),'utf8')) as {
-  schema_version:number;spec_sha256:string;groups:{id:string;status:string}[];
+  schema_version:number;spec_sha256:string;local_audit_files?:string[];groups:{id:string;status:string}[];
   cases:{id:string;group:string;scenario:string;expected:string;status:string;evidence:string[]}[];
 };
 if(mapping.schema_version!==1||mapping.spec_sha256!==createHash('sha256').update(spec).digest('hex'))throw new Error('acceptance_mapping_out_of_date');
@@ -20,6 +21,8 @@ for(let i=0;i<rows.length;i++) {
   if(item.status==='complete'&&item.evidence.length===0)throw new Error(`completion_without_evidence:${item.id}`);
   for(const path of item.evidence)await readFile(resolve(path));
 }
+const localAudits=mapping.local_audit_files?await loadCaseAudits(mapping.local_audit_files,mapping.cases.map(item=>item.id)):[];
+for(const audit of localAudits){const item=mapping.cases.find(row=>row.id===audit.id)!;if(item.status==='complete'&&audit.remaining.length)throw new Error('complete_case_has_remaining_requirements:'+audit.id);}
 const verified=mapping.cases.filter(c=>c.status==='complete').length;
-console.log(JSON.stringify({mapped:mapping.cases.length,complete:verified,pending:mapping.cases.length-verified,groups:mapping.groups.length},null,2));
+console.log(JSON.stringify({mapped:mapping.cases.length,complete:verified,pending:mapping.cases.length-verified,groups:mapping.groups.length,local_audit:localAudits.length?{covered:localAudits.filter(item=>item.local_status==='covered').length,partial:localAudits.filter(item=>item.local_status==='partial').length,missing:localAudits.filter(item=>item.local_status==='missing').length}:null},null,2));
 if(process.argv.includes('--strict')&&verified!==mapping.cases.length)throw new Error('full_spec_verification_incomplete');

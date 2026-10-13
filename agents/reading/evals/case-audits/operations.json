@@ -1,0 +1,813 @@
+{
+  "schema_version": 1,
+  "case_indices_range": [
+    29,
+    57
+  ],
+  "cases": [
+    {
+      "id": "C030",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/monitor.test.ts",
+          "test_name": "a source failure is visible despite another source succeeding; repeats do not spam",
+          "proves": "A故障与B恢复分别投影，A Issue保持open；重复相同事件写入与通知不增加。"
+        },
+        {
+          "file": "agents/reading/evals/operations/monitor.test.ts",
+          "test_name": "suppression retains fault history; preview never issues; policy read failure never means healthy",
+          "proves": "已有active事件在全局暂停后仍active且suppressed=true；恢复监控未伪造source recovery。"
+        },
+        {
+          "file": "agents/reading/evals/collect/sources.test.ts",
+          "test_name": "normal pagination yields never create false source incidents, while mid-run policy revocation suppresses read",
+          "proves": "disabled结果attempted_at=null，空SourceHealth不会新增故障；不是已有active故障的停用恢复测试。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "补已有来源故障之后disabled/not_attempted/publish-only与另一来源success的完整矩阵，核对SourceHealth事件不减少且停用来源Issue明确suppressed；当前disabled测试从空health起步，监控helper disabled_sources总是空数组。"
+        },
+        {
+          "layer": "source_live",
+          "requirement": "真实隔离采集运行中暂停/停用/另一路恢复，核对提交的来源事件与游标，不能仅从静态HTML或回放证明。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "实际Issue body/state在策略抑制后保留故障，恢复通知无重复。"
+        }
+      ]
+    },
+    {
+      "id": "C031",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/collect/sources.test.ts",
+          "test_name": "parser failure cannot announce empty success or move state; candidates+cursor commit failure leaves original",
+          "proves": "解析失败返回failed，commitSourcePage提交失败后原identity.candidates为空；未包含成功页之后的冷恢复。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
+          "proves": "真实FileStore同checkpoint写candidate、SourceProgress、SourceResult、SourceHealth，冷恢复保留项目；该源结果是failed，未测试成功分页推进游标。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "注入成功采集页候选+实际非空cursor_after提交后进程退出，用新manager读取并比较候选集合及下一页游标；不能把提交失败空候选测试当作这个场景。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实OSS在该原子页提交边界中断/读回，候选与订阅游标来自同一有效commit。"
+        },
+        {
+          "layer": "source_live",
+          "requirement": "真实来源分页与迟到条目验收，恢复不会遗漏已发现候选。"
+        }
+      ]
+    },
+    {
+      "id": "C032",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/usage-ledger.test.ts",
+          "test_name": "FileStore restart preserves one query, deduplicates message replay, uses cumulative summary once and partitions run/day/project/scope",
+          "proves": "一个invocation记录step与query summary；冷恢复重复summary不产生revision，summary费用只计一次；同ID的receipts/invocations别名合并，跨scope分别计量。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "uses latest SDK cumulative query summary instead of duplicate step totals",
+          "proves": "step+s1+s2汇总采用最新累计2美元，不是1+2；空观测费用null。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "sdk_live",
+          "requirement": "真实供应方SDK query多步assistant/tool/result消息，核对消息ID、缓存tokens和累计summary与实际消耗，替身summary不是实际模型计费证据。"
+        }
+      ]
+    },
+    {
+      "id": "C033",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "lost terminal response becomes unknown; fresh process never repeats model call",
+          "proves": "已观察assistant用量后丢终结响应，invocation变unknown；新StageExecutor仍拒绝request_unknown且stream调用计数1。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "persists prepared before call and recovery reports unknown; duplicates cannot pay again",
+          "proves": "prepared真实提交后新manager恢复为unknown，重复prepare冲突；已知消息回执不被清除。"
+        },
+        {
+          "file": "agents/reading/evals/integration/recovery.test.ts",
+          "test_name": "unknown stays blocked without evidence; explicit retry survives restore, preserves counters/unknown cost and permits only one successful replacement",
+          "proves": "FileStore恢复后缺审计证据不能解阻；显式重试授权保留未知费用和计数，替代调用只有一次。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK启动后断连/丢result并重启，确认已知tokens/IDs留下且无自动第二次query。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "远端不可变调用账本在这些边界真实读回；必须确认prepared checkpoint后才开始实际付费。"
+        }
+      ]
+    },
+    {
+      "id": "C034",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "cost summaries include caches and unknown pricing is never zero",
+          "proves": "缓存tokens参与总计，costBasis unknown和无modelUsage时cost_usd=null/cost_status=unknown。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
+          "proves": "5个显式回放query均unknown金额，仍完成四阶段与发布；最终UsageTotals invocation_count=5、cost_usd=null，不凭未知价格阻断流程。"
+        },
+        {
+          "file": "agents/reading/evals/operations/runtime-limits.test.ts",
+          "test_name": "parses the actual trusted YAML and rejects configuration that capacity does not enforce",
+          "proves": "trusted runtime解析要求observe_only，费用策略不变为金额上限。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "sdk_live",
+          "requirement": "实际DeepSeek SDK可用模型query与价格未知/结果错误的usage归一，核对真实tokens和费用unknown，不把回放token数字当实际消耗。"
+        }
+      ]
+    },
+    {
+      "id": "C035",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "budgets and stall/revision limits survive batches and restart",
+          "proves": "从tool_calls39/supplementary7开始，下一tool达40、再调用batch_yield；commit捕获累计79，revisions/stalls保护拒绝。该journal只是内存数组。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/driver.test.ts",
+          "test_name": "eight supplementary materials checkpoint and yield; the next batch consumes the previous response and continues without rereading completed materials",
+          "proves": "真实driver回放在8份补充材料后保存9个snapshots与研究gap，下一batch只读新增材料，total_materials=9；查询journal替身仍在同一fixture内。"
+        },
+        {
+          "file": "agents/reading/evals/integration/controller.test.ts",
+          "test_name": "records batch yield with stage and resumes without losing the candidate",
+          "proves": "FileStore恢复deferred/batch_yield项目保留候选和resume_stage，但fixture没有真实40次工具或8份材料循环。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "把实际40工具边界及8材料边界各接到FileStore/controller冷恢复，断言已完成子任务/图源继续复用、每批计数按允许条件重置、累计计数不重置且剩余工作完成。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK在预算耗尽时产出可确认batch_yield或明确unknown，后续继续不能盲重付费。"
+        }
+      ]
+    },
+    {
+      "id": "C036",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "budgets and stall/revision limits survive batches and restart",
+          "proves": "revisions=2时revise拒绝quality_blocked，stall=2无进展后拒绝research_stalled且保存3；未构造跨天真实控制器恢复。"
+        },
+        {
+          "file": "agents/reading/evals/integration/recovery.test.ts",
+          "test_name": "explicit changed input creates one new generation, preserving prior fees and classification allowance while archiving exhausted counters",
+          "proves": "显式人工changed_input后归档旧revisions2/stalls2，保留旧收费事实；不是默认scheduled跨天继续的测试。"
+        },
+        {
+          "file": "agents/reading/evals/integration/controller.test.ts",
+          "test_name": "unavailable fixed runtime stops only its project and cold restart preserves the manual barrier",
+          "proves": "manual barrier跨FileStore冷恢复阻止该项目继续，其他项目可运行；触发原因是runtime不可用。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "从真实driver产生research_stalled/quality_blocked，经controller保存manual；跨上海日期scheduled冷恢复验证同generation计数未重置且无query，只有显式人工新输入可恢复。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实研究/审校反复无进展后保护计数与人工处理路径验收，不以回放结果宣称实际质量通过。"
+        }
+      ]
+    },
+    {
+      "id": "C037",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/runtime/executor.test.ts",
+          "test_name": "last five minutes forbid new query; cancellation signal fires at generation deadline",
+          "proves": "构造已经过56分钟的deadline：mayStart=false、requireStart拒绝，signal计时触发；没有正在执行的SDK query。"
+        },
+        {
+          "file": "agents/reading/evals/integration/recovery.test.ts",
+          "test_name": "SIGTERM interrupts an active paid query and a cold restart preserves unknown fees without repeating it",
+          "proves": "活动回放query的SIGTERM链主动abort，11/3部分tokens与unknown费用冷恢复且不重复调用；触发源不是最后5分钟timer。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "用活动StageExecutor stream推进generation_deadline timer，核对先前已提交产物仍在、query中止后unknown账本冷恢复和新付费拒绝，补精确最后5分钟场景。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK abort使模型子进程/请求停止，终结summary缺失仍按未知收费对账。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "实际Actions安装/构建耗时计入原始job clock，55分钟收尾与60分钟job timeout及下一run恢复验收。"
+        }
+      ]
+    },
+    {
+      "id": "C038",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "reconciles lost %s response in the next process",
+          "proves": "FakeGitHub先创建PR再抛响应丢失；持久intent为publishing+uncertain_action，下一Publisher找回awaiting_review且pr调用仍1。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
+          "proves": "真实FileStore的PR丢响应后domain-3冷恢复，原number=1被对账，第二完整轮模型/image/PR/Issue副作用不增加。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "隔离测试repo用真实App创建PR后模拟客户端响应丢失，从实际project/交付marker分页找回唯一原PR。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "发布意图、预期commit与PR回执在真实OSS写入及丢确认边界恢复。"
+        }
+      ]
+    },
+    {
+      "id": "C039",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
+          "proves": "已创建PR的open状态在7天后、permission callback拒绝情况下仍awaiting_review，GitHub写调用不增加；测试标题提到index但此项只引用待审部分断言。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
+          "proves": "pr_open冷恢复后重复已有调用/交付不产生新model调用、图片或PR。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "真实长期待审PR、当前暂停及来源有效期过期同时存在时只读对账，保持原交付不重新生成。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "受控正式手动复跑检查长期待审项目仍被保留，不以待审数量限制新文章。"
+        }
+      ]
+    },
+    {
+      "id": "C040",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
+          "proves": "远端state=closed_unmerged时本地交付status同值，不变merged且不新增GitHub写；没有验证host知识索引/候选ledger的闭环。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/metrics.test.ts",
+          "test_name": "counts actual unique PR outcomes and preserves unknown edits/cost/human effort",
+          "proves": "closed_unmerged实际PR计为rejected，与merged/pending分开统计。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "增加关闭未合并事实经host reconcile后冷恢复的candidate/project状态与default知识索引断言，确保没有已入库条目且下一scheduled不重提。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "人工关闭真实测试PR且不merge，随后实际App核对closed_unmerged、无重提/入库；不能以FakeGitHub枚举变化当真实事实。"
+        }
+      ]
+    },
+    {
+      "id": "C041",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "protects human branch changes and default branch filenames/sources",
+          "proves": "机器人枝的实际HEAD变为另一SHA，返回delivery_conflict，pr调用不存在；不会用预期commit覆盖该枝。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/github-read.test.ts",
+          "test_name": "merged review outcome compares actual PR HEAD delivery bytes (modified=%s)",
+          "proves": "真实OctokitGitHub代码读PR HEAD blob并比较人工修改bytes，modified时accepted_with_changes；该client是API替身，未实际push人类commit。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "真实人类修改测试PR branch内容/额外文件，下一publisher完整diff核对冲突且HEAD不变；验证实际GitRef API没有force覆盖。"
+        }
+      ]
+    },
+    {
+      "id": "C042",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
+          "proves": "merged事实更新delivery.status=merged且不写；其FakeGitHub没有merged_notes，因此标题不能证明实际默认分支索引。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/github-read.test.ts",
+          "test_name": "merged review outcome compares actual PR HEAD delivery bytes (modified=%s)",
+          "proves": "OctokitGitHub实际实现返回default tree里的merged_notes.content，并比较PR HEAD修改；已断言默认内容包含原笔记。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "补实际host reconcile→identity入库状态→后续召回索引的冷恢复闭环，输入默认分支真实修改后的note bytes，验证索引用default内容而非原封存草稿。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "真实测试PR人工merge后核对default branch实际note/blob以及已入库回执和下一次检索；自动agent不得代替人工merge。"
+        }
+      ]
+    },
+    {
+      "id": "C043",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "initializes only explicitly and reconstructs records on a new instance",
+          "proves": "无链restore不允许默认初始化；显式allow_initialize后zero commit存在，后续新manager重建记录和连续序号。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "two real filesystem clients racing initialization recover the one complete zero commit",
+          "proves": "两个独立FileObjectStore客户端并发初始化，双方最终revision相同，commits数量1。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "原生OSS显式空链初始化及两client争写zero对象，服务端forbid-overwrite保证只有一个初始commit；不能以文件系统atomic link替代。"
+        }
+      ]
+    },
+    {
+      "id": "C044",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "does not initialize on list permissions, gaps or content corruption",
+          "proves": "list permission错误时allow_initialize=true仍抛permission；提交链缺号抛corrupt；没有commit/manifest read timeout/403矩阵。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "hash corruption of referenced blob stops restoration instead of dropping the file",
+          "proves": "控制blob哈希坏时恢复corrupt而不是删除字段；下一次有效read仍读到旧记录。"
+        },
+        {
+          "file": "agents/reading/evals/operations/watchdog-reader.test.ts",
+          "test_name": "watchdog validates HEAD chain and reads only committed health/reports, never original evidence or writes",
+          "proves": "只读monitor的manifest读取损坏拒绝；不是writer恢复初始化分支的测试。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "补writer restore的commit/manifest read超时、403和manifest字节损坏；allow_initialize=true时检查零新create/不丢旧快照，不能用list错误或blob损坏代替每种边界。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实传输timeout与损坏/缺失manifest读回，不能把服务异常当NoSuchKey空库。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "隔离只读或明确拒绝身份的403实际返回禁止初始化，原commit前缀不被覆盖。"
+        }
+      ]
+    },
+    {
+      "id": "C045",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/chunks.test.ts",
+          "test_name": "a crash after physical chunks cannot expose a partial logical file; retry and missing/corrupt-chunk restart are strict",
+          "proves": "真实FileStore先上传大材料chunks，再在manifest创建处模拟退出；新manager恢复old.revision且files=[]，孤立chunks不成为已完成逻辑文件，随后同内容retry正常提交。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "failure before commit preserves old full snapshot despite uploaded artifacts",
+          "proves": "在commit create注入permission，已上传控制blobs存在，恢复仍zero sequence且records.value不存在；该例上传的是控制记录，不是文章文件。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实blob/manifest上传成功而commit尚未发布时终止运行，下进程仅认旧权威commit，后续按稳定对象hash复用/GC。"
+        }
+      ]
+    },
+    {
+      "id": "C046",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "reconciles create-success-response-lost at the same sequence and persists effects",
+          "proves": "commit序号1写成功后抛after故障，固定key读回确认，restore revision等于已确认handle且sequence仍1。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "unknown readback blocks external effects; next run validates the committed snapshot",
+          "proves": "write成功+首次readback失败返回unknown且effect counter0；下一restore验证同已存在snapshot records。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "原生服务commit已落地后丢HTTP响应，读固定序号比对manifest/commit hash；展示无额外版本/跳号，未确认期间无外部effect。"
+        }
+      ]
+    },
+    {
+      "id": "C047",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "loser cannot jump sequence or proceed after competing writer",
+          "proves": "两个manager同父revision，第一提交a1成功，第二不同意图a2返回conflict；恢复a1且commit总数2(含zero)，没有跳号。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "reconciles create-success-response-lost at the same sequence and persists effects",
+          "proves": "同一prepared写意图在单caller响应丢失后读回补确认；不是两个客户端共享相同prepared bytes的race。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "补两个客户端同序号且完全相同prepared commit bytes/意图的对账回执；并核对败方不同意图停止后不能再以旧handle跳号。当前只有不同意图竞争与单caller丢回执。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "原生OSS并发同key同/不同字节完整race及forbid-overwrite返回，读回相同者补确认、不同者停止。"
+        }
+      ]
+    },
+    {
+      "id": "C048",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "rejects %s versioning",
+          "proves": "preflight读取enabled/suspended两种配置即抛configuration；只执行configuration读取，没有bucket mutation接口调用。"
+        },
+        {
+          "file": "agents/reading/evals/operations/modes.test.ts",
+          "test_name": "binds production and isolated integration targets; unverified OSS stops live startup",
+          "proves": "声明versioning_verified=enabled的部署被解析拒绝，unknown不能冒称verified。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "在用户预先提供、明确隔离且已启用/暂停版本控制的bucket上核对原生getBucketVersioning结果和启动拒绝；不自行修改现有obs-agent设置来造测试。"
+        }
+      ]
+    },
+    {
+      "id": "C049",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "a later pagination failure cannot be treated as a complete chain",
+          "proves": "commit listing第二页transient直接拒绝restore，不能把首页面当全部链。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "does not initialize on list permissions, gaps or content corruption",
+          "proves": "序号0之后人为放序号2造成gap，allow_initialize=true仍拒绝corrupt。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "hash corruption of referenced blob stops restoration instead of dropping the file",
+          "proves": "引用blob错误hash停止恢复；下一有效恢复保留旧完整记录。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "empty listing cannot hide an existing zero commit",
+          "proves": "列表空却zero对象可读时拒绝corrupt，commit create调用仍仅初次1，不回退初始化。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "oss_live",
+          "requirement": "真实多页列举中断、服务端缺序号及引用hash/commit链故障；保存完整读取证据，不能从LastModified猜版本或误初始化。"
+        }
+      ]
+    },
+    {
+      "id": "C050",
+      "local_status": "missing",
+      "evidence": [],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "当前source存在NoSuchBucket→configuration分类及private/anonymous preflight守卫，但未找到NoSuchBucket、public ACL或anonymous_readable=true驱动manager启动并断言零初始化写的测试。补这三个反例，不能把unknown错误分类或unverified配置声明当场景证据。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "用户预先准备的不存在测试bucket访问以及实际匿名可读隔离bucket应拒绝运行/初始化；不更改private obs-agent为public。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "使用被限定到测试前缀的身份核对权限失败不会被当作普通缺对象，且无其他bucket/前缀写能力。"
+        }
+      ]
+    },
+    {
+      "id": "C051",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "protects HEAD blobs and permanent commits; confirmed lost delete response is idempotent",
+          "proves": "过保留期orphan删后HEAD记录仍可restore，HEAD commit列入retained；丢delete响应第二次GC不重复删除。"
+        },
+        {
+          "file": "agents/reading/evals/storage/chunks.test.ts",
+          "test_name": "reassembles large exact control JSON after restart and retains all chunks through historical reads and GC",
+          "proves": "删除逻辑引用后仍可历史读取saved revision；protected_revisions保留全部chunks，去除保护后才删除且新HEAD仍恢复。历史读取发生在保留GC之前。"
+        },
+        {
+          "file": "agents/reading/evals/storage/maintenance.test.ts",
+          "test_name": "detach commit survives exit before GC; next fresh run retains audit and deletes only unreferenced aged blobs",
+          "proves": "detach之后退出，下次新manager保留调用/候选审计再清旧source，commits数量>4且HEAD identity恢复；没有比较全部commit键前后相等。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "补GC前后完整commit key/hash集合不变、GC之后protected历史revision新manager读取完整bytes以及逻辑HEAD重建的组合断言；当前覆盖保护集合与HEAD，不完整证明所有承诺。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实版本/分页库存与保留期清理后可恢复HEAD及受保护历史版本，永久commit前缀不删。"
+        },
+        {
+          "layer": "ram_live",
+          "requirement": "专用GC身份只能删允许blob/manifest对象，服务端拒绝commit删除；业务分支不调用delete不能代替RAM证明。"
+        }
+      ]
+    },
+    {
+      "id": "C052",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/integration/recovery.test.ts",
+          "test_name": "SIGTERM interrupts an active paid query and a cold restart preserves unknown fees without repeating it",
+          "proves": "实际processCancellation注册EventEmitter信号→RunDeadline→StageExecutor stream abort；FileStore冷恢复11/3已知tokens、unknown费用且新executor拒重复query，calls1。信号是本地EventEmitter，不是实际Actions取消。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "failure before commit preserves old full snapshot despite uploaded artifacts",
+          "proves": "被中断提交不成为新权威快照，旧sequence完整恢复。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "sdk_live",
+          "requirement": "真实SDK query子进程在取消时终止；没有result则保留未知费用及已知消息，下进程不自动重付费。"
+        },
+        {
+          "layer": "production_smoke",
+          "requirement": "实际隔离Actions取消和job timeout各执行一次，确认宿主/容器结束，无退出后后台agent；下run从最后commit恢复。"
+        }
+      ]
+    },
+    {
+      "id": "C053",
+      "local_status": "missing",
+      "evidence": [],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "未找到绘图容器运行途中exit/kill的故障注入。missing sandbox测试只证明不退回宿主；lost draft checkpoint测试只模拟阶段提交丢失。需证明已提交证据/已检查图源保留、半成品图不被认可，冷恢复继续未完成操作。"
+        },
+        {
+          "layer": "image_live",
+          "requirement": "在实际Linux固定工具容器绘图中退出，核对保留的图源hash及恢复渲染结果，而非只执行正常绘图或Python回放。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "若容器退出发生在query工具回调中，实际SDK结果known/unknown归类与恢复不得盲重复付费。"
+        }
+      ]
+    },
+    {
+      "id": "C054",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/operations/workflows.test.ts",
+          "test_name": "keeps production cron absent and serializes every writer under one fixed group",
+          "proves": "解析当前YAML，固定reading-workspace-writer/cancel-in-progress:false，preview/production/integration都依赖validate；是配置断言，未运行Actions scheduler。"
+        },
+        {
+          "file": "agents/reading/evals/operations/workflows.test.ts",
+          "test_name": "maintenance shares the writer mutex and does not receive generation or image write secrets",
+          "proves": "maintenance与reading-agent完全同concurrency配置，不含图床/model上传Secrets。"
+        },
+        {
+          "file": "agents/reading/evals/storage/workspace.test.ts",
+          "test_name": "loser cannot jump sequence or proceed after competing writer",
+          "proves": "FileStore两个manager竞争相同序号，不同意图第二方conflict、旧handle无法产出新版本。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "production_smoke",
+          "requirement": "实际两个Actions(隔离integration/preview，含维护writer)并发dispatch证明同组串行，展示不cancel正在运行者和pending替换语义；本地YAML等值不证明平台执行。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "实际原生OSS相同序号禁止覆盖，过期发布者停止，不能以文件系统原子写代替服务契约。"
+        }
+      ]
+    },
+    {
+      "id": "C055",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "reconciles lost %s response in the next process",
+          "proves": "真实Publisher分支已先保存intent，FakeGitHub创建PR后响应丢失，下次找回唯一PR而不再次create。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
+          "proves": "FileStore PR丢确认后实际cold restore补awaiting_review；完整第二轮5个已知query复用，model/image/PR计数均不增加。"
+        },
+        {
+          "file": "agents/reading/evals/integration/controller.test.ts",
+          "test_name": "keeps publishing after an uncertain PR result and only reconciles on the next run",
+          "proves": "控制器发布异常保留publishing，下一manager/controller仅reconcile，未调用publish/读取阶段。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "真实测试PR成功但OSS回执保存失败或HTTP确认丢失，后续原PR与稳定delivery marker一致且唯一。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "真实checkpoint失败后补回执，不覆盖历史封存/调用事实。"
+        },
+        {
+          "layer": "sdk_live",
+          "requirement": "关联实际SDK invocation IDs/usage，确认补回执运行没有新model request。"
+        }
+      ]
+    },
+    {
+      "id": "C056",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
+          "proves": "7天后的已知open PR仍awaiting_review，permission拒绝不会触发新写；不是丢失PR回执后的过期场景。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "reconciles lost %s response in the next process",
+          "proves": "丢PR响应后下一次找回原PR，但now保持1小时，没有跨24小时。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "组合PR已创建/未确认回执+推进25小时以上+publisher冷恢复，明确记录先找到PR再判来源过期，assert不新增seal/generation/model/PR。当前两个分开的测试不证明整个组合。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "实际旧PR在超期丢回执环境找回并补确认，不进行来源重验/重生成。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "超期冷恢复读取原delivery/seal/control chain，实际补回执。"
+        }
+      ]
+    },
+    {
+      "id": "C057",
+      "local_status": "partial",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "read unavailability never means absent; stale sources require resume after reconciliation",
+          "proves": "PR成功后丢响应，再设read unavailable并推进7天；publish-only抛read unavailable，delivery保持publishing+uncertain_action=create_pr。没有直接断言generation/index与清理效果。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/image-gc.test.ts",
+          "test_name": "protects %s images and never releases capacity",
+          "proves": "GC的未知调用及待审交付保护例均deleted=[]、store.deletes=0、release=0；不是同一超期GitHub read故障的host维护闭环。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "local",
+          "requirement": "补同一旧delivery的GitHub结果不可确认→host下一run及maintenance，核对所有sealed IDs/generation保持、PR/model调用无增加、图床对象与reservation不删除；不能用独立GC保护例冒充组合。"
+        },
+        {
+          "layer": "github_live",
+          "requirement": "真实GitHub超时/权限错误不能当无PR，历史所有PR状态完整读取失败仍publishing。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "超期unknown状态跨进程持久保留，任何未决回执不能导致新版本。"
+        },
+        {
+          "layer": "image_live",
+          "requirement": "实际维护/图床GC在该unknown delivery下零delete/零容量释放。"
+        }
+      ]
+    },
+    {
+      "id": "C058",
+      "local_status": "covered",
+      "evidence": [
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "reconciles lost %s response in the next process",
+          "proves": "只有预期commit或机器人branch存在、无PR时读回expected_commit/full_diff，继续建立唯一PR，已有对象/branch写不重复。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/publisher.test.ts",
+          "test_name": "protects human branch changes and default branch filenames/sources",
+          "proves": "同一branch HEAD变为人工SHA时delivery_conflict、pr未调用，不force覆盖。"
+        },
+        {
+          "file": "agents/reading/evals/delivery/git.test.ts",
+          "test_name": "builds the same tree from changed directory overlays and preserves unrelated existing files",
+          "proves": "真实Git树构造保留无关文件，对新增/修改路径有确定性tree结构；不是GitHub远端完整diff权限证明。"
+        }
+      ],
+      "remaining": [
+        {
+          "layer": "github_live",
+          "requirement": "实际无PR机器人commit/branch恢复，完整diff包含新增/删除/额外路径；人工修改后冲突且远端HEAD保持，不只比较模拟SHA。"
+        },
+        {
+          "layer": "oss_live",
+          "requirement": "预期prepared commit意图先于远端branch写，恢复继续读取同一封存与预期commit。"
+        }
+      ]
+    }
+  ]
+}
