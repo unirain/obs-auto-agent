@@ -24,9 +24,24 @@ export class Watchdog {
     for (const [key, group] of groups) {
       const current = await this.projector.current(key);
       if (current) {
-        const acknowledged = group.filter(e => e.position <= current.metadata.last_position);
-        const proof = projectEvents(acknowledged, undefined, current.metadata.suppressed);
-        if (!proof || proof.metadata.last_position !== current.metadata.last_position || proof.metadata.status !== current.metadata.status || JSON.stringify([...proof.metadata.unresolved_gaps].sort()) !== JSON.stringify([...current.metadata.unresolved_gaps].sort())) throw new Error('Issue cursor/state contradicts persistent source events');
+        const acknowledged = group.filter(
+          (e) => e.position <= current.metadata.last_position,
+        );
+        const proof = projectEvents(
+          acknowledged,
+          undefined,
+          current.metadata.suppressed,
+        );
+        if (
+          !proof ||
+          proof.metadata.last_position !== current.metadata.last_position ||
+          proof.metadata.status !== current.metadata.status ||
+          JSON.stringify([...proof.metadata.unresolved_gaps].sort()) !==
+            JSON.stringify([...current.metadata.unresolved_gaps].sort())
+        )
+          throw new Error(
+            "Issue cursor/state contradicts persistent source events",
+          );
       }
       const suppressed =
         policy.global || policy.disabled_sources.includes(group[0]!.source_id);
@@ -49,7 +64,6 @@ export class Watchdog {
 }
 
 import type { Octokit } from "@octokit/rest";
-import type { MonitorMetadata } from "./source-health.js";
 import { runHealth, type ActionsRun } from "./run-health.js";
 export interface WatchdogRunnerOptions {
   actions: Octokit;
@@ -67,9 +81,7 @@ export interface WatchdogRunnerOptions {
   }>;
   now?: () => Date;
 }
-export async function runWatchdog(
-  options: WatchdogRunnerOptions,
-): Promise<{
+export async function runWatchdog(options: WatchdogRunnerOptions): Promise<{
   sources: { processed: number; projected: number };
   run_faults: number;
 }> {
@@ -77,113 +89,234 @@ export async function runWatchdog(
   const parts = options.repository.split("/");
   if (parts.length !== 2 || !parts.every((x) => /^[\w.-]+$/.test(x)))
     throw new Error("Invalid watchdog implementation repository");
-  const policy = await options.readPolicy(); // Failure remains visible to Actions; no cached fallback.
-  const reportIds = await options.readReportRunIds();
-  const remote = await options.actions.paginate(
-    options.actions.actions.listWorkflowRuns,
-    {
-      owner: parts[0]!,
-      repo: parts[1]!,
-      workflow_id: "reading-agent.yml",
-      per_page: 100,
-    },
+  const workspace = options.workspace_id ?? "obs-notes-hub/reading";
+  let policy: Awaited<ReturnType<typeof options.readPolicy>>;
+  let reportIds: Set<string>;
+  let events: MonitorEvent[];
+  let runs: ActionsRun[];
+  try {
+    policy = await options.readPolicy();
+    reportIds = await options.readReportRunIds();
+    events = await options.readEvents();
+    const remote = await options.actions.paginate(
+      options.actions.actions.listWorkflowRuns,
+      {
+        owner: parts[0]!,
+        repo: parts[1]!,
+        workflow_id: "reading-agent.yml",
+        per_page: 100,
+      },
+    );
+    const attempts: Array<(typeof remote)[number]> = [];
+    for (const run of remote) {
+      const count = run.run_attempt;
+      if (
+        typeof count !== "number" ||
+        !Number.isSafeInteger(count) ||
+        count < 1
+      )
+        throw new Error("Actions attempt metadata unavailable");
+      for (let attempt = 1; attempt < count; attempt++)
+        attempts.push(
+          (
+            await options.actions.actions.getWorkflowRunAttempt({
+              owner: parts[0]!,
+              repo: parts[1]!,
+              run_id: run.id,
+              attempt_number: attempt,
+            })
+          ).data,
+        );
+      attempts.push(run);
+    }
+    runs = attempts.map((r) => {
+      const encoded =
+        /reading:([^:]+):(preview|production)(?::(production|preview|integration))?/.exec(
+          r.display_title ?? "",
+        );
+      const id = `${r.id}-${r.run_attempt}`;
+      return {
+        id,
+        mode:
+          r.event === "schedule" ? "scheduled" : (encoded?.[1] ?? "unknown"),
+        scope:
+          r.event === "schedule"
+            ? options.deployment_name === "integration"
+              ? "different_deployment"
+              : "production"
+            : encoded?.[3] &&
+                encoded[3] !== (options.deployment_name ?? "production")
+              ? "different_deployment"
+              : (encoded?.[2] ?? "unknown"),
+        started_at: r.run_started_at ?? r.created_at,
+        status:
+          r.status === "completed"
+            ? "completed"
+            : r.status === "queued"
+              ? "queued"
+              : "in_progress",
+        conclusion: r.conclusion,
+        report_present:
+          reportIds.has(id) ||
+          (r.run_attempt === 1 && reportIds.has(String(r.id))),
+        finished_at: r.updated_at,
+      };
+    });
+  } catch (error) {
+    await syntheticIncident(
+      options.projector,
+      workspace,
+      "__monitor__",
+      "read_failed",
+      true,
+      now(),
+    );
+    throw error;
+  }
+  const resumeAt = await policyClock(
+    options.projector,
+    workspace,
+    policy.global,
+    now(),
   );
-  const runs: ActionsRun[] = remote.map((r) => {
-    const encoded =
-      /reading:([^:]+):(preview|production)(?::(production|preview|integration))?/.exec(
-        r.display_title ?? "",
-      );
-    return {
-      id: String(r.id),
-      mode: r.event === "schedule" ? "scheduled" : (encoded?.[1] ?? "unknown"),
-      scope:
-        r.event === "schedule"
-          ? options.deployment_name === "integration"
-            ? "different_deployment"
-            : "production"
-          : encoded?.[3] &&
-              encoded[3] !== (options.deployment_name ?? "production")
-            ? "different_deployment"
-            : (encoded?.[2] ?? "unknown"),
-      started_at: r.run_started_at ?? r.created_at,
-      status:
-        r.status === "completed"
-          ? "completed"
-          : r.status === "queued"
-            ? "queued"
-            : "in_progress",
-      conclusion: r.conclusion,
-      report_present:
-        reportIds.has(String(r.id)) ||
-        reportIds.has(`${r.id}-${r.run_attempt}`),
-    };
-  });
+  const effectiveResume = policy.resumed_at ?? resumeAt;
   const sources = await new Watchdog(
     options.projector,
-    options.readEvents,
+    async () => events,
     async () => policy,
   ).run();
+  // All failed/recovered completed runs are projected, not merely the latest healthy outcome.
+  const runEvents = runIncidentEvents(
+    runs,
+    workspace,
+    policy.enabled_at,
+    now(),
+  );
+  const runProjection = new Watchdog(
+    options.projector,
+    async () => runEvents,
+    async () => ({ global: policy.global, disabled_sources: [] }),
+  );
+  if (!effectiveResume) await runProjection.run();
+  else {
+    // Older failures remain in the historical projection; the current missing-start obligation restarts on resume.
+    await new Watchdog(
+      options.projector,
+      async () => runEvents.filter((e) => e.reason_code !== "missed_schedule"),
+      async () => ({ global: policy.global, disabled_sources: [] }),
+    ).run();
+    const health = runHealth(
+      runs,
+      {
+        enabled_at: policy.enabled_at,
+        globally_paused: policy.global,
+        resumed_at: effectiveResume,
+      },
+      now(),
+    );
+    await syntheticIncident(
+      options.projector,
+      workspace,
+      "__run__",
+      "missed_schedule",
+      health.faults.some((f) => f.reason_code === "missed_schedule"),
+      now(),
+      policy.global,
+      true,
+    );
+  }
+  await syntheticIncident(
+    options.projector,
+    workspace,
+    "__monitor__",
+    "read_failed",
+    false,
+    now(),
+  );
   const health = runHealth(
     runs,
     {
       enabled_at: policy.enabled_at,
       globally_paused: policy.global,
-      ...(policy.resumed_at !== undefined
-        ? { resumed_at: policy.resumed_at }
-        : {}),
+      ...(effectiveResume ? { resumed_at: effectiveResume } : {}),
     },
     now(),
   );
-  const faults = new Map(health.faults.map((f) => [f.reason_code, f]));
-  for (const reason of [
-    "missed_schedule",
-    "report_missing",
-    "failed",
-    "cancelled",
-  ]) {
-    const key = `${options.workspace_id ?? "obs-notes-hub/reading"}|__run__|${reason}`;
-    const current = await options.projector.current(key);
-    if (health.suppressed) {
-      if (current && !current.metadata.suppressed)
-        await options.projector.apply(
-          { ...current.metadata, suppressed: true },
-          false,
-        );
-      continue;
-    }
-    const fault = faults.get(reason);
-    if (!fault && !current) continue;
-    // Recovery needs actual scheduled startup/report; no activation means monitoring was never enabled.
-    const canRecover =
-      policy.enabled_at &&
-      (reason === "missed_schedule"
-        ? runs.some((r) => r.mode === "scheduled" && r.scope === "production")
-        : runs.some(
-            (r) =>
-              r.mode === "scheduled" &&
-              r.scope === "production" &&
-              r.status === "completed" &&
-              r.conclusion === "success" &&
-              r.report_present,
-          ));
-    if (!fault && !canRecover) continue;
+  return { sources, run_faults: health.faults.length };
+}
+
+import { runIncidentEvents } from "./run-events.js";
+async function syntheticIncident(
+  projector: IssueProjector,
+  workspace: string,
+  source: string,
+  reason: string,
+  active: boolean,
+  now: Date,
+  suppressed = false,
+  createWhenActive = true,
+): Promise<void> {
+  const key = `${workspace}|${source}|${reason}`;
+  const current = await projector.current(key);
+  if (!current && (!active || suppressed || !createWhenActive)) return;
+  if (
+    current &&
+    current.metadata.status === (active ? "active" : "recovered") &&
+    current.metadata.suppressed === suppressed
+  ) {
+    if ((current.issue.state === "open") !== active)
+      await projector.apply(current.metadata, false);
+    return;
+  }
+  const position = Math.max(
+    now.getTime() * 1000,
+    (current?.metadata.last_position ?? 0) + 1,
+  );
+  const event: MonitorEvent = {
+    event_id: `monitor-${reason}-${position}`,
+    position,
+    workspace_id: workspace,
+    execution_scope: "production",
+    source_id: source,
+    reason_code: reason,
+    kind: active ? "occurred" : "recovered",
+    occurred_at: now.toISOString(),
+  };
+  const result = projectEvents([event], current?.metadata, suppressed);
+  if (result) await projector.apply(result.metadata, result.notify);
+}
+/** Closed control Issue stores observed pause/resume times without workspace write access. */
+async function policyClock(
+  projector: IssueProjector,
+  workspace: string,
+  paused: boolean,
+  now: Date,
+): Promise<string | null> {
+  const key = `${workspace}|__policy__|pause_clock`;
+  const current = await projector.current(key);
+  if (!current && !paused) return null;
+  if (!current || current.metadata.suppressed !== paused) {
     const position = Math.max(
-      now().getTime(),
+      now.getTime() * 1000,
       (current?.metadata.last_position ?? 0) + 1,
     );
-    const e: MonitorEvent = {
-      event_id: `run-${reason}-${position}`,
+    const event: MonitorEvent = {
+      event_id: `policy-${paused ? "paused" : "resumed"}-${position}`,
       position,
-      workspace_id: options.workspace_id ?? "obs-notes-hub/reading",
+      workspace_id: workspace,
       execution_scope: "production",
-      source_id: "__run__",
-      reason_code: reason,
-      kind: fault ? "occurred" : "recovered",
-      occurred_at: now().toISOString(),
+      source_id: "__policy__",
+      reason_code: "pause_clock",
+      kind: paused ? "occurred" : "recovered",
+      occurred_at: now.toISOString(),
     };
-    const projection = projectEvents([e], current?.metadata, false);
-    if (projection)
-      await options.projector.apply(projection.metadata, projection.notify);
-  }
-  return { sources, run_faults: health.faults.length };
+    const result = projectEvents([event], current?.metadata, paused);
+    if (result) await projector.apply(result.metadata, false);
+  } else if (current.issue.state !== "closed")
+    await projector.apply(current.metadata, false);
+  const confirmed = await projector.current(key);
+  return (
+    confirmed?.metadata.events.filter((e) => e.kind === "recovered").at(-1)
+      ?.occurred_at ?? null
+  );
 }

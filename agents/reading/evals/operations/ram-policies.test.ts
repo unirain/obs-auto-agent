@@ -82,3 +82,24 @@ it("rejects unsafe buckets/prefixes before writing any local policy", () => {
     createRAMPolicies({ ...DEFAULT_RAM_BINDINGS, image_prefix: "../images/" }),
   ).toThrow();
 });
+
+it("dedicated image GC policy has only image deletion/read permission and explicitly denies uploads/private workspace deletion", () => {
+  const gc = policies["test-image-gc"]!;
+  const allowed = gc.Statement.filter((s) => s.Effect === "Allow");
+  expect(allowed.flatMap((s) => s.Action)).not.toContain("oss:PutObject");
+  const deleteRules = allowed.filter((s) =>
+    s.Action.includes("oss:DeleteObject"),
+  );
+  expect(deleteRules).toHaveLength(1);
+  expect(deleteRules[0]!.Resource).toEqual([
+    "acs:oss:*:*:configure-image-bucket/reading-agent/integration/*",
+  ]);
+  expect(
+    gc.Statement.some(
+      (s) =>
+        s.Effect === "Deny" &&
+        s.Action.includes("oss:DeleteObject") &&
+        s.Resource.includes("acs:oss:*:*:obs-agent/*"),
+    ),
+  ).toBe(true);
+});

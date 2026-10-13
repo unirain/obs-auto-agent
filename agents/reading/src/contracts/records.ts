@@ -6,7 +6,65 @@ import {
   type InvocationRecord,
   type CheckpointChange,
 } from "./index.js";
-import { validateSchema } from "./schema.js";
+import { validateSchema, type StorageReservationSchema } from "./schema.js";
+import type { Static } from "@sinclair/typebox";
+type Reservation = Static<typeof StorageReservationSchema>;
+function validatedReservation(
+  key: string,
+  value: unknown,
+  scope: WorkspaceHandle["execution_scope"],
+): Reservation {
+  const record = validateSchema<Reservation>("storage_reservation", value);
+  if (record.execution_scope !== scope)
+    throw new AgentError("scope", "Reservation scope mismatch");
+  if (key !== `storage/reservations/${record.reservation_id}`)
+    throw new AgentError("corrupt", "Reservation record identity mismatch");
+  return record;
+}
+function validateReservationChange(
+  key: string,
+  value: JsonValue | null,
+  old: JsonValue | undefined,
+  scope: WorkspaceHandle["execution_scope"],
+): void {
+  if (value === null)
+    throw new AgentError(
+      "corrupt",
+      "Reservation audit record cannot be deleted",
+    );
+  const next = validatedReservation(key, value, scope);
+  if (!old) {
+    if (next.state !== "pending" || next.version !== null)
+      throw new AgentError(
+        "corrupt",
+        "Reservation must begin pending without a version receipt",
+      );
+    return;
+  }
+  const prior = validatedReservation(key, old, scope);
+  for (const field of [
+    "schema_version",
+    "reservation_id",
+    "execution_scope",
+    "bucket",
+    "key",
+    "expected_bytes",
+  ] as const)
+    if (prior[field] !== next[field])
+      throw new AgentError("corrupt", "Immutable reservation binding changed");
+  const legal = {
+    pending: ["pending", "confirmed", "released"],
+    confirmed: ["confirmed", "released"],
+    released: ["released"],
+  };
+  if (!legal[prior.state].includes(next.state))
+    throw new AgentError("corrupt", "Illegal reservation transition");
+  if (
+    prior.version !== next.version &&
+    !(prior.state === "pending" && next.state === "confirmed")
+  )
+    throw new AgentError("corrupt", "Reservation version receipt changed");
+}
 export type RecordValidator = (
   next: JsonValue | null,
   previous: JsonValue | undefined,
@@ -97,6 +155,13 @@ export function validateRecords(
   change: CheckpointChange,
 ): void {
   for (const [key, value] of Object.entries(change.records ?? {})) {
+    if (key.startsWith("storage/reservations/"))
+      validateReservationChange(
+        key,
+        value,
+        handle.records[key],
+        handle.execution_scope,
+      );
     for (const validator of validators)
       if (key.startsWith(validator.prefix))
         validator.validate(value, handle.records[key], handle, change);
@@ -107,6 +172,10 @@ export function validateRestoredRecords(
   scope: WorkspaceHandle["execution_scope"],
 ): void {
   for (const [key, value] of Object.entries(records)) {
+    if (key.startsWith("storage/reservations/")) {
+      validatedReservation(key, value, scope);
+      continue;
+    }
     if (!key.startsWith("invocations/") && !key.startsWith("receipts/"))
       continue;
     const record = validateSchema<InvocationRecord>("invocation", value);

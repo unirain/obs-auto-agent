@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "at": "2026-10-13T11:22:45.825Z",
+  "kind": "isolated_linux_fixture",
+  "tools_image": "sha256:66bc2e4d14f732be1da3e685e0337844c8c1dce01cbf3014094489e6561d1a7a",
+  "capture_method": "browser",
+  "snapshot_hash": "0d2ccb7ede3b9272a07fc20225ea2e164f7289e3bddfc6fbca2ca96154f75749",
+  "text": "JS hydration mechanism\nThe article was rendered through a typed gateway inside an isolated container.",
+  "gateway_requests": [
+    "https://fixture.example/article",
+    "https://fixture.example/app.js",
+    "http://169.254.169.254/latest",
+    "https://fixture.example/article"
+  ],
+  "transport_requests": [
+    "https://fixture.example/article",
+    "https://fixture.example/app.js",
+    "https://fixture.example/article"
+  ],
+  "download_bytes": 328,
+  "metadata_transport_blocked": true,
+  "request_limit_enforced": true,
+  "model_exercised": false,
+  "live_external_site_exercised": false
+}

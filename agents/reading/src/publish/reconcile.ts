@@ -4,6 +4,8 @@ export function reconcileRecord(
   fact: GitHubFact,
   now: string,
 ): DeliveryRecord {
+  if (record.schema_version !== 1)
+    throw new Error("Unsupported delivery record schema");
   const own = fact.prs.filter(
     (p) =>
       p.delivery_id === record.delivery_id ||
@@ -31,6 +33,7 @@ export function reconcileRecord(
       reason: null,
       updated_at: now,
       ...(fact.merged_notes ? { merged_notes: fact.merged_notes } : {}),
+      ...(fact.review_outcome ? { review_outcome: fact.review_outcome } : {}),
     };
   if (
     record.superseded_by &&
@@ -45,6 +48,7 @@ export function reconcileRecord(
     };
   if (
     fact.default_branch_duplicate ||
+    fact.pending_duplicate ||
     (fact.branch_sha !== null &&
       (!record.prepared ||
         fact.branch_sha !== record.prepared.commit_sha ||
@@ -53,7 +57,9 @@ export function reconcileRecord(
     return {
       ...record,
       status: "delivery_conflict",
-      reason: "Default branch duplicate or modified delivery branch",
+      reason: fact.pending_duplicate
+        ? "Pending PR already contains source or target file"
+        : "Default branch duplicate or modified delivery branch",
       uncertain_action: null,
       updated_at: now,
     };

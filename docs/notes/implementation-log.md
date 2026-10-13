@@ -1,5 +1,16 @@
 # Reading Agent implementation log
 
+## 2026-10-13 Continuation: recovery and cross-module audit
+
+- Prior turn advanced authoritative state: commits 667fa1a/640894d pushed; both Linux Node 24 CI runs passed. This continuation retained the full goal and addressed identified implementation gaps with three module owners.
+- Added inspect/recover CLI and a metadata-only recovery workflow sharing the writer mutex. Manual retry preserves old unknown/cost facts, requires fixed input and duplicate-charge acknowledgement, and a newly unknown replacement reblocks. Confirmed response import is atomic and bound to the original invocation; proof of no start cannot be inferred from an absent reply. Persistent replay/fault tests exercise the next process and preserve counters.
+- Runtime now settles confirmed semantic bindings before reclassification, verifies material closure/read ranges, reads retrieved notes by version/hash, detects semantic no-progress, and runs a bounded browser fallback. The installed SDK's actual child spawn was tested with a sentinel process: only the model token is present, not controller secrets. Real Docker Chromium executed a JS fixture through the gateway; neither test contacted a model or proves real article quality.
+- Host ports now consume settlement, related-note versions, browser scope and typed source change. Classification refresh precedes production upload; completed output plus manual/pending work is partial progress. SDK intents and remote writes link exact persisted policy receipts, and seals retain the policy check before revision capture.
+- Usage is reconstructed from persisted calls by scope/workspace/project/Beijing start day/run; whole-query summaries cover late steps rather than being added to them. Missing attribution/prices remain unknown. Workspace adapter counts, Actions wall time and actual PR review outcomes are exposed with explicit limits; no account invoice or human review minutes were fabricated.
+- Implemented native version-aware image GC with a distinct deletion identity, complete default/open-PR reference scans, unknown/active/merged protection and readback before releasing reservations. Missing identity or partial evidence reports incomplete. Reservation, upload and delivery records reject unversioned/unknown control state. No actual GC, RAM changes or external writes were performed in this continuation.
+- Replaced substring duplicate detection with exact explicit primary-source metadata/aliases; citations, snippets and supplemental sources do not imply prior admission. Added a 25-package/G0–G5/87-case audit index without equating local tests to full layered acceptance.
+- Further implementation and all external/human requirements remain tracked in the canonical task ledger. No gate was silently reduced and production generation cron remains disabled.
+
 ## 2026-10-13 Implementation started
 
 - Read the five implementation plans and inspected the project: documentation only, no package or Git repository.
@@ -27,3 +38,5 @@
 - Final local checkpoint at 18:50: 187 tests passed, typecheck/build and mapping passed; three live tests skipped. Sanitized command results and implementation fingerprint are saved in `agents/reading/evals/results/local-verification.json`. Production-scope publish-only composition proves no model/image credential reads and no SDK construction.
 
 - Initial implementation commit `667fa1a` was pushed to master; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38386402472). Cross-review then found and fixed host policy-subject propagation: gateway, source verification and Publisher now retain original tool domains; default subjects include actual aliases and snapshot URLs. Regression checks reject later scope expansion and revoked alias/core domains; the full 187-test suite, typecheck/build and mapping pass after the fix.
+
+- Continuation checkpoint: 288 local tests passed; typecheck/build/mapping passed. Three live tests skipped. The sanitized evidence fingerprint was refreshed; this does not mark any of the 87 full acceptance cases complete.

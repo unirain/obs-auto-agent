@@ -112,6 +112,7 @@ it.skipIf(!enabled)(
           "generation",
         );
         const r: StorageReservation = {
+          schema_version: 1,
           reservation_id: sha256(key),
           execution_scope: "production",
           bucket: d.image!.bucket,

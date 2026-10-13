@@ -21,6 +21,7 @@ export interface MaintenanceOptions {
   with_mutex: <T>(work: () => Promise<T>) => Promise<T>;
   delivery_fact?: (id: string) => Promise<DeliveryRetentionFact>;
   image_gc?: () => Promise<{
+    complete?: boolean;
     deleted: string[];
     retained: string[];
     unknown: string[];
@@ -33,9 +34,11 @@ export interface MaintenanceResult {
   blocked_projects: { project_id: string; reason: string }[];
   gc: GcResult;
   image_gc: {
-    status: "not_exercised" | "verified";
+    status: "not_exercised" | "verified" | "incomplete";
     reason: string | null;
     deleted: string[];
+    retained?: string[];
+    unknown?: string[];
   };
 }
 const terminal = new Set([
@@ -270,9 +273,19 @@ export async function maintainWorkspace(
     if (options.image_gc) {
       const images = await options.image_gc();
       result.image_gc = {
-        status: "verified",
-        reason: images.unknown.length ? "delete_reconciliation_required" : null,
+        status:
+          images.complete !== true || images.unknown.length
+            ? "incomplete"
+            : "verified",
+        reason:
+          images.complete !== true
+            ? "image_reference_or_permission_unverified"
+            : images.unknown.length
+              ? "delete_reconciliation_required"
+              : null,
         deleted: images.deleted,
+        retained: images.retained,
+        unknown: images.unknown,
       };
     }
     await options.journal.commit(

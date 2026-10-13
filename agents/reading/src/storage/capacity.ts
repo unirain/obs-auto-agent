@@ -4,10 +4,12 @@ import {
   type StorageCapacityView,
 } from "../contracts/index.js";
 import type { InventoryObject } from "./inventory.js";
+import { validateSchema } from "../contracts/schema.js";
 export const STORAGE_LIMIT = 50_000_000_000;
 export const STORAGE_WARNING = 45_000_000_000;
 export const STORAGE_GENERATION_STOP = 49_000_000_000;
 export interface StorageReservation {
+  schema_version: 1;
   reservation_id: string;
   execution_scope: ExecutionScope;
   bucket: string;
@@ -15,6 +17,10 @@ export interface StorageReservation {
   version: string | null;
   expected_bytes: number;
   state: "pending" | "confirmed" | "released";
+}
+/** Versioned control envelope; no implicit migration or defaulting. */
+export function parseStorageReservation(value: unknown): StorageReservation {
+  return validateSchema<StorageReservation>("storage_reservation", value);
 }
 export function capacityView(
   objects: InventoryObject[],
@@ -33,6 +39,7 @@ export function capacityView(
   const ids = new Set<string>();
   let pending = 0;
   for (const r of reservations) {
+    parseStorageReservation(r);
     const id = JSON.stringify([
       r.bucket,
       r.key,

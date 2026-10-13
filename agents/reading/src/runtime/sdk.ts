@@ -28,7 +28,7 @@ export function mcpToolContent(result:unknown):CallToolResult {
 }
 export function normalizeSdkMessage(message:SDKMessage):RuntimeMessage {
   const raw=message as unknown as Record<string,unknown>;const message_id=typeof raw.uuid==='string'?raw.uuid:`${message.type}:${String(raw.subtype??'')}:${String(raw.session_id??'')}`;
-  const lifecycle={session_id:typeof raw.session_id==='string'?raw.session_id:null,provider_request_id:typeof raw.request_id==='string'?raw.request_id:null};
+  const actualModel=(raw.message as {model?:unknown}|undefined)?.model;const lifecycle={actual_models:raw.modelUsage&&typeof raw.modelUsage==='object'?Object.keys(raw.modelUsage):typeof actualModel==='string'?[actualModel]:[],session_id:typeof raw.session_id==='string'?raw.session_id:null,provider_request_id:typeof raw.request_id==='string'?raw.request_id:null};
   if(message.type==='result'){const usage=summarizeModelUsage(message.modelUsage);const zeroedError=message.subtype!=='success'&&usage.input_tokens===0&&usage.output_tokens===0;
     return {message_id,type:'result',summary:!zeroedError,usage:zeroedError?{...usage,cost_usd:null,cost_status:'unknown'}:usage,success:message.subtype==='success'&&!message.is_error,
     ...(message.subtype==='success'?{result:message.structured_output??message.result}:{}),observable:{...lifecycle,subtype:message.subtype,num_turns:message.num_turns,duration_ms:message.duration_ms,
@@ -71,6 +71,6 @@ export class ClaudeSdkAdapter implements ModelAdapter {
     const options=sdkOptions(request,this.secrets,this.home);if(compatible)options.env={...options.env,ANTHROPIC_MODEL:request.model,ANTHROPIC_SMALL_FAST_MODEL:request.model,ANTHROPIC_DEFAULT_HAIKU_MODEL:request.model,ANTHROPIC_DEFAULT_SONNET_MODEL:request.model,ANTHROPIC_DEFAULT_OPUS_MODEL:request.model};
     const prompt=compatible?`${request.prompt}\nReturn JSON only matching this exact schema. No Markdown fences or additional text.\n${JSON.stringify(request.schema)}`:request.prompt;
     const session=query({prompt,options});
-    try{for await(const message of session){const normalized=normalizeSdkMessage(message);if(compatible){normalized.usage={...normalized.usage,cost_usd:null,cost_status:'unknown'};normalized.observable={...normalized.observable,provider:'deepseek',pricing_status:'unknown',actual_model:request.model};}yield normalized;}}finally{session.close();}
+    try{for await(const message of session){const normalized=normalizeSdkMessage(message);if(compatible){normalized.usage={...normalized.usage,cost_usd:null,cost_status:'unknown'};normalized.observable={...normalized.observable,provider:'deepseek',pricing_status:'unknown',requested_model:request.model};}yield normalized;}}finally{session.close();}
   }
 }

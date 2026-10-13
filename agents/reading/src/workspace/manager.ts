@@ -406,6 +406,34 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
       return { status: "conflict", reason: "Concurrent local checkpoint" };
     validateChange(handle, change);
     validateRecords(handle, change);
+    // Raw control files must obey the same reservation contract as record updates.
+    for (const path of change.remove_paths ?? [])
+      if (path.startsWith("state/storage/reservations/"))
+        throw new AgentError(
+          "corrupt",
+          "Reservation audit record cannot be deleted",
+        );
+    for (const file of change.files ?? []) {
+      if (
+        !file.path.startsWith("state/storage/reservations/") ||
+        !file.path.endsWith(".json")
+      )
+        continue;
+      if (file.role !== "control")
+        throw new AgentError("corrupt", "Reservation must be a control record");
+      let value: JsonValue;
+      try {
+        value = JSON.parse(
+          Buffer.from(file.bytes).toString("utf8"),
+        ) as JsonValue;
+      } catch {
+        throw new AgentError("corrupt", "Reservation control is not JSON");
+      }
+      validateRecords(handle, {
+        ...change,
+        records: { [file.path.slice(6, -5)]: value },
+      });
+    }
     this.writing.add(handle.workspace_id);
     try {
       if (this.options.verify_preflight !== false)

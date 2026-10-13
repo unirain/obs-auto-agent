@@ -7,7 +7,7 @@ export type TrustedPolicy = {
 };
 export type ClassificationCredential = {candidate_id:string;source_snapshot_hash:string;semantic_policy_hash:string;content_eligibility:'allowed'|'excluded'|'unresolved';evidence_hash:string};
 export type PolicySubject = {subject_ref:string;candidate_id?:string;project_id?:string;execution_scope:Scope;
-  origin_source_ids:string[];urls:string[];original_domains?:string[];main_url?:string;source_snapshot_hash?:string;classification?:ClassificationCredential};
+  origin_source_ids:string[];urls:string[];original_domains?:string[];manual_resource_of?:string;main_url?:string;source_snapshot_hash?:string;classification?:ClassificationCredential};
 export type PolicyCheck = {schema_version:1;subject_ref:string;execution_scope:Scope;checkpoint:string;requested_capability:Capability;
   policy_commit:string|null;policy_hash:string|null;semantic_policy_hash:string|null;checked_at:string;
   execution_permission:'allowed'|'denied'|'unavailable';content_eligibility:'allowed'|'excluded'|'unresolved';reason_codes:string[];check_id:string};
@@ -43,11 +43,12 @@ export class PolicyGate {
           if(!['https:','http:'].includes(url.protocol)||url.username||url.password)result.reason_codes.push('invalid_url');
           if(policy.denied_domains.some(rule=>domainMatches(host,rule)))result.reason_codes.push(`domain_denied:${host}`);
           const manualMain=origins.has('manual_url')&&subject.main_url===raw;
-          if(!manualMain&&!policy.allowed_domains.some(rule=>domainMatches(host,rule)))result.reason_codes.push(`domain_outside_scope:${host}`);if(!manualMain&&subject.original_domains&&!subject.original_domains.some(rule=>domainMatches(host,rule)))result.reason_codes.push(`domain_outside_original_scope:${host}`);
+          const manualResource=capability==='main_read'&&origins.has('manual_url')&&subject.main_url!==undefined&&subject.manual_resource_of===subject.main_url&&url.origin===new URL(subject.main_url).origin;
+          if(!manualMain&&!manualResource&&!policy.allowed_domains.some(rule=>domainMatches(host,rule)))result.reason_codes.push(`domain_outside_scope:${host}`);if(!manualMain&&!manualResource&&subject.original_domains&&!subject.original_domains.some(rule=>domainMatches(host,rule)))result.reason_codes.push(`domain_outside_original_scope:${host}`);
         }
-        if(subject.execution_scope==='preview'&&['upload','publish'].includes(capability))result.reason_codes.push('preview_no_write');
+        if(subject.execution_scope==='preview'&&['upload','publish','cleanup'].includes(capability))result.reason_codes.push('preview_no_write');
         result.content_eligibility=credentialValid(subject,policy)?subject.classification!.content_eligibility:'unresolved';
-        if(!['discover','main_read','classify_only'].includes(capability) && result.content_eligibility!=='allowed')result.reason_codes.push(result.content_eligibility==='excluded'?'semantic_excluded':'classification_required');
+        if(!['discover','main_read','classify_only','cleanup'].includes(capability) && result.content_eligibility!=='allowed')result.reason_codes.push(result.content_eligibility==='excluded'?'semantic_excluded':'classification_required');
         if(result.reason_codes.length)result.execution_permission='denied';
       }
     } catch {result.execution_permission='unavailable';result.reason_codes=['policy_unavailable'];}

@@ -21,13 +21,37 @@ interface Workflow {
 const load = (name: string) =>
   parse(readFileSync(`.github/workflows/${name}.yml`, "utf8")) as Workflow;
 describe("Actions capability boundaries", () => {
+  it("recovery is audited metadata only, shares the writer mutex and never receives SDK or delivery write credentials", () => {
+    const workflow = load("reading-recovery");
+    expect(workflow.concurrency).toEqual(load("reading-agent").concurrency);
+    expect(workflow.on.schedule).toBeUndefined();
+    expect(workflow.jobs.recover?.if).toContain("default_branch");
+    const data = JSON.stringify(workflow.jobs);
+    for (const secret of [
+      "DEEPSEEK_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "READING_GITHUB_APP",
+      "TEST_GITHUB_APP",
+      "OSS_IMAGE_CREDENTIALS",
+      "OSS_TEST_IMAGE_CREDENTIALS",
+    ])
+      expect(data).not.toContain(secret);
+    for (const step of workflow.jobs.recover!.steps)
+      if (step.run) expect(step.run).not.toContain("${{ inputs.");
+  });
   it("maintenance shares the writer mutex and does not receive generation or image write secrets", () => {
-    const w=load("reading-maintenance");
+    const w = load("reading-maintenance");
     expect(w.concurrency).toEqual(load("reading-agent").concurrency);
     expect(w.on.schedule).toBeUndefined();
     expect(w.jobs.cleanup?.if).toContain("default_branch");
-    const encoded=JSON.stringify(w.jobs);
-    for(const secret of ["DEEPSEEK_API_KEY","ANTHROPIC_API_KEY","OSS_IMAGE_CREDENTIALS","OSS_TEST_IMAGE_CREDENTIALS"])expect(encoded).not.toContain(secret);
+    const encoded = JSON.stringify(w.jobs);
+    for (const secret of [
+      "DEEPSEEK_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "OSS_IMAGE_CREDENTIALS",
+      "OSS_TEST_IMAGE_CREDENTIALS",
+    ])
+      expect(encoded).not.toContain(secret);
     expect(encoded).toContain("READING_SHARED_MUTEX_HELD");
   });
   it("keeps production cron absent and serializes every writer under one fixed group", () => {

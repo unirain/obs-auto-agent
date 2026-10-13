@@ -42,6 +42,12 @@ export class PersistentInvocationJournal implements InvocationJournal {
     handle: WorkspaceHandle,
     record: InvocationRecord,
     runId: string,
+    metadata?: {
+      started_at?: string;
+      project_id?: string;
+      purpose?: "stage" | "format_repair" | "application_retry";
+      pricing_version?: string;
+    },
   ): Promise<CheckpointResult> {
     validateSchema("invocation", record);
     if (
@@ -52,7 +58,31 @@ export class PersistentInvocationJournal implements InvocationJournal {
       throw new AgentError("scope", "Invalid invocation preparation");
     if (handle.records[key(record.invocation_id)])
       throw new AgentError("conflict", "Invocation identity already used");
-    return this.save(handle, record, runId, "invocation_prepared");
+    const started = metadata?.started_at ?? new Date().toISOString();
+    if (!Number.isFinite(Date.parse(started)))
+      throw new AgentError("corrupt", "Invocation start timestamp invalid");
+    const attribution = {
+      run_id: runId,
+      started_at: started,
+      execution_scope: handle.execution_scope,
+      workspace_id: handle.workspace_id,
+      project_id:
+        metadata?.project_id ??
+        (record.subject_id.startsWith("project:")
+          ? record.subject_id.slice(8)
+          : null),
+      purpose: metadata?.purpose ?? "unspecified",
+      pricing_version: metadata?.pricing_version ?? null,
+    };
+    return this.manager.checkpoint(handle, {
+      expected_revision: handle.revision,
+      reason: "invocation_prepared",
+      run_id: runId,
+      records: {
+        [key(record.invocation_id)]: record as unknown as JsonValue,
+        [`invocation_meta/${record.invocation_id}`]: attribution,
+      },
+    });
   }
   async observe(
     handle: WorkspaceHandle,

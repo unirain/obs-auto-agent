@@ -1,0 +1,80 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "reservation_id",
+    "execution_scope",
+    "bucket",
+    "key",
+    "version",
+    "expected_bytes",
+    "state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "number"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "type": "string"
+    },
+    "execution_scope": {
+      "anyOf": [
+        {
+          "const": "production",
+          "type": "string"
+        },
+        {
+          "const": "preview",
+          "type": "string"
+        }
+      ]
+    },
+    "bucket": {
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f]+$",
+      "type": "string"
+    },
+    "key": {
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f]+$",
+      "type": "string"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expected_bytes": {
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "const": "pending",
+          "type": "string"
+        },
+        {
+          "const": "confirmed",
+          "type": "string"
+        },
+        {
+          "const": "released",
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

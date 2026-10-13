@@ -102,6 +102,7 @@ describe("exact storage contracts", () => {
     const root = await mkdtemp(join(tmpdir(), "reservation-eval-"));
     const store = new FileObjectStore(join(root, "remote"));
     const r = {
+      schema_version: 1 as const,
       reservation_id: "r1",
       execution_scope: "preview" as const,
       bucket: store.bucket,
@@ -146,6 +147,7 @@ it("OSS legacy VersionId literal null and absent version refer to the same accou
     created_at: "2026-10-13T00:00:00Z",
   };
   const reservation = {
+    schema_version: 1 as const,
     reservation_id: "r",
     execution_scope: "production" as const,
     bucket: "images",
@@ -170,6 +172,7 @@ it("unknown upload into a versioned image bucket is counted once before its vers
     [object],
     [
       {
+        schema_version: 1 as const,
         reservation_id: "pending",
         execution_scope: "production",
         bucket: "images",

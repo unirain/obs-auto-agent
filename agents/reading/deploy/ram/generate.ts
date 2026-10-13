@@ -113,6 +113,35 @@ export function createRAMPolicies(
   return {
     "preview-workspace": workspaceWriter(b.workspace_bucket, b.preview_prefix),
     "test-workspace": workspaceWriter(b.workspace_bucket, b.integration_prefix),
+    "test-image-gc": {
+      Version: "1",
+      Statement: [
+        config(b.image_bucket),
+        list(b.image_bucket, [b.image_prefix], true),
+        {
+          Effect: "Allow",
+          Action: [
+            "oss:GetObject",
+            "oss:DeleteObject",
+            "oss:DeleteObjectVersion",
+          ],
+          Resource: [objectResource(b.image_bucket, b.image_prefix)],
+        },
+        {
+          Effect: "Deny",
+          Action: ["oss:PutObject"],
+          Resource: [
+            `${bucketResource(b.workspace_bucket)}/*`,
+            `${bucketResource(b.image_bucket)}/*`,
+          ],
+        },
+        {
+          Effect: "Deny",
+          Action: ["oss:DeleteObject", "oss:DeleteObjectVersion"],
+          Resource: [`${bucketResource(b.workspace_bucket)}/*`],
+        },
+      ],
+    },
     "test-image": {
       Version: "1",
       Statement: [

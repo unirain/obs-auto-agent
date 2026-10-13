@@ -7,7 +7,11 @@ import {
   type ObjectStore,
 } from "../contracts/index.js";
 import { encode } from "../workspace/manifest.js";
-import { assertCapacity, type StorageReservation } from "./capacity.js";
+import {
+  assertCapacity,
+  parseStorageReservation,
+  type StorageReservation,
+} from "./capacity.js";
 import type { StorageCapacityView } from "../contracts/index.js";
 export async function reserve(
   manager: WorkspaceManager,
@@ -16,6 +20,7 @@ export async function reserve(
   view: StorageCapacityView,
   runId: string,
 ) {
+  parseStorageReservation(reservation);
   if (
     reservation.execution_scope !== handle.execution_scope ||
     reservation.state !== "pending"
@@ -24,6 +29,7 @@ export async function reserve(
   const key = `storage/reservations/${reservation.reservation_id}`;
   const existing = handle.records[key];
   if (existing) {
+    parseStorageReservation(existing);
     if (canonicalJson(existing) !== canonicalJson(reservation))
       throw new AgentError("conflict", "Reservation identity reused");
     return { status: "committed" as const, handle, snapshot: handle.snapshot };
@@ -44,6 +50,9 @@ export async function reconcileReservation(
   store: ObjectStore,
   reservation: StorageReservation,
 ): Promise<StorageReservation> {
+  parseStorageReservation(reservation);
+  if (reservation.bucket !== store.bucket)
+    throw new AgentError("scope", "Reservation bucket does not match adapter");
   try {
     const found = await store.stat(reservation.key);
     if (found.size !== reservation.expected_bytes)
@@ -62,6 +71,9 @@ export async function releaseUnwrittenReservation(
   store: ObjectStore,
   reservation: StorageReservation,
 ): Promise<StorageReservation> {
+  parseStorageReservation(reservation);
+  if (reservation.bucket !== store.bucket)
+    throw new AgentError("scope", "Reservation bucket does not match adapter");
   try {
     await store.stat(reservation.key);
     throw new AgentError("conflict", "Written reservation cannot be released");

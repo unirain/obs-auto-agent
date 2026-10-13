@@ -1,3 +1,4 @@
+import { samePrimarySource } from "./primary-source.js";
 import { Octokit } from "@octokit/rest";
 import { createHash } from "node:crypto";
 import type {
@@ -89,6 +90,15 @@ export function overlayTreeSHA(
   };
   return build("");
 }
+export function parseDeliveryMarker(
+  body: string | null | undefined,
+): { delivery_id: string; project_id: string } | null {
+  const match =
+    /^<!-- reading-delivery:([A-Za-z0-9_-]+) project:([A-Za-z0-9_-]+) -->\r?\n/.exec(
+      (body ?? "") + "\n",
+    );
+  return match ? { delivery_id: match[1]!, project_id: match[2]! } : null;
+}
 const missing = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
@@ -175,7 +185,7 @@ export class OctokitGitHub implements GitHubPort {
     for (const p of all.filter(
       (p) =>
         p.head.ref.startsWith(prefix) ||
-        p.body?.includes(`project:${d.project_id} -->`),
+        parseDeliveryMarker(p.body)?.project_id === d.project_id,
     )) {
       const full = (
         await this.client.pulls.get({ ...this.args(), pull_number: p.number })
@@ -190,9 +200,10 @@ export class OctokitGitHub implements GitHubPort {
             : "closed_unmerged",
         branch: full.head.ref,
         head_sha: full.head.sha,
-        delivery_id:
-          /reading-delivery:([a-zA-Z0-9_-]+)/.exec(full.body ?? "")?.[1] ??
-          null,
+        delivery_id: parseDeliveryMarker(full.body)?.delivery_id ?? null,
+        created_at: full.created_at,
+        closed_at: full.closed_at,
+        merged_at: full.merged_at,
       });
     }
     let branch_sha: string | null = null;
@@ -266,11 +277,47 @@ export class OctokitGitHub implements GitHubPort {
           blob.content.replace(/\n/g, ""),
           "base64",
         ).toString("utf8");
-        if (d.sources[0] && body.includes(d.sources[0])) {
+        if (samePrimarySource(body, d)) {
           default_branch_duplicate = true;
           break;
         }
       }
+    }
+    let pending_duplicate = false;
+    for (const p of all.filter(
+      (p) =>
+        p.state === "open" &&
+        !p.head.ref.startsWith(prefix) &&
+        parseDeliveryMarker(p.body)?.project_id !== d.project_id,
+    )) {
+      const pending = await this.tree(p.head.sha);
+      if (
+        d.files.some((f) =>
+          pending.tree.some((e) => e.path === f.path && e.type === "blob"),
+        )
+      ) {
+        pending_duplicate = true;
+        break;
+      }
+      for (const note of pending.tree.filter(
+        (e) =>
+          e.type === "blob" &&
+          e.path.startsWith("Organize Notes By AI/") &&
+          e.path.endsWith(".md"),
+      )) {
+        const blob = (
+          await this.client.git.getBlob({ ...this.args(), file_sha: note.sha })
+        ).data;
+        const body = Buffer.from(
+          blob.content.replace(/\n/g, ""),
+          "base64",
+        ).toString("utf8");
+        if (samePrimarySource(body, d)) {
+          pending_duplicate = true;
+          break;
+        }
+      }
+      if (pending_duplicate) break;
     }
     const merged_notes: { path: string; content: string; sha: string }[] = [];
     if (prs.some((p) => p.state === "merged")) {
@@ -293,13 +340,105 @@ export class OctokitGitHub implements GitHubPort {
         });
       }
     }
+    let review_outcome: import("./types.js").GitHubFact["review_outcome"];
+    const own = prs.find(
+      (p) => p.delivery_id === d.delivery_id || p.branch === branch,
+    );
+    if (own?.state === "merged") {
+      const mergedHead = await this.tree(own.head_sha);
+      const changed = d.files.some(
+        (f) =>
+          mergedHead.tree.find((e) => e.path === f.path && e.type === "blob")
+            ?.sha !== gitObjectSHA("blob", f.content),
+      );
+      review_outcome = changed
+        ? "accepted_with_changes"
+        : "accepted_without_changes";
+    } else if (own)
+      review_outcome = own.state === "closed_unmerged" ? "rejected" : "pending";
     return {
       prs,
+      ...(review_outcome ? { review_outcome } : {}),
       branch_sha,
       expected_commit_exists,
       complete_diff_matches,
       default_branch_duplicate,
+      pending_duplicate,
       ...(merged_notes.length ? { merged_notes } : {}),
+    };
+  }
+  /** Read every Markdown note on the actual default branch and every open PR head before image cleanup. */
+  async imageReferences(): Promise<
+    import("./image-gc.js").RemoteImageReferences
+  > {
+    const defaultSHA = (
+      await this.client.git.getRef({
+        ...this.args(),
+        ref: `heads/${this.defaultBranch}`,
+      })
+    ).data.object.sha;
+    const prs = await this.client.paginate(this.client.pulls.list, {
+      ...this.args(),
+      state: "open",
+      per_page: 100,
+    });
+    const heads = [
+      { number: 0, sha: defaultSHA },
+      ...prs.map((p) => ({ number: p.number, sha: p.head.sha })),
+    ];
+    const urls = new Set<string>();
+    const blobs = new Map<string, string>();
+    for (const head of heads) {
+      const tree = await this.tree(head.sha); // Truncated/inaccessible heads fail closed.
+      for (const file of tree.tree.filter(
+        (e) =>
+          e.type === "blob" &&
+          /\.(?:md|markdown|svg|drawio|mmd|json|html|htm|canvas)$/i.test(
+            e.path,
+          ),
+      )) {
+        let text = blobs.get(file.sha);
+        if (text === undefined) {
+          const blob = (
+            await this.client.git.getBlob({
+              ...this.args(),
+              file_sha: file.sha,
+            })
+          ).data;
+          if (blob.encoding !== "base64")
+            throw new Error("Unexpected GitHub reference blob encoding");
+          text = Buffer.from(
+            blob.content.replace(/\n/g, ""),
+            "base64",
+          ).toString("utf8");
+          blobs.set(file.sha, text);
+        }
+        for (const match of text.matchAll(/https?:\/\/[^\s"'<>\)]+/g))
+          urls.add(match[0]);
+      }
+    }
+    // A moving default branch/PR set makes this scan incomplete; never delete from a mixed snapshot.
+    const afterDefault = (
+      await this.client.git.getRef({
+        ...this.args(),
+        ref: `heads/${this.defaultBranch}`,
+      })
+    ).data.object.sha;
+    const afterPRs = await this.client.paginate(this.client.pulls.list, {
+      ...this.args(),
+      state: "open",
+      per_page: 100,
+    });
+    const signature = (items: { number: number; sha: string }[]) =>
+      JSON.stringify(items.slice().sort((a, b) => a.number - b.number));
+    const open = prs.map((p) => ({ number: p.number, sha: p.head.sha }));
+    const after = afterPRs.map((p) => ({ number: p.number, sha: p.head.sha }));
+    return {
+      complete:
+        afterDefault === defaultSHA && signature(open) === signature(after),
+      urls,
+      default_branch_commit: defaultSHA,
+      open_pr_heads: open,
     };
   }
   async materialize(
@@ -377,7 +516,10 @@ export class OctokitGitHub implements GitHubPort {
       state: "open",
       branch,
       head_sha: p.head.sha,
-      delivery_id: /reading-delivery:([a-zA-Z0-9_-]+)/.exec(body)?.[1] ?? null,
+      delivery_id: parseDeliveryMarker(body)?.delivery_id ?? null,
+      created_at: p.created_at,
+      closed_at: p.closed_at,
+      merged_at: p.merged_at,
     };
   }
 }

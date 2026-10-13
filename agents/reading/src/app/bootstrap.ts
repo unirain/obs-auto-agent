@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join, dirname, resolve, basename } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import OSS from "ali-oss";
 import { Octokit } from "@octokit/rest";
 import { parse as parseYaml } from "yaml";
@@ -34,6 +34,8 @@ import {
 import { FileObjectStore } from "../storage/filesystem.js";
 import { OssObjectStore } from "../storage/oss.js";
 import { listAll, preflight } from "../storage/preflight.js";
+import { MeteredObjectStore } from "../storage/metrics.js";
+import { collectActionsMetrics } from "../monitor/actions-metrics.js";
 import {
   assertCapacity,
   capacityView,
@@ -42,6 +44,8 @@ import {
 import { assertG1Evidence } from "../storage/gates.js";
 import { capacityBrokerFromEnvironment } from "../storage/broker.js";
 import { extractPdf } from "../tools/pdf.js";
+import { readWebMaterial } from "../tools/web-reader.js";
+import { readBrowser, type BrowserReadLimits } from "../tools/browser.js";
 import type { InventoryObject } from "../storage/inventory.js";
 import { ImmutableWorkspaceManager } from "../workspace/manager.js";
 import {
@@ -75,13 +79,24 @@ import { StageExecutor } from "../stages/executor.js";
 import {
   registeredCitationUrls,
   type RuntimeEnvironment,
+  type RuntimeProject,
 } from "../stages/driver.js";
 import { validateWriting, validateReview } from "../stages/validation.js";
 import { WebSourceAdapter, type SourceConfig } from "../collect/sources.js";
 import { createGitHubAppClient, parseAppCredentials } from "../publish/auth.js";
 import { OSSImageStore } from "../publish/oss-images.js";
-import { ResourcePublisher, type ImageStore } from "../publish/resources.js";
+import {
+  ResourcePublisher,
+  resourceNames,
+  type ImageStore,
+} from "../publish/resources.js";
 import { Publisher } from "../publish/publisher.js";
+import { imageGCFromTrustedHost } from "../publish/image-gc-bootstrap.js";
+import {
+  deliveryMetrics,
+  type HumanReviewFeedback,
+} from "../publish/metrics.js";
+import { buildUsageLedger, usageForProject } from "../workspace/usage.js";
 import { OctokitGitHub } from "../publish/github.js";
 import {
   deliveryValidationHash,
@@ -100,6 +115,7 @@ import {
   type DeliveryRetentionFact,
 } from "./maintenance.js";
 import { WorkspaceJournal, ApplicationInvocationJournal } from "./journal.js";
+import { retryAuthorized } from "./recovery.js";
 import {
   ReadingController,
   SourceRevisionChanged,
@@ -127,6 +143,10 @@ export interface BuildApplicationOptions {
   env?: NodeJS.ProcessEnv;
   allow_initialize?: boolean;
   gateway_transport?: GatewayTransport;
+  browser_read?: (
+    url: string,
+    limits: BrowserReadLimits,
+  ) => Promise<import("../tools/fetch.js").WebSnapshot>;
   gateway_resolver?: (hostname: string) => Promise<DnsAddress[]>;
   github_port?: GitHubPort;
   image_store?: ImageStore;
@@ -291,23 +311,20 @@ function projectUsage(
   journal: WorkspaceJournal,
   projectId: string,
 ): SealedDelivery["usage"] {
-  const calls = Object.entries(journal.handle.records)
-    .filter(([key]) => key.startsWith("invocations/"))
-    .map(([, value]) => value as unknown as InvocationRecord)
-    .filter((r) => r.subject_id === `project:${projectId}`);
-  const known = calls.filter(
-    (r) => r.usage.cost_status === "known" && r.usage.cost_usd !== null,
+  const total = usageForProject(
+    buildUsageLedger([journal.handle]),
+    journal.handle.execution_scope,
+    journal.handle.workspace_id,
+    projectId,
   );
   return {
     status:
-      known.length === calls.length && calls.length > 0
+      total.cost_status === "known" && total.invocation_count > 0
         ? "known"
-        : known.length
+        : total.known_cost_usd !== null && total.invocation_count > 0
           ? "partial"
           : "unknown",
-    estimated_usd: known.length
-      ? known.reduce((n, r) => n + (r.usage.cost_usd ?? 0), 0)
-      : null,
+    estimated_usd: total.invocation_count > 0 ? total.known_cost_usd : null,
   };
 }
 function mappedState(
@@ -397,6 +414,7 @@ export async function buildApplication(
     options.local_root ?? env.RUNNER_TEMP ?? ".reading-local",
   );
   await mkdir(root, { recursive: true });
+  const runId = options.run_id ?? `run_${randomUUID()}`;
   let store: ObjectStore;
   if (options.local) store = new FileObjectStore(join(root, "object-store"));
   else {
@@ -409,8 +427,14 @@ export async function buildApplication(
       ...credentials,
       allowed_prefix: deployment.workspace.prefix,
     });
-    await preflight(store);
   }
+  const meteredStore = new MeteredObjectStore(store, {
+    run_id: runId,
+    execution_scope: target.execution_scope,
+    storage_role: "workspace",
+  });
+  store = meteredStore;
+  if (!options.local) await preflight(store);
   let journal: WorkspaceJournal | undefined;
   const pending = () =>
     journal
@@ -464,11 +488,7 @@ export async function buildApplication(
       ["scheduled", "preview"].includes(options.dispatch.mode),
     run_id: options.run_id ?? "initialize",
   });
-  journal = new WorkspaceJournal(
-    manager,
-    handle,
-    options.run_id ?? `run_${randomUUID()}`,
-  );
+  journal = new WorkspaceJournal(manager, handle, runId);
   const records = journal;
   const implementation = options.implementation_repository ?? process.cwd();
   const policySource =
@@ -650,21 +670,25 @@ export async function buildApplication(
     }
     return combined;
   };
+  const relatedViews = new Map<string, NoteIndex>();
   const currentKnowledge = async (project: HostProject) => {
     const heldout = options.heldout ?? {
       urls: new Set<string>(),
       note_paths: new Set<string>(),
     };
     const query = `${project.candidate.title ?? ""} ${project.candidate.url} ${project.selection?.reason ?? ""}`;
-    const selected = recallNotes(await currentNotes(), query, heldout).map(
-      (note) => ({
-        id: note.id,
-        title: note.title,
-        summary: note.summary,
-        source_urls: note.sources,
-        pending: note.pending,
-      }),
-    );
+    const recalled = recallNotes(await currentNotes(), query, heldout);
+    for (const note of recalled) relatedViews.set(note.id, note);
+    const selected = recalled.map((note) => ({
+      id: note.id,
+      title: note.title,
+      summary: note.summary,
+      source_urls: note.sources,
+      path: note.path,
+      commit: note.commit,
+      hash: note.hash,
+      pending: note.pending,
+    }));
     const terms = new Set(
       query.toLowerCase().match(/[a-z0-9_-]{2,}|[\u3400-\u9fff]{2,}/g) ?? [],
     );
@@ -675,6 +699,9 @@ export async function buildApplication(
       source_urls: string[];
       pending: boolean;
       score: number;
+      path?: string;
+      commit?: string;
+      hash?: string;
     }[] = [];
     for (const key of records.keys("projects/")) {
       const current = await records.load<HostProject>(key);
@@ -695,7 +722,34 @@ export async function buildApplication(
         .join("\n");
       const text = `${current.candidate.title ?? ""} ${summary}`.toLowerCase();
       const score = [...terms].filter((term) => text.includes(term)).length;
-      if (summary && score > 0)
+      if (summary && score > 0) {
+        const artifact = current.writing
+          ? records.handle.snapshot.manifest.files.find(
+              (file) =>
+                file.path ===
+                `projects/${current.project_id}/draft/${current.writing!.note_path}`,
+            )
+          : undefined;
+        let version: { path: string; commit: string; hash: string } | undefined;
+        if (
+          current.writing &&
+          artifact?.sha256 === sha256(current.writing.markdown)
+        ) {
+          const snapshot = indexNote({
+            path: current.writing.note_path,
+            commit: records.handle.revision,
+            text: current.writing.markdown,
+            first_added_at: current.created_at,
+            pending: current.state !== "merged",
+          });
+          snapshot.id = current.project_id;
+          relatedViews.set(snapshot.id, snapshot);
+          version = {
+            path: snapshot.path,
+            commit: snapshot.commit,
+            hash: snapshot.hash,
+          };
+        }
         projects.push({
           id: current.project_id,
           title: current.candidate.title ?? current.project_id,
@@ -703,7 +757,9 @@ export async function buildApplication(
           source_urls: [current.candidate.url],
           pending: current.state !== "merged",
           score,
+          ...version,
         });
+      }
     }
     const view = [
       ...selected,
@@ -722,6 +778,134 @@ export async function buildApplication(
       snapshot,
     );
     return view;
+  };
+  const readRelatedNote = async (project: HostProject, id: string) => {
+    const heldout = options.heldout ?? {
+      urls: new Set<string>(),
+      note_paths: new Set<string>(),
+    };
+    const authorizedViews = records
+      .keys("knowledge-views/")
+      .map(
+        (key) =>
+          records.handle.records[key] as unknown as {
+            project_id: string;
+            notes: { id: string }[];
+          },
+      );
+    if (
+      !project.context.related_notes.some((note) => note.id === id) &&
+      !authorizedViews.some(
+        (view) =>
+          view.project_id === project.project_id &&
+          view.notes.some((note) => note.id === id),
+      )
+    )
+      throw new Error("related_note_not_retrieved");
+    const note = relatedViews.get(id) ?? index.find((note) => note.id === id);
+    if (note) {
+      if (
+        heldout.note_paths.has(note.path) ||
+        note.sources.some((url) => heldout.urls.has(url))
+      )
+        throw new Error("heldout_related_note_denied");
+      if (sha256(note.text) !== note.hash)
+        throw new Error("related_note_hash_mismatch");
+      return {
+        id,
+        path: note.path,
+        commit: note.commit,
+        hash: note.hash,
+        text: note.text,
+        source_urls: note.sources,
+      };
+    }
+    const other = await records.load<HostProject>("projects/" + id);
+    if (
+      !other?.writing ||
+      other.project_id === project.project_id ||
+      heldout.note_paths.has(other.writing.note_path) ||
+      [other.candidate.url, ...other.candidate.aliases].some((url) =>
+        heldout.urls.has(url),
+      )
+    )
+      throw new Error("related_note_version_unavailable");
+    const bytes = await manager.readFile(
+      records.handle,
+      `projects/${other.project_id}/draft/${other.writing.note_path}`,
+    );
+    return {
+      id,
+      path: other.writing.note_path,
+      commit: records.handle.revision,
+      hash: sha256(bytes),
+      text: Buffer.from(bytes).toString("utf8"),
+      source_urls: [other.candidate.url],
+    };
+  };
+  const settleSemanticBinding = async (input: {
+    previous: RuntimeProject;
+    next: RuntimeProject;
+    reason: string;
+    from_semantic_hash: string | null;
+    to_semantic_hash: string;
+  }) => {
+    const host = await records.load<HostProject>(
+      "projects/" + input.previous.project_id,
+    );
+    if (
+      !host ||
+      host.workspace_id !== target.workspace_id ||
+      host.execution_scope !== target.execution_scope
+    )
+      throw new Error("semantic_binding_scope_mismatch");
+    if (
+      host.delivery_id ||
+      ["publishing", "pr_open", "merged", "closed_unmerged"].includes(
+        host.state,
+      )
+    )
+      throw new Error("semantic_binding_delivery_reconciliation_required");
+    const archives: Record<string, unknown> = {};
+    const ids: string[] = [];
+    for (const key of records.keys("invocations/")) {
+      const call = await records.load<InvocationRecord>(key);
+      if (!call || call.subject_id !== "project:" + host.project_id) continue;
+      if (
+        ["prepared", "running", "unknown"].includes(call.status) &&
+        !(await retryAuthorized(records, call, "", ""))
+      )
+        return { status: "request_unknown" as const };
+      if (!["succeeded", "failed"].includes(call.status)) continue;
+      ids.push(call.invocation_id);
+      archives["consumed/" + call.invocation_id] = {
+        project_id: host.project_id,
+        reason: input.reason,
+      };
+      archives["binding-superseded/" + call.invocation_id] = {
+        subject_id: call.subject_id,
+        input_hash: call.input_hash,
+        from_semantic_hash: input.from_semantic_hash,
+        to_semantic_hash: input.to_semantic_hash,
+      };
+      archives[
+        `binding-archives/${host.project_id}/${input.from_semantic_hash ?? "unclassified"}/${call.invocation_id}`
+      ] = {
+        invocation_id: call.invocation_id,
+        from_semantic_hash: input.from_semantic_hash,
+        to_semantic_hash: input.to_semantic_hash,
+        input_hash: call.input_hash,
+        status: call.status,
+      };
+    }
+    await records.commitMany(
+      {
+        ...archives,
+        ["projects/" + host.project_id]: { ...host, ...input.next },
+      },
+      "invocation_reconciled",
+    );
+    return { status: "committed" as const, archived_invocation_ids: ids };
   };
   const skillCache = new Map<string, SkillBundle>();
   const viewId = randomUUID();
@@ -902,7 +1086,7 @@ export async function buildApplication(
     if (!projectId) throw new Error("project_permission_identity_missing");
     const p = await records.load<HostProject>(`projects/${projectId}`);
     if (!p) throw new Error("permission_project_missing");
-    await gate.require(
+    return gate.require(
       projectSubject(p),
       capability === "upload_resource" ? "upload" : "publish",
       "remote_write",
@@ -983,6 +1167,7 @@ export async function buildApplication(
               "generation",
             );
             const reservation: StorageReservation = {
+              schema_version: 1,
               reservation_id: sha256(key),
               execution_scope: target.execution_scope,
               bucket: deployment.image!.bucket,
@@ -1119,6 +1304,60 @@ export async function buildApplication(
     ...{
       refreshDelivery,
       readArtifact: (path: string) => manager.readFile(records.handle, path),
+      metrics: async () => {
+        let view: unknown;
+        try {
+          view = await capacity();
+        } catch {
+          view = {
+            status: "unknown",
+            reason: "capacity_observation_unavailable",
+          };
+        }
+        const deliveries = records
+          .keys("delivery-")
+          .map(
+            (key) => records.handle.records[key] as unknown as DeliveryRecord,
+          )
+          .filter((value) => typeof value?.delivery_id === "string");
+        const ledger = buildUsageLedger([records.handle]);
+        const fees = Object.fromEntries(
+          deliveries.map((delivery) => [
+            delivery.project_id,
+            usageForProject(
+              ledger,
+              target.execution_scope,
+              target.workspace_id,
+              delivery.project_id,
+            ),
+          ]),
+        );
+        const feedback = records
+          .keys("review-feedback/")
+          .map(
+            (key) =>
+              records.handle.records[key] as unknown as HumanReviewFeedback,
+          );
+        const token = env.GITHUB_TOKEN ?? env.READING_REPOSITORY_READ_TOKEN;
+        let actions: unknown = {
+          status: "unknown",
+          reason: "actions_run_or_read_credential_unavailable",
+          billed_minutes: null,
+        };
+        if (token && /^\d+$/.test(env.GITHUB_RUN_ID ?? ""))
+          actions = await collectActionsMetrics(
+            new Octokit({ auth: token }),
+            deployment.implementation_repository,
+            Number(env.GITHUB_RUN_ID),
+            Number(env.GITHUB_RUN_ATTEMPT ?? 1),
+          );
+        return {
+          workspace_storage: meteredStore.snapshot(),
+          capacity: view,
+          delivery: deliveryMetrics(deliveries, feedback, fees, new Date(), 7),
+          actions,
+        };
+      },
     },
     journal: records,
     gate,
@@ -1195,10 +1434,21 @@ export async function buildApplication(
         executor,
         gate,
         gateway: gatewayFor(projectSubject(project)),
+        browser_gateway: (main_url: string) => {
+          if (main_url !== project.candidate.url)
+            throw new Error("browser_main_binding_mismatch");
+          return gatewayFor(
+            { ...projectSubject(project), manual_resource_of: main_url },
+            "main_read",
+          );
+        },
+        ...(options.browser_read ? { browser_read: options.browser_read } : {}),
         deadline,
         skills,
         commit,
         read_current_knowledge: () => currentKnowledge(project),
+        read_related_note: (id: string) => readRelatedNote(project, id),
+        settle_semantic_binding: settleSemanticBinding,
       } satisfies RuntimeEnvironment;
     },
     prepareResources: async (original, files) => {
@@ -1209,7 +1459,7 @@ export async function buildApplication(
       if (!project.note_date)
         throw new Error("fixed_first_generation_date_missing");
       const receipts: ResourceReceipt[] = [];
-      for (const [resourceIndex, resource] of writing.resources.entries()) {
+      for (const resource of writing.resources) {
         const bytes = files[resource.path];
         if (!bytes || sha256(bytes) !== resource.hash)
           throw new Error("resource_input_changed");
@@ -1219,12 +1469,10 @@ export async function buildApplication(
         const receipt = await resources.upload({
           project_id: project.project_id,
           first_generated_date: project.note_date!,
-          article_slug: project.project_id,
-          description:
-            basename(resource.source_path ?? resource.path)
-              .replace(/\.[^.]+$/, "")
-              .replace(/[^a-zA-Z0-9_-]+/g, "-")
-              .replace(/^-+|-+$/g, "") || `diagram-${resourceIndex + 1}`,
+          ...resourceNames(
+            project.candidate,
+            resource.source_path ?? resource.path,
+          ),
           extension: ext as "png" | "jpg" | "svg" | "webp",
           mime: resource.mime,
           content: bytes,
@@ -1293,11 +1541,42 @@ export async function buildApplication(
         );
         const current =
           response.mime === "text/html"
-            ? extractWebSnapshot(
-                response.url,
-                Buffer.from(response.bytes).toString("utf8"),
-                new Date().toISOString(),
-              ).hash
+            ? (
+                await readWebMaterial(
+                  response.url,
+                  Buffer.from(response.bytes).toString("utf8"),
+                  new Date().toISOString(),
+                  async () => {
+                    const subject = {
+                      ...projectSubject(project),
+                      ...(version.main
+                        ? { manual_resource_of: project.candidate.url }
+                        : {}),
+                    };
+                    const browserGateway = gatewayFor(
+                      subject,
+                      version.main ? "main_read" : "research",
+                    );
+                    const limits: BrowserReadLimits = {
+                      before_request: async (url) => {
+                        await gate.require(
+                          { ...subject, urls: [url] },
+                          version.main ? "main_read" : "research",
+                          "source_reverification_browser",
+                        );
+                      },
+                    };
+                    return options.browser_read
+                      ? options.browser_read(response.url, limits)
+                      : readBrowser(
+                          browserGateway,
+                          response.url,
+                          deadline.generation_deadline,
+                          limits,
+                        );
+                  },
+                )
+              ).snapshot.hash
             : response.mime === "application/pdf"
               ? (
                   await extractPdf(
@@ -1353,6 +1632,11 @@ export async function buildApplication(
         (await records.load<ResourceReceipt[]>(
           `resources/${project.project_id}`,
         )) ?? [];
+      const sealPolicy = await gate.require(
+        projectSubject(project),
+        "publish",
+        "delivery_seal",
+      );
       const d: SealedDelivery = {
         schema_version: 1,
         delivery_id: project.delivery_id,
@@ -1409,7 +1693,27 @@ export async function buildApplication(
             ...project.snapshots.map((s) => s.url),
           ]),
         ],
-        quality_report: { review: project.review, checks: "passed" },
+        primary_source_aliases: [
+          ...new Set([
+            project.candidate.url,
+            ...project.candidate.aliases,
+            ...project.snapshots
+              .filter(
+                (snapshot) =>
+                  snapshot.requested_url === project.candidate.url ||
+                  snapshot.url === project.candidate.url,
+              )
+              .flatMap((snapshot) => [
+                snapshot.url,
+                ...(snapshot.requested_url ? [snapshot.requested_url] : []),
+              ]),
+          ]),
+        ],
+        quality_report: {
+          review: project.review,
+          checks: "passed",
+          seal_policy_check: sealPolicy,
+        },
         rationale: project.selection?.reason ?? "",
         knowledge_increment: project.research.knowledge_increment,
         gaps: project.research.gaps.map((g) => `${g.url}: ${g.reason}`),
@@ -1488,7 +1792,14 @@ export async function buildApplication(
         ...(options.retention_delivery_fact
           ? { delivery_fact: options.retention_delivery_fact }
           : {}),
-        ...(options.image_gc ? { image_gc: options.image_gc } : {}),
+        ...((options.image_gc ??
+        defaultImageCleanup(deployment, env, records, policySource))
+          ? {
+              image_gc:
+                options.image_gc ??
+                defaultImageCleanup(deployment, env, records, policySource),
+            }
+          : {}),
       }),
   };
 }
@@ -1500,14 +1811,121 @@ export interface BuildMaintenanceOptions {
   local_root?: string;
   run_id?: string;
   env?: NodeJS.ProcessEnv;
+  policy_source?: PolicySource;
   capacity_provider?: () => Promise<GlobalCapacityInventory>;
   maintenance_mutex?: <T>(work: () => Promise<T>) => Promise<T>;
   retention_delivery_fact?: (id: string) => Promise<DeliveryRetentionFact>;
   image_gc?: () => Promise<{
+    complete?: boolean;
     deleted: string[];
     retained: string[];
     unknown: string[];
   }>;
+}
+function defaultImageCleanup(
+  deployment: Deployment,
+  env: NodeJS.ProcessEnv,
+  journal: WorkspaceJournal,
+  policy_source?: PolicySource,
+) {
+  if (deployment.execution_scope === "preview") return undefined;
+  return async () => {
+    const ref =
+      deployment.name === "integration"
+        ? "TEST_IMAGE_GC_CREDENTIALS"
+        : "READING_IMAGE_GC_CREDENTIALS";
+    const credentials = env[ref] ? await credentialsFor(ref, env) : undefined;
+    let github: OctokitGitHub | undefined;
+    if (
+      credentials &&
+      deployment.image?.sole_writer_verified &&
+      deployment.image.versioning !== "unknown" &&
+      deployment.target_repository &&
+      deployment.github_app_credential_ref &&
+      env[deployment.github_app_credential_ref]
+    ) {
+      try {
+        const client = createGitHubAppClient(
+          parseAppCredentials(env[deployment.github_app_credential_ref]),
+        );
+        const [owner, repo] = deployment.target_repository.split("/");
+        const info = (await client.repos.get({ owner: owner!, repo: repo! }))
+          .data;
+        github = new OctokitGitHub(
+          client,
+          deployment.target_repository,
+          info.default_branch,
+        );
+      } catch {
+        /* Remote uncertainty must retain images. */
+      }
+    }
+    const [owner, repo] = deployment.implementation_repository.split("/");
+    const token = env.GITHUB_TOKEN ?? env.READING_REPOSITORY_READ_TOKEN;
+    const source =
+      policy_source ??
+      (token
+        ? new GitHubPolicySource(new Octokit({ auth: token }), owner!, repo!)
+        : undefined);
+    const gate = new PolicyGate(
+      async () => {
+        if (!source) throw new Error("image_gc_policy_unavailable");
+        return parseTrustedPolicy(await source.readSnapshot());
+      },
+      (check) => journal.commit("policy-checks/" + check.check_id, check),
+    );
+    const start = env.READING_JOB_STARTED_AT
+      ? Number(env.READING_JOB_STARTED_AT)
+      : Date.now();
+    if (!Number.isSafeInteger(start) || start <= 0 || start > Date.now() + 1000)
+      throw new Error("trusted_job_start_invalid");
+    const callback = imageGCFromTrustedHost({
+      deployment,
+      credentials,
+      credential_reference: ref,
+      github,
+      journal,
+      records: () => journal.handle.records,
+      beforeDelete: async (projectId, key) => {
+        if (Date.now() >= start + 30 * 60000)
+          throw new Error("maintenance_deadline");
+        if (!deployment.image || !key.startsWith(deployment.image.prefix))
+          throw new Error("image_gc_scope_mismatch");
+        const project = await journal.load<HostProject>(
+          "projects/" + projectId,
+        );
+        if (!project) throw new Error("image_gc_project_unknown");
+        await gate.require(
+          {
+            subject_ref: "image-gc:" + projectId,
+            project_id: projectId,
+            execution_scope: deployment.execution_scope,
+            origin_source_ids: [],
+            urls: [],
+          },
+          "cleanup",
+          "image_gc_delete",
+        );
+      },
+      afterKeyAbsent: async (key) => {
+        const updates: Record<string, unknown> = {};
+        for (const recordKey of journal.keys("storage/reservations/")) {
+          const reservation = await journal.load<StorageReservation>(recordKey);
+          if (
+            reservation &&
+            deployment.image &&
+            reservation.bucket === deployment.image.bucket &&
+            reservation.key === key &&
+            reservation.state !== "released"
+          )
+            updates[recordKey] = { ...reservation, state: "released" };
+        }
+        if (Object.keys(updates).length)
+          await journal.commitMany(updates, "storage_reconciled");
+      },
+    });
+    return callback();
+  };
 }
 /** Storage-only maintenance entry: no SDK, image upload adapter, notes/skill materialization or PR writes. */
 export async function buildMaintenanceApplication(
@@ -1648,7 +2066,19 @@ export async function buildMaintenanceApplication(
             return work();
           }),
         delivery_fact: fact,
-        ...(options.image_gc ? { image_gc: options.image_gc } : {}),
+        ...((options.image_gc ??
+        defaultImageCleanup(deployment, env, records, options.policy_source))
+          ? {
+              image_gc:
+                options.image_gc ??
+                defaultImageCleanup(
+                  deployment,
+                  env,
+                  records,
+                  options.policy_source,
+                ),
+            }
+          : {}),
       }),
   };
 }

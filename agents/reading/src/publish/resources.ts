@@ -1,10 +1,12 @@
 import { AgentError } from "../contracts/index.js";
 import { validateStaticSVG } from "./svg.js";
 import { sha256 } from "./validate.js";
+import { writePolicyReceipt } from "./types.js";
 import type {
   OperationsJournal,
   PermissionCheck,
   ResourceReceipt,
+  WritePolicyReceipt,
 } from "./types.js";
 export interface ImageObject {
   content: Uint8Array;
@@ -31,12 +33,14 @@ export interface ResourceInput {
   content: Uint8Array;
 }
 interface UploadIntent {
+  schema_version: 1;
   status: "reserved" | "unknown" | "confirmed";
   object_key: string;
   sha256: string;
   bytes: number;
   mime: string;
   receipt: ResourceReceipt | null;
+  policy_checks?: WritePolicyReceipt[];
 }
 export class ResourcePublisher {
   constructor(
@@ -54,8 +58,8 @@ export class ResourcePublisher {
     if (
       !/^[a-zA-Z0-9_-]+$/.test(input.project_id) ||
       !/^\d{4}-\d{2}-\d{2}$/.test(input.first_generated_date) ||
-      !/^[a-z0-9_-]+$/i.test(input.article_slug) ||
-      !/^[a-z0-9_-]+$/i.test(input.description)
+      !/^[\p{L}\p{N}\p{M}_-]{1,80}$/u.test(input.article_slug) ||
+      !/^[\p{L}\p{N}\p{M}_-]{1,80}$/u.test(input.description)
     )
       throw new Error("Invalid resource naming");
     const types = {
@@ -84,16 +88,52 @@ export class ResourcePublisher {
     const key = `${this.prefix}${input.project_id}/${input.first_generated_date}-${input.article_slug}-${input.description}-${hash}.${input.extension}`;
     const journalKey = `resource-${sha256(key)}`;
     let intent = await this.journal.load<UploadIntent>(journalKey);
+    if (intent && intent.schema_version !== 1)
+      throw new Error("Unsupported resource intent schema");
+    if (
+      intent &&
+      (!["reserved", "unknown", "confirmed"].includes(intent.status) ||
+        intent.object_key !== key ||
+        intent.mime !== input.mime)
+    )
+      throw new Error("Invalid persisted resource intent");
     if (
       intent &&
       (intent.sha256 !== hash || intent.bytes !== input.content.byteLength)
     )
       throw new Error("Resource intent conflict");
-    if (intent?.status === "confirmed" && intent.receipt) return intent.receipt;
+    if (intent?.status === "confirmed" && intent.receipt) {
+      if (
+        intent.receipt.object_key !== key ||
+        intent.receipt.project_id !== input.project_id ||
+        intent.receipt.sha256 !== hash ||
+        intent.receipt.bytes !== input.content.byteLength ||
+        intent.receipt.mime !== input.mime
+      )
+        throw new Error("Confirmed resource receipt identity conflict");
+      const actual = await this.store.get(key);
+      if (actual) {
+        if (
+          sha256(actual.content) !== hash ||
+          actual.content.byteLength !== intent.bytes ||
+          actual.mime !== input.mime
+        )
+          throw new Error("Confirmed image content conflict");
+        if (!(await this.store.accessible(intent.receipt.url, hash)))
+          throw new Error("Confirmed image URL unverified");
+        return intent.receipt;
+      }
+      // Verified GC may have removed an unreferenced image. Recreate only after new permission/reservation.
+      await this.permission("upload_resource", input.project_id);
+      await this.capacity.reserve(key, input.content.byteLength);
+      intent = { ...intent, status: "reserved", receipt: null };
+      await this.journal.commit(journalKey, intent);
+    }
     await this.permission("upload_resource", input.project_id);
     if (!intent) {
       await this.capacity.reserve(key, input.content.byteLength);
       intent = {
+        schema_version: 1,
         status: "reserved",
         object_key: key,
         sha256: hash,
@@ -106,7 +146,15 @@ export class ResourcePublisher {
     // Read before writing, including on a fresh process after a lost response.
     let existing = await this.store.get(key);
     if (!existing) {
-      await this.permission("upload_resource", input.project_id);
+      const policy = writePolicyReceipt(
+        "upload_resource",
+        await this.permission("upload_resource", input.project_id),
+        this.now().toISOString(),
+      );
+      intent = {
+        ...intent,
+        policy_checks: [...(intent.policy_checks ?? []), policy],
+      };
       await this.journal.commit(journalKey, { ...intent, status: "unknown" });
       try {
         await this.store.create(key, input.content, input.mime);
@@ -154,4 +202,35 @@ export class ResourcePublisher {
     });
     return receipt;
   }
+}
+
+/** Preserve readable article/diagram words rather than replacing descriptions with opaque hashes. */
+export function resourceNames(
+  article: { title: string | null; url: string },
+  path: string,
+  alt?: string,
+): { article_slug: string; description: string } {
+  const slug = (value: string, fallback: string) =>
+    value
+      .normalize("NFKC")
+      .replace(/[^\p{L}\p{N}\p{M}_-]+/gu, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || fallback;
+  let segment = "";
+  try {
+    segment = decodeURIComponent(
+      new URL(article.url).pathname.split("/").filter(Boolean).at(-1) ?? "",
+    );
+  } catch {
+    /* trusted fallback */
+  }
+  const file =
+    path
+      .split("/")
+      .at(-1)
+      ?.replace(/\.[^.]+$/, "") ?? "";
+  return {
+    article_slug: slug(article.title ?? segment, "article"),
+    description: slug(alt ?? file, "diagram"),
+  };
 }

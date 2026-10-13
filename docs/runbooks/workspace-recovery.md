@@ -44,3 +44,15 @@ blob/manifest 成功但 commit 未发布，恢复仍看到旧完整版本。孤�
 `ImmutableWorkspaceManager` 的 `lazy_restore` 先校验完整提交链及 HEAD manifest，完整列举 blob 元数据验证全部引用的存在和大小，下载并校验控制状态及活跃项目正文。已结束或待审项目的非控制文件暂不物化；`readFile(handle, path)` 只接受该提交的文件清单成员，并在读取时以 SHA-256 核验正文。Inactive 正文的完整哈希校验在实际访问时完成，不能把元数据检查称为正文已验证。
 
 本地缓存按 workspace 身份和内容哈希隔离，不承担远端持久化事实。启动重新核验远端控制/活跃正文；同一运行的检查点可复用已校验缓存并用硬链接避免复制全部旧文件。受信 skill 与此缓存分离，仍从固定 Git commit 物化。
+
+## 持久化用量视图
+
+`workspace/usage.ts` 的 `buildUsageLedger(handles)` 只读取已提交 Invocation 与 `invocation_meta`，按 workspace、scope、项目、轮次、北京时间日期和 capability 汇总。相同 invocation 的一致 receipt/invocations 别名只计一次；不一致别名拒绝聚合。不同 workspace 或 scope 的相同 ID 分开计量。
+
+SDK message ID 重放按规范化 JSON 比较；整个 query 的累计 summary 不再叠加任何 step。终态未知时总费用保持 null，已知费用和 tokens 保留为下界。`known_cost_usd` 是可观察的估算下界，不能冒充供应方最终账单。查询汇总较早观测倒退时标记不完整，不丢掉旧值。
+
+日期默认归于 invocation 开始时刻的北京时间日期，字段 `day_basis` 明示此口径；缺开始时刻、轮次或项目归属的历史回执进入 `unattributed`。指定轮次或项目存在无法归属的回执时，`usageForRun`／`usageForProject` 报告归属不完整和未知总费用，不能把缺资料视为零。格式修复、应用重试目的只能来自可信 metadata，缺失时为 unspecified。
+
+持久化基础 journal 的 prepare 会原子写入开始时间、run_id、scope metadata；恢复后观察或终态写入不会将旧调用归到新一轮。应用 journal 应复用 `aggregateUsage`，报告和 PR 分别使用 `usageForRun` 与 `usageForProject`。
+
+回归：`npm test -- agents/reading/evals/storage/usage-ledger.test.ts` 验证真实文件对象存储重启、跨 scope 分离、相同消息重放、未知消耗与缺 metadata。

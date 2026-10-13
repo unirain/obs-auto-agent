@@ -134,3 +134,9 @@ ListObjects 使用 bucket Resource 并通过 `oss:Prefix` 条件限制目录；G
 真实测试逐身份验证 Allowed 和 Denied：preview/test key 不能写正式前缀；图床 key 不能读私有 workspace；容量/watchdog 不能 Put/Delete；workspace key 不得删除 commits。期望拒绝需以真实 403 为证据，不能由本地 wrapper 假装证明 RAM 已拒绝。
 
 `verify-storage` 验证真实服务配置；`READING_LIVE_DELIVERY=1` 和 `READING_LIVE_IMAGES=1` 加 `READING_LIVE_DEPLOYMENT=/absolute/path/integration.json` 才执行对应 live spike。完整 G3/G4/G5 仍须计划规定的真实模型、PR/Issue 故障恢复和质量确认。正式 cron 保持关闭。
+
+## 9. 图片清理另用第六个 RAM 身份
+
+`test-image-gc.json` 仅允许指定测试图片前缀的 GetObject/DeleteObject/DeleteObjectVersion 和必要元数据/版本清单读取；明确不允许上传，不允许私有 workspace 删除。给独立 RAM 用户/角色绑定该策略，Secret **`TEST_IMAGE_GC_CREDENTIALS`**；正式后续另建身份并使用 **`READING_IMAGE_GC_CREDENTIALS`**。不要把 `OSS_TEST_IMAGE_CREDENTIALS` 或当前基础探针 key 自动当清理身份。
+
+确认专用前缀、唯一 writer 与版本状态后，在共享 writer 互斥下使用可信 `maintenance` 入口。无引用证明、无归属、仍在 HEAD/活跃/待审/已合并/unknown 路径上的图片不会删除。实际允许/拒绝和 DELETE 回读需在隔离对象验证；这些 JSON 模板与本地测试不证明 RAM 已配置。

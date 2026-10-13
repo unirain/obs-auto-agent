@@ -6,7 +6,7 @@ import {type ModelAdapter,type ToolDefinition,SDK_VERSION,QueryNotStartedError} 
 import {RunDeadline} from '../runtime/deadline.js';
 export interface JournalPort {find(subject_id:string,input_hash:string,capability:string):Promise<InvocationRecord|null>;result?(id:string):Promise<unknown>;prepare(record:InvocationRecord):Promise<void>;
   observe(id:string,message:InvocationMessage,observable:Record<string,unknown>):Promise<void>;finish(id:string,status:'succeeded'|'failed'|'unknown'):Promise<void>}
-export type StageExecution={task:StageTask;subject:PolicySubject;prompt:string;system_prompt:string;schema:object;cwd:string;model:string;tools:ToolDefinition[];deadline:RunDeadline;skills?:string[];max_output_tokens?:number;semantic_policy_hash?:string};
+export type StageExecution={task:StageTask;subject:PolicySubject;prompt:string;system_prompt:string;schema:object;cwd:string;model:string;tools:ToolDefinition[];deadline:RunDeadline;skills?:string[];purpose?:'classification'|'format_repair'|'stage';max_output_tokens?:number;semantic_policy_hash?:string};
 export function stageInputHash(input:Pick<StageExecution,'prompt'|'system_prompt'|'schema'|'model'|'tools'|'task'|'max_output_tokens'|'semantic_policy_hash'>):string{return digest(canonicalJson({prompt:input.prompt,system_prompt:input.system_prompt,schema:input.schema,model:input.model,tool_names:input.tools.map(tool=>tool.name),context_id:input.task.context_id,capability:input.task.capability,max_output_tokens:input.max_output_tokens??8192,semantic_policy_hash:input.semantic_policy_hash??null}));}
 export class StageExecutor {
   constructor(private readonly model:ModelAdapter,private readonly gate:PolicyGate,private readonly journal:JournalPort){}
@@ -23,7 +23,7 @@ export class StageExecutor {
     const invocation_id=`inv_${randomUUID()}`;
     await this.journal.prepare({schema_version:1,invocation_id,execution_scope:input.task.execution_scope,subject_id:input.subject.subject_ref,capability:input.task.capability,
       input_hash:expected,context_hash:input.task.context_id,policy_hash:check.policy_hash!,model:input.model,sdk_version:SDK_VERSION,status:'prepared',messages:[],
-      usage:{input_tokens:0,output_tokens:0,cost_usd:null,cost_status:'unknown'},limits:{max_tools:40,max_new_materials:8,max_output_tokens:input.max_output_tokens??8192,deadline:input.deadline.generation_deadline}});
+      usage:{input_tokens:0,output_tokens:0,cost_usd:null,cost_status:'unknown'},limits:{policy_check_ref:check.check_id,purpose:input.purpose??'stage',max_tools:40,max_new_materials:8,max_output_tokens:input.max_output_tokens??8192,deadline:input.deadline.generation_deadline}});
     const cancellation=input.deadline.signal();let final:unknown;let terminal=false;let success=false;let stopped=false;let policyFailed=false;let observedSdkMessage=false;
     // The running SDK query is actively interrupted if latest trusted policy is revoked or becomes unreadable.
     const refresh=setInterval(()=>{if(stopped)return;void this.gate.check(input.subject,input.task.capability,'active_query_refresh').then(current=>{if(current.execution_permission!=='allowed'){policyFailed=true;controller.abort('policy_revoked');}}).catch(()=>{policyFailed=true;controller.abort('policy_unavailable');});},15_000);refresh.unref();

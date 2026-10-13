@@ -8,10 +8,23 @@ export type WriteCapability =
   | "upload_resource"
   | "github_write"
   | "issue_write";
+export interface PolicyEvidence {
+  check_id: string;
+  policy_commit: string | null;
+  policy_hash: string | null;
+  checked_at: string;
+  execution_permission?: "allowed" | "denied" | "unavailable";
+}
+export interface WritePolicyReceipt {
+  action: string;
+  evidence: PolicyEvidence | null;
+  status: "verified" | "legacy_unverified";
+  checked_at: string;
+}
 export type PermissionCheck = (
   capability: WriteCapability,
   projectId?: string,
-) => Promise<void>;
+) => Promise<void | PolicyEvidence>;
 export interface ResourceReceipt {
   object_key: string;
   sha256: string;
@@ -45,6 +58,7 @@ export interface SealedDelivery {
   files: DeliveryFile[];
   resources: ResourceReceipt[];
   /** Main article URL must be first; supplemental references never define duplicate article identity. */ sources: string[];
+  /** Trusted aliases of the main article only, never supplemental materials. */ primary_source_aliases?: string[];
   quality_report: Record<string, unknown>;
   rationale: string;
   knowledge_increment: string;
@@ -79,6 +93,9 @@ export interface PullRequestFact {
   branch: string;
   head_sha: string;
   delivery_id: string | null;
+  created_at?: string;
+  closed_at?: string | null;
+  merged_at?: string | null;
 }
 export interface GitHubFact {
   prs: PullRequestFact[];
@@ -86,6 +103,12 @@ export interface GitHubFact {
   expected_commit_exists: boolean;
   complete_diff_matches: boolean;
   default_branch_duplicate: boolean;
+  pending_duplicate?: boolean;
+  review_outcome?:
+    | "accepted_without_changes"
+    | "accepted_with_changes"
+    | "rejected"
+    | "pending";
   merged_notes?: { path: string; content: string; sha: string }[];
 }
 export interface GitHubPort {
@@ -118,6 +141,7 @@ export type DeliveryStatus =
   | "policy_blocked"
   | "superseded";
 export interface DeliveryRecord {
+  schema_version: 1;
   delivery_id: string;
   project_id: string;
   generation_version: number;
@@ -127,10 +151,55 @@ export interface DeliveryRecord {
   pr: PullRequestFact | null;
   uncertain_action: string | null;
   reason: string | null;
+  policy_checks?: WritePolicyReceipt[];
   updated_at: string;
   superseded_by?: string;
+  review_outcome?:
+    | "accepted_without_changes"
+    | "accepted_with_changes"
+    | "rejected"
+    | "pending";
   merged_notes?: { path: string; content: string; sha: string }[];
 }
 export const branchFor = (
   d: Pick<SealedDelivery, "project_id" | "generation_version">,
 ): string => `notes/${d.project_id}/g${d.generation_version}`;
+
+export function writePolicyReceipt(
+  action: string,
+  check: void | PolicyEvidence,
+  now: string,
+): WritePolicyReceipt {
+  if (!check)
+    return {
+      action,
+      evidence: null,
+      status: "legacy_unverified",
+      checked_at: now,
+    };
+  if (
+    !/^[a-f0-9]{64}$/.test(check.check_id) ||
+    !check.policy_commit ||
+    !/^[a-f0-9]{40}$/.test(check.policy_commit) ||
+    !check.policy_hash ||
+    !/^[a-f0-9]{64}$/.test(check.policy_hash) ||
+    !Number.isFinite(Date.parse(check.checked_at)) ||
+    (check.execution_permission !== undefined &&
+      check.execution_permission !== "allowed")
+  )
+    throw new Error("Invalid current policy evidence");
+  return {
+    action,
+    evidence: {
+      check_id: check.check_id,
+      policy_commit: check.policy_commit,
+      policy_hash: check.policy_hash,
+      checked_at: check.checked_at,
+      ...(check.execution_permission
+        ? { execution_permission: check.execution_permission }
+        : {}),
+    },
+    status: "verified",
+    checked_at: check.checked_at,
+  };
+}

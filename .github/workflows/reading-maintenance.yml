@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 30
     environment: ${{ inputs.deployment == 'preview' && 'reading-preview' || inputs.deployment == 'integration' && 'reading-integration' || 'reading-production' }}
     steps:
+      - name: Record job deadline origin
+        run: echo "READING_JOB_STARTED_AT=$(date +%s000)" >> "$GITHUB_ENV"
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -36,6 +38,9 @@ jobs:
           READING_PROFILE: ${{ inputs.deployment }}
           READING_PREVIEW_ID: ${{ inputs.preview_id }}
           READING_SHARED_MUTEX_HELD: 'true'
+          GITHUB_TOKEN: ${{ github.token }}
+          TEST_IMAGE_GC_CREDENTIALS: ${{ inputs.deployment == 'integration' && secrets.TEST_IMAGE_GC_CREDENTIALS || '' }}
+          READING_IMAGE_GC_CREDENTIALS: ${{ inputs.deployment == 'production' && secrets.READING_IMAGE_GC_CREDENTIALS || '' }}
           OSS_PREVIEW_CREDENTIALS: ${{ inputs.deployment == 'preview' && secrets.OSS_PREVIEW_CREDENTIALS || '' }}
           OSS_TEST_CREDENTIALS: ${{ inputs.deployment == 'integration' && secrets.OSS_TEST_CREDENTIALS || '' }}
           OSS_WORKSPACE_CREDENTIALS: ${{ inputs.deployment == 'production' && secrets.OSS_WORKSPACE_CREDENTIALS || '' }}

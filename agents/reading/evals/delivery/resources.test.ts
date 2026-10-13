@@ -203,3 +203,55 @@ it("definitive IAM denial is sanitized, remains reserved and can retry only afte
   expect(s.writes).toBe(1);
   expect(c.receipts.size).toBe(1);
 });
+
+it("a confirmed receipt is rechecked remotely after cleanup or external corruption, never silently reused", async () => {
+  const s = new ImageFake(),
+    j = new MemoryJournal(),
+    c = new CapacityFake();
+  const publisher = new ResourcePublisher(s, j, c, async () => {});
+  const receipt = await publisher.upload(input);
+  s.objects.get(receipt.object_key)!.content = Buffer.from("corrupt");
+  await expect(
+    new ResourcePublisher(s, j, c, async () => {}).upload(input),
+  ).rejects.toThrow("Confirmed image content conflict");
+  expect(s.writes).toBe(1);
+  s.objects.delete(receipt.object_key);
+  await expect(
+    new ResourcePublisher(s, j, c, async () => {
+      throw new Error("revoked");
+    }).upload(input),
+  ).rejects.toThrow("revoked");
+  expect(s.writes).toBe(1);
+  const recreated = await new ResourcePublisher(s, j, c, async () => {}).upload(
+    input,
+  );
+  expect(recreated.object_key).toBe(receipt.object_key);
+  expect(s.writes).toBe(2);
+});
+
+it("image keys preserve descriptive article/diagram words, including Chinese, without accepting unsafe path syntax", async () => {
+  const { resourceNames } = await import("../../src/publish/resources.js");
+  const names = resourceNames(
+    { title: "有效的 Agent 自动化", url: "https://example.com/automation" },
+    "图文件/检查点恢复架构.svg",
+    "检查点与恢复",
+  );
+  expect(names).toEqual({
+    article_slug: "有效的-Agent-自动化",
+    description: "检查点与恢复",
+  });
+  const s = new ImageFake(),
+    j = new MemoryJournal(),
+    c = new CapacityFake();
+  const receipt = await new ResourcePublisher(s, j, c, async () => {}).upload({
+    ...input,
+    ...names,
+  });
+  expect(receipt.object_key).toContain("有效的-Agent-自动化-检查点与恢复-");
+  expect(
+    resourceNames(
+      { title: "../hidden $(command)", url: "https://example.com/x" },
+      "../private/../script.png",
+    ).article_slug,
+  ).not.toContain("/");
+});

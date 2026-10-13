@@ -50,3 +50,21 @@ Bootstrap 的 scoped workspace/image 凭据只从部署指定的环境变量 JSO
 最近三十天历史 manifest 仍保护旧正文，所以解除 HEAD 引用不意味着立即回收。正式图片只有提供已核对默认分支和待审 PR 引用的 `image_gc` 才可删除；缺少该提供器报告 `not_exercised`，绝不假装安全。真实 RAM 删除范围、图床引用与云端共享互斥仍须实测。
 
 回归：`npm test -- agents/reading/evals/storage/maintenance.test.ts` 覆盖惰性读取、解除引用后退出、下一运行 GC、未知调用、真实 PR 状态覆盖旧本地状态及未知结束时间。
+
+## 请求与容量指标
+
+`storage/metrics.ts` 的 `MeteredObjectStore` 记录实际发生的适配器调用、成功返回的 payload 字节和结果不明状态；传输层没有提供观测时，真实 HTTP 请求次数、wire 字节和重试次数为 null。一个 `configuration()` 可能包含多个 SDK 请求，不能将一个适配器方法直接称为一个 HTTP 请求。SDK 的失败可能已经产生网络费用，失败不代表零请求。
+
+`inventoryMetrics` 对完整存活对象清单按 bucket/key/version 去重，分列 commit、manifest、引用 blob、孤立 blob、无法分类的 blob 和图床对象，以及 scope 和存储版本数。引用集合不完整时，不把任何未知 blob 当孤立。额外版本数可由完整清单计算；缺 latest 标记时，精确历史版本数仍是未知。
+
+这些字段记录观测，不输出虚构的 OSS 或 Actions 金额。供应方账单、实际 wire 指标和 Actions 可计费用量仍需外部观测；本地适配器和文件恢复测试不会证明这些 live 属性。指标快照明确截至哪个 event，保存快照自身后发生的写入不得伪称已包含。
+
+回归：`npm test -- agents/reading/evals/storage/metrics.test.ts` 包含成功后丢响应、指标落盘及新进程重放、部分传输指标和版本化容量清单。
+
+## 预留记录版本
+
+`storage/reservations/<reservation_id>` 必须是 `storage-reservation.schema.json` 定义的精确版本 1 envelope，含 `schema_version: 1`、稳定对象键、bucket、scope、预计字节、nullable 版本回执及 pending/confirmed/released 状态。生产方写入版本；读取方不补默认值。容量 broker、预留对账、通用 checkpoint 与恢复都拒绝无版本、未知版本、额外字段、身份和 scope 不一致的记录。
+
+预留从 pending 开始，确认对象后可变为 confirmed，确认已不存在后可释放；释放的身份不能重新用于上传，对象绑定和已确认版本回执不可改写。现有未版本化记录需要单独审查迁移，不能在启动或容量统计时静默升级。此轮未读取或迁移 live 预留，不能将本地契约测试当作真实图床预留验证。
+
+回归：`npm test -- agents/reading/evals/storage/reservation-envelope.test.ts` 覆盖所有读取入口拒绝非法 envelope、FileStore 重启的合法生命周期，以及完整不可变提交链中无版本／未知版本记录的恢复拒绝。

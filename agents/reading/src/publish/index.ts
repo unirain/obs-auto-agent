@@ -8,3 +8,8 @@ export * from "./recovery.js";
 export * from "./publisher.js";
 export * from "./auth.js";
 export * from "./svg.js";
+export * from "./image-gc.js";
+export * from "./image-gc-oss.js";
+export * from "./image-gc-bootstrap.js";
+export * from "./metrics.js";
+export * from './primary-source.js';

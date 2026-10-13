@@ -33,6 +33,7 @@ on:
   #   - cron: '17 0 * * *' # Asia/Shanghai 08:17
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: reading-workspace-writer
   cancel-in-progress: false

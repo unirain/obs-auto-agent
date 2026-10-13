@@ -7,7 +7,10 @@ import {
 import { OssObjectStore, type OssStoreOptions } from "./oss.js";
 import { listAll, preflight } from "./preflight.js";
 import type { InventoryObject } from "./inventory.js";
-import type { StorageReservation } from "./capacity.js";
+import {
+  parseStorageReservation,
+  type StorageReservation,
+} from "./capacity.js";
 import {
   decode,
   assertBytes,
@@ -184,20 +187,21 @@ export function capacityBrokerFromEnvironment(
           assertBytes(bytes, f.sha256, f.size);
           let reservation: StorageReservation;
           try {
-            reservation = JSON.parse(
-              Buffer.from(bytes).toString("utf8"),
-            ) as StorageReservation;
+            reservation = parseStorageReservation(
+              JSON.parse(Buffer.from(bytes).toString("utf8")),
+            );
           } catch {
             throw new AgentError("corrupt", "Capacity reservation invalid");
           }
           if (
             reservation.execution_scope !== head.execution_scope ||
-            !Number.isSafeInteger(reservation.expected_bytes) ||
-            reservation.expected_bytes < 0 ||
-            !["pending", "confirmed", "released"].includes(reservation.state) ||
-            typeof reservation.reservation_id !== "string" ||
-            typeof reservation.key !== "string" ||
-            typeof reservation.bucket !== "string"
+            f.path !==
+              `state/storage/reservations/${reservation.reservation_id}.json` ||
+            !bindings.some(
+              (binding) =>
+                binding.bucket === reservation.bucket &&
+                reservation.key.startsWith(binding.prefix),
+            )
           )
             throw new AgentError("corrupt", "Capacity reservation invalid");
           reservations.push(reservation);

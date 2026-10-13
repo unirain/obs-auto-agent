@@ -219,9 +219,24 @@ describe("independent schedule monitoring", () => {
   });
 });
 
-it('editing Issue machine state cannot invent source recovery or skip persisted events',async()=>{
-  const {issueBody}=await import('../../src/monitor/issues.js');const port=new Issues();const events=[event(1)];await watchdog(port,events).run();
-  const original=decodeMetadata(port.issues[0]!.body)!;port.issues[0]!.body=issueBody({...original,status:'recovered'},port.issues[0]!.body);
-  await expect(watchdog(port,events).run()).rejects.toThrow('contradicts persistent');
-  port.issues[0]!.body=issueBody({...original,last_position:9999},port.issues[0]!.body);await expect(watchdog(port,events).run()).rejects.toThrow('contradicts persistent');
+it("editing Issue machine state cannot invent source recovery or skip persisted events", async () => {
+  const { issueBody } = await import("../../src/monitor/issues.js");
+  const port = new Issues();
+  const events = [event(1)];
+  await watchdog(port, events).run();
+  const original = decodeMetadata(port.issues[0]!.body)!;
+  port.issues[0]!.body = issueBody(
+    { ...original, status: "recovered" },
+    port.issues[0]!.body,
+  );
+  await expect(watchdog(port, events).run()).rejects.toThrow(
+    "contradicts persistent",
+  );
+  port.issues[0]!.body = issueBody(
+    { ...original, last_position: 9999 },
+    port.issues[0]!.body,
+  );
+  await expect(watchdog(port, events).run()).rejects.toThrow(
+    "contradicts persistent",
+  );
 });

@@ -250,7 +250,9 @@ export async function runWatchdogApplication(
       allowed_prefix: deployment.workspace.prefix,
     }),
   );
-  const projection = await readMonitorProjection(store, deployment);
+  let projectionPromise: ReturnType<typeof readMonitorProjection> | undefined;
+  const projection = () =>
+    (projectionPromise ??= readMonitorProjection(store, deployment));
   const readPolicy = async () => {
     const policy = parseTrustedPolicy(await source.readSnapshot());
     return {
@@ -276,8 +278,8 @@ export async function runWatchdogApplication(
     deployment_name:
       deployment.name === "integration" ? "integration" : "production",
     projector,
-    readEvents: async () => projection.events,
-    readReportRunIds: async () => projection.reportIds,
+    readEvents: async () => (await projection()).events,
+    readReportRunIds: async () => (await projection()).reportIds,
     readPolicy,
     ...(options.now ? { now: options.now } : {}),
   });

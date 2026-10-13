@@ -69,7 +69,8 @@ export class IssueProjector {
       );
     if (!found[0]) return undefined;
     const metadata = decodeMetadata(found[0].body);
-    if (!metadata || metadata.key !== key) throw new Error("Issue marker without matching metadata");
+    if (!metadata || metadata.key !== key)
+      throw new Error("Issue marker without matching metadata");
     return { issue: found[0], metadata };
   }
   async apply(metadata: MonitorMetadata, notify: boolean): Promise<void> {
@@ -85,7 +86,7 @@ export class IssueProjector {
       );
       existing = await this.current(metadata.key);
       if (!existing) throw new Error("Issue creation result unknown");
-      if (metadata.status !== "active") {
+      if (metadata.status !== "active" || metadata.source_id === "__policy__") {
         await this.beforeWrite();
         await this.port.update(
           existing.issue.number,
@@ -113,7 +114,9 @@ export class IssueProjector {
     await this.port.update(
       existing.issue.number,
       issueBody(metadata, existing.issue.body),
-      metadata.status === "active" ? "open" : "closed",
+      metadata.status === "active" && metadata.source_id !== "__policy__"
+        ? "open"
+        : "closed",
     );
     const readback = await this.current(metadata.key);
     if (!readback || readback.metadata.last_position !== metadata.last_position)

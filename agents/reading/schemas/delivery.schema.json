@@ -190,6 +190,12 @@
     "validated_hash": {
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
+    },
+    "primary_source_aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

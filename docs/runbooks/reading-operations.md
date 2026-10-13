@@ -45,3 +45,11 @@ READING_SUBMISSION_ID=<stable-manual-submission-id-or-empty>
 启用前 G0–G4 的实际证据、至少五类真实文章 preview 用户反馈、冻结留出集校准、两信源、固定 skill commit、模型凭据、图床唯一 writer、私有 OSS、App 和监控权限均完成。确认设计默认值：08:17 每日、首次七天、50 GB 十进制合计、45/49 GB 阈值、近期正例日期依据和 36 小时漏跑。
 
 记录受信任 code commit、lockfile/镜像版本、配置 SHA-256、启用时间、测试及清理回执。先演练 watchdog，再手动 production scheduled + input_urls，核对候选、source events、费用、图片与 PR；然后配置 cron_enabled、enabled_at、g5_evidence 并启用注释的正式 schedule。记录第一轮定时真实结果，零产出可以健康，不以篇数或待审数量作为门槛。当前全部真实环境证据和用户质量确认未具备，因此不能填写“已启用”。
+
+## 监控历史、重跑与暂停基线
+
+watchdog 读取每个 Actions run 的历史 attempts，报告按 `run_id-attempt` 匹配。历史取消、失败或缺报告随后成功，即使发生于两次巡检之间，也会合并保留发生与恢复记录；不只读取最新成功结论。queued 和 publish-only 不抵消实际 scheduled 启动缺口。发生时间来自 Actions 事实，未知 attempt 元数据或读取异常不报告健康。
+
+首次观察全局暂停时，监控建立一个关闭状态的 `__policy__/pause_clock` 控制 Issue，记录 observed pause/resume。解除暂停后重新计算三十六小时预期周期；来源故障仍必须真实采集恢复。该控制 Issue 不是来源恢复证明，也不是模型控制入口。监控自身无法读策略/Actions/OSS 时，API 可用的情况下维护去重 `__monitor__/read_failed`；同平台整体 API 或调度故障仍无法保证通知。
+
+Actions metrics 记录具体 attempt 的实际 job 开始/结束区间；进行中、缺时间或 API 不可读时保持 partial/unknown，不能把它们或 job elapsed 推断为实际计费分钟、账单金额。PR metrics 只由确认的 GitHub 状态及实际 merged HEAD 字节确定合并/改稿/拒绝，人工审阅分钟必须由用户显式提供，自动审校不替代人工数据。

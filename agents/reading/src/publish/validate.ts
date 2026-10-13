@@ -1,7 +1,8 @@
+import { normalizeUrl } from "../collect/identity.js";
 import { validateStaticSVG } from "./svg.js";
 import { createHash } from "node:crypto";
 import { canonicalJson } from "../contracts/index.js";
-import type { SealedDelivery } from "./types.js";
+import type { SealedDelivery, PreparedCommit } from "./types.js";
 export const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
 export function deliveryValidationHash(d: SealedDelivery): string {
@@ -44,6 +45,14 @@ export function validateDelivery(
     !d.sources.length
   )
     throw new Error("Missing source verification or base commit");
+  if (d.primary_source_aliases !== undefined) {
+    if (
+      !Array.isArray(d.primary_source_aliases) ||
+      d.primary_source_aliases.some((alias) => typeof alias !== "string")
+    )
+      throw new Error("Invalid primary source aliases");
+    for (const alias of d.primary_source_aliases) normalizeUrl(alias);
+  }
   const paths = new Set<string>();
   let notes = 0;
   for (const file of d.files) {
@@ -105,4 +114,31 @@ export function validateDelivery(
   }
   if (d.validated_hash !== deliveryValidationHash(d))
     throw new Error("Final validation is stale");
+}
+
+/** Restored expected commit content must still be the sealed artifact; never emit objects from an unbound intent. */
+export function validatePreparedFiles(
+  d: SealedDelivery,
+  p: PreparedCommit,
+): void {
+  if (
+    p.base_commit !== d.base_commit ||
+    p.files.length !== d.files.length ||
+    p.blobs.length !== d.files.length ||
+    new Set(p.blobs.map((b) => b.path)).size !== p.blobs.length
+  )
+    throw new Error("Prepared commit file/base binding changed");
+  for (const file of d.files) {
+    const recorded = p.files.find((f) => f.path === file.path);
+    const blob = p.blobs.find((b) => b.path === file.path);
+    if (!recorded || recorded.sha256 !== file.sha256 || !blob)
+      throw new Error("Prepared commit file hash changed");
+    const bytes = Buffer.from(blob.content_base64, "base64");
+    const gitSHA = createHash("sha1")
+      .update(`blob ${bytes.length}\0`)
+      .update(bytes)
+      .digest("hex");
+    if (sha256(bytes) !== file.sha256 || gitSHA !== blob.sha)
+      throw new Error("Prepared commit blob differs from sealed artifact");
+  }
 }

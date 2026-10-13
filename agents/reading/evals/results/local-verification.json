@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-13T10:57:50.366065+00:00",
-  "implementation_sha256": "ff684f2de152aa28149d43b7c0eb51c51f98da66403ceb86a05ba5f6d9d3b4be",
-  "fingerprint_files": 156,
+  "recorded_at": "2026-10-13T12:52:05.417389+00:00",
+  "implementation_sha256": "0598c4f8a5b24ddd73d49f96ff402fb80be62539c103d2156b4f7054bc7bae52",
+  "fingerprint_files": 188,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -10,7 +10,7 @@
     "npm run test:live": "skipped"
   },
   "local_tests": {
-    "passed": 187,
+    "passed": 288,
     "failed": 0
   },
   "live_tests": {

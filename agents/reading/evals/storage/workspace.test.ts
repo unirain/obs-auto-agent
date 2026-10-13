@@ -348,6 +348,7 @@ describe("global shared capacity and GC", () => {
     ];
     const view = capacityView(objects, [
       {
+        schema_version: 1 as const,
         reservation_id: "r",
         execution_scope: "preview",
         bucket: "b",

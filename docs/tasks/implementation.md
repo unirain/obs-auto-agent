@@ -13,20 +13,20 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | S5 | storage | local_verified | Scope/file views/sealing |
 | S6 | storage | local_verified | Invocation journal and counters |
 | S7 | storage | live_unverified | Global capacity, reservations and GC |
-| S8 | storage/root | implemented | Recovery integration and runbooks |
+| S8 | storage/root | in_progress | Audited inspect/recover, unknown replacement and receipt import locally verified; explicit changed-input generation management remains |
 | A1 | runtime/root | local_verified | Domain schemas, modes and stage routing |
 | A2 | runtime | local_verified | Latest policy and restricted classification |
 | A3 | runtime | live_unverified | Manual URL and source collection |
 | A4 | runtime | local_verified | Context, examples, index and fair scheduling |
 | A5 | runtime | live_unverified | SDK execution and usage lifecycle |
-| A6 | runtime | in_progress | Restricted reading and evidence |
+| A6 | runtime/root | live_unverified | Bounded reading, material closure, retrieved-note versions, semantic progress and Docker JS fallback locally verified; actual model/research evidence pending |
 | A7 | runtime | in_progress | Linux skill, rendering and review |
-| A8 | runtime/root | in_progress | Preview integration and recovery |
+| A8 | runtime/root | live_unverified | Actual driver replay, independent manual barriers and source/policy recovery locally verified; five varied real previews pending |
 | A9 | runtime/root | blocked_external | Evaluation set and human quality confirmation |
 | O1 | operations | live_unverified | Trusted deployments and permissions |
 | O2 | operations | live_unverified | Immutable resource upload |
 | O3 | operations | live_unverified | Publisher and reconciliation |
-| O4 | operations | in_progress | Expiry, revocation and recovery routing |
+| O4 | operations/root | live_unverified | Expiry, source-generation routing, reclassification-before-upload and exact primary-source dedup locally verified; real withdrawal/recovery pending |
 | O5 | operations/root | in_progress | Four-mode Actions and CLI wiring |
 | O6 | operations | live_unverified | Watchdog, incident events and Issue dedup |
 | O7 | operations/root | blocked_external | Isolated live delivery fault tests |
@@ -43,6 +43,8 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 External configuration: implementation repository unirain/obs-auto-agent is connected on default branch master, preserving the initial Apache License. obs-agent in Beijing supplied and native OSS core probe passed. DEEPSEEK_API_KEY is visible to host; read-only model catalog confirms deepseek-flash. Distinct restricted RAM identities, separate GitHub test repository/App and public image test prefix remain unprepared. Human dataset labels and quality confirmation remain required. No secret values belong in this document.
 
-Evidence checkpoint: 187 local tests passed at 2026-10-13 18:50 Asia/Shanghai; sanitized evidence: agents/reading/evals/results/local-verification.json; typecheck/build passed. All three opt-in live tests were skipped. Safe OSS core evidence: agents/reading/evals/storage/fixtures/oss-live-evidence.json; required RAM denial and actual transport-loss evidence remain incomplete. Linux tools and actual source reads have separate limited evidence; the fixed cloud-adapted skill, live SDK execution and human quality acceptance remain unverified. The 87 spec cases are mapped, none is yet marked fully complete across its required layers. Re-run checks after further code changes.
+Evidence checkpoint: 288 local tests passed at 2026-10-13 20:52 Asia/Shanghai; typecheck/build and mapping passed. Sanitized command results and implementation fingerprint: agents/reading/evals/results/local-verification.json. Three opt-in live tests remain skipped. SDK child isolation and Docker JS/render probes are actual local evidence only. Core OSS evidence is partial; RAM/transport evidence and full service/human gates are still missing. All 87 spec cases remain pending complete layered proof.
 
-Implementation follow-ups before full acceptance: deliver and consume a fixed cloud-adapted skill commit; finish the explicit audited manual invocation-resolution/unblock entrypoint and its recovery tests; archive confirmed obsolete semantic-policy results and reclassify safely; connect the sandboxed browser fallback for JS pages and on-demand full related-note reads; complete material-registration checks and semantic no-progress detection; verify project/day usage rollups and external storage/Actions metrics; attach concrete evidence to individual acceptance cases. These remain part of the objective alongside the external gates above. The host original-domain/alias propagation gap found in cross-review has been fixed and regression checked.
+Implemented in this continuation: audited fixed-input manual invocation recovery, confirmed-result import and readonly inspection; policy settlement before upload; source-change generation routing; bounded browser/related-note reading; material closure and semantic progress; project/day/run usage; observable storage/Actions/PR metrics; typed image GC with dedicated delete identity and complete reference checks; exact primary-source dedup; strict control-record envelopes and per-write policy receipts. See docs/notes/operations-audit.md for the requirement/evidence index.
+
+Implementation follow-ups before full acceptance: explicit human changed-input/new-generation management and review-feedback command; deliver and consume a fixed cloud-adapted skill commit; audit configured limits and tool/runtime version binding; complete explicitly scoped RSS and no-text/unsupported-format handling; exercise the host composition of newly added semantic/source/browser/GC ports against their full failure cases; attach concrete evidence to individual acceptance cases. External service/human gates above remain unchanged. Completion is still unproven.

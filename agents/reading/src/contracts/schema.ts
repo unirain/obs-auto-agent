@@ -102,6 +102,26 @@ export const StorageSchema = Type.Object(
   },
   exact,
 );
+export const StorageReservationSchema = Type.Object(
+  {
+    schema_version: Type.Literal(1),
+    reservation_id: identity,
+    execution_scope: scope,
+    bucket: Type.String({ minLength: 1, pattern: "^[^\\u0000-\\u001f]+$" }),
+    key: Type.String({ minLength: 1, pattern: "^[^\\u0000-\\u001f]+$" }),
+    version: nullable(Type.String({ minLength: 1 })),
+    expected_bytes: Type.Integer({
+      minimum: 0,
+      maximum: Number.MAX_SAFE_INTEGER,
+    }),
+    state: Type.Union([
+      Type.Literal("pending"),
+      Type.Literal("confirmed"),
+      Type.Literal("released"),
+    ]),
+  },
+  exact,
+);
 const validators = new Map<string, ReturnType<typeof TypeCompiler.Compile>>();
 export function registerSchema(name: string, schema: TSchema): void {
   if (validators.has(name))
@@ -112,6 +132,7 @@ registerSchema("workspace", WorkspaceSchema);
 registerSchema("checkpoint", CheckpointSchema);
 registerSchema("invocation", InvocationSchema);
 registerSchema("storage", StorageSchema);
+registerSchema("storage_reservation", StorageReservationSchema);
 export function validateSchema<T>(name: string, value: unknown): T {
   const v = validators.get(name);
   if (!v) throw new AgentError("configuration", "Unknown schema");

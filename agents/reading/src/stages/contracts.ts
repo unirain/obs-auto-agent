@@ -4,7 +4,7 @@ import { Ajv } from 'ajv';
 
 export const digest = (value: string | Uint8Array): string => createHash('sha256').update(value).digest('hex');
 export type Scope = 'production' | 'preview';
-export type Capability = 'discover' | 'main_read' | 'classify_only' | 'select' | 'research' | 'write' | 'review' | 'upload' | 'publish' | 'reconcile';
+export type Capability = 'discover' | 'main_read' | 'classify_only' | 'select' | 'research' | 'write' | 'review' | 'upload' | 'publish' | 'reconcile' | 'cleanup';
 const text = Type.String({ minLength: 1 });
 const nullableText = Type.Union([text, Type.Null()]);
 const strict = { additionalProperties: false };

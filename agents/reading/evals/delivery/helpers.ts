@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   OperationsJournal,
   SealedDelivery,
@@ -86,7 +87,17 @@ export class FakeGitHub implements GitHubPort {
         email: "bot@example.com",
         date: "2026-10-13T00:00:00Z",
       },
-      blobs: [],
+      blobs: d.files.map((f) => ({
+        path: f.path,
+        sha: (() => {
+          const bytes = Buffer.from(f.content);
+          return createHash("sha1")
+            .update(`blob ${bytes.length}\0`)
+            .update(bytes)
+            .digest("hex");
+        })(),
+        content_base64: Buffer.from(f.content).toString("base64"),
+      })),
       files: d.files.map((f) => ({ path: f.path, sha256: f.sha256 })),
     };
   }

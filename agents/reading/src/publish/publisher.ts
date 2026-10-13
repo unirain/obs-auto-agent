@@ -5,8 +5,8 @@ import type {
   PermissionCheck,
   SealedDelivery,
 } from "./types.js";
-import { branchFor } from "./types.js";
-import { validateDelivery } from "./validate.js";
+import { branchFor, writePolicyReceipt } from "./types.js";
+import { validateDelivery, validatePreparedFiles } from "./validate.js";
 import { reconcileRecord } from "./reconcile.js";
 import { recoveryRoute, assertRefreshAllowed } from "./recovery.js";
 export interface PublisherOptions {
@@ -39,6 +39,10 @@ export class Publisher {
     for (const id of ids) {
       const record = await this.journal.load<DeliveryRecord>(this.key(id));
       if (!record) throw new Error("Missing persisted historical delivery");
+      if (record.schema_version !== 1)
+        throw new Error("Unsupported delivery record schema");
+      if (record.project_id !== projectId || record.delivery_id !== id)
+        throw new Error("Historical delivery identity mismatch");
       records.push(record);
     }
     return records;
@@ -165,6 +169,7 @@ export class Publisher {
       // Local writes are checkpoints too. Both indexes commit before any external mutation.
       await this.journal.commit(`sealed-${d.delivery_id}`, encodeDelivery(d));
       record = {
+        schema_version: 1,
         delivery_id: d.delivery_id,
         project_id: d.project_id,
         generation_version: d.generation_version,
@@ -223,9 +228,14 @@ export class Publisher {
       await this.save(record); // Expected commit SHA is authoritative before the first remote write.
     }
     const before = async (action: string): Promise<void> => {
-      await this.permission("github_write", d.project_id);
+      const policy = writePolicyReceipt(
+        action,
+        await this.permission("github_write", d.project_id),
+        this.now().toISOString(),
+      );
       record = {
         ...record!,
+        policy_checks: [...(record!.policy_checks ?? []), policy],
         status: "publishing",
         uncertain_action: action,
         updated_at: this.now().toISOString(),
@@ -234,6 +244,7 @@ export class Publisher {
     };
     const prepared = record.prepared;
     if (!prepared) throw new Error("Missing committed commit preparation");
+    validatePreparedFiles(d, prepared);
     try {
       let facts = await this.github.inspect(d, prepared);
       const reconciled = reconcileRecord(

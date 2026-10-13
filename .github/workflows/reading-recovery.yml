@@ -1,0 +1,93 @@
+name: Reading Agent Recovery
+on:
+  workflow_dispatch:
+    inputs:
+      deployment:
+        type: choice
+        options: [preview, integration, production]
+        default: preview
+        required: true
+      preview_id:
+        description: Existing preview workspace identity
+        type: string
+      action:
+        type: choice
+        options: [unblock, authorize_retry, confirm_not_started]
+        required: true
+      project_id:
+        type: string
+        required: true
+      expected_revision:
+        description: Exact revision from the readonly inspect command
+        type: string
+        required: true
+      recovery_id:
+        description: Stable unique identity for this audited action
+        type: string
+        required: true
+      invocation_id:
+        type: string
+      input_hash:
+        type: string
+      audit_metadata:
+        description: JSON with reason and evidence_reference only; no evidence body or secrets
+        type: string
+        required: true
+      acknowledge_possible_duplicate_charge:
+        description: Explicitly authorize possible duplicate charge for a retry
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: reading-workspace-writer
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: ${{ inputs.deployment == 'preview' && 'reading-preview' || inputs.deployment == 'integration' && 'reading-integration' || 'reading-production' }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.10.0'
+          cache: npm
+      - run: npm ci
+      - name: Build audited metadata request and apply it without model or delivery credentials
+        env:
+          READING_PROFILE: ${{ inputs.deployment }}
+          READING_PREVIEW_ID: ${{ inputs.preview_id }}
+          RECOVERY_ACTION: ${{ inputs.action }}
+          RECOVERY_PROJECT: ${{ inputs.project_id }}
+          RECOVERY_REVISION: ${{ inputs.expected_revision }}
+          RECOVERY_ID: ${{ inputs.recovery_id }}
+          RECOVERY_INVOCATION: ${{ inputs.invocation_id }}
+          RECOVERY_HASH: ${{ inputs.input_hash }}
+          RECOVERY_AUDIT: ${{ inputs.audit_metadata }}
+          RECOVERY_ACK: ${{ inputs.acknowledge_possible_duplicate_charge }}
+          READING_SHARED_MUTEX_HELD: 'true'
+          OSS_PREVIEW_CREDENTIALS: ${{ inputs.deployment == 'preview' && secrets.OSS_PREVIEW_CREDENTIALS || '' }}
+          OSS_TEST_CREDENTIALS: ${{ inputs.deployment == 'integration' && secrets.OSS_TEST_CREDENTIALS || '' }}
+          OSS_WORKSPACE_CREDENTIALS: ${{ inputs.deployment == 'production' && secrets.OSS_WORKSPACE_CREDENTIALS || '' }}
+          READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const e=process.env;
+          let audit;try{audit=JSON.parse(e.RECOVERY_AUDIT);}catch{throw new Error('Invalid non-secret audit metadata');}
+          const request={schema_version:1,action:e.RECOVERY_ACTION,recovery_id:e.RECOVERY_ID,project_id:e.RECOVERY_PROJECT,expected_revision:e.RECOVERY_REVISION,reason:audit?.reason,evidence_reference:audit?.evidence_reference};
+          if(request.action!=='unblock'){request.invocation_id=e.RECOVERY_INVOCATION;request.input_hash=e.RECOVERY_HASH;}
+          if(request.action==='authorize_retry')request.acknowledge_possible_duplicate_charge=e.RECOVERY_ACK==='true';
+          writeFileSync(`${e.RUNNER_TEMP}/reading-recovery.json`,JSON.stringify(request),{mode:0o600});
+          NODE
+          case "$READING_PROFILE" in
+            preview) npm run reading -- recover --deployment agents/reading/deploy/examples/preview.json --mode preview --preview-id "$READING_PREVIEW_ID" --request-file "$RUNNER_TEMP/reading-recovery.json" ;;
+            integration) npm run reading -- recover --deployment agents/reading/deploy/examples/integration.json --mode scheduled --request-file "$RUNNER_TEMP/reading-recovery.json" ;;
+            production) npm run reading -- recover --deployment agents/reading/deploy/examples/production.json --mode scheduled --request-file "$RUNNER_TEMP/reading-recovery.json" ;;
+            *) exit 1 ;;
+          esac

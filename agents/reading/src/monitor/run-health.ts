@@ -8,6 +8,7 @@ export interface ActionsRun {
   status: "queued" | "in_progress" | "completed";
   conclusion: string | null;
   report_present: boolean;
+  finished_at?: string;
 }
 export interface HealthFault {
   key: string;
@@ -36,6 +37,7 @@ export function runHealth(
     (r) =>
       r.mode === "scheduled" &&
       r.scope === "production" &&
+      r.status !== "queued" &&
       Date.parse(r.started_at) >= anchor,
   );
   const last = Math.max(
