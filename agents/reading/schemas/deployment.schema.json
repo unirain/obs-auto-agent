@@ -1,0 +1,243 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "reading/deployment",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "enum": [
+        "production",
+        "preview",
+        "integration"
+      ]
+    },
+    "execution_scope": {
+      "enum": [
+        "production",
+        "preview"
+      ]
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "credential_ref": {
+          "type": "string"
+        },
+        "versioning_verified": {
+          "enum": [
+            "never_enabled",
+            "unknown"
+          ]
+        },
+        "private_verified": {
+          "type": "boolean"
+        },
+        "lifecycle_verified": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "bucket",
+        "region",
+        "endpoint",
+        "prefix",
+        "credential_ref",
+        "versioning_verified",
+        "private_verified",
+        "lifecycle_verified"
+      ],
+      "additionalProperties": false
+    },
+    "image": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "bucket": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "public_url": {
+              "type": "string"
+            },
+            "credential_ref": {
+              "type": "string"
+            },
+            "sole_writer_verified": {
+              "type": "boolean"
+            },
+            "versioning": {
+              "enum": [
+                "disabled",
+                "enabled",
+                "suspended",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "bucket",
+            "region",
+            "endpoint",
+            "prefix",
+            "public_url",
+            "credential_ref",
+            "sole_writer_verified",
+            "versioning"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "target_repository": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "github_app_credential_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "implementation_repository": {
+      "type": "string"
+    },
+    "watchdog_credential_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model_credential_ref": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "cost_policy": {
+      "const": "observe_only"
+    },
+    "storage_limit_bytes": {
+      "const": 50000000000
+    },
+    "cron_enabled": {
+      "type": "boolean"
+    },
+    "enabled_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "g5_evidence": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "watchdog_repository": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model_provider": {
+      "enum": [
+        "claude",
+        "deepseek"
+      ]
+    },
+    "model_base_url": {
+      "enum": [
+        "https://api.anthropic.com",
+        "https://api.deepseek.com/anthropic"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "name",
+    "execution_scope",
+    "workspace_id",
+    "workspace",
+    "image",
+    "target_repository",
+    "github_app_credential_ref",
+    "implementation_repository",
+    "watchdog_credential_ref",
+    "model_credential_ref",
+    "model",
+    "cost_policy",
+    "storage_limit_bytes",
+    "cron_enabled",
+    "enabled_at",
+    "g5_evidence"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "model_provider": {
+            "const": "deepseek"
+          }
+        },
+        "required": [
+          "model_provider"
+        ]
+      },
+      "then": {
+        "properties": {
+          "model_base_url": {
+            "const": "https://api.deepseek.com/anthropic"
+          }
+        },
+        "required": [
+          "model_base_url"
+        ]
+      },
+      "else": {
+        "properties": {
+          "model_base_url": {
+            "const": "https://api.anthropic.com"
+          }
+        }
+      }
+    }
+  ]
+}

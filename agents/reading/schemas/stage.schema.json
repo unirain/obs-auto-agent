@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "project_id",
+    "stage",
+    "decision",
+    "artifact_refs",
+    "issues",
+    "resume_hint"
+  ],
+  "properties": {
+    "project_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "stage": {
+      "anyOf": [
+        {
+          "const": "selection",
+          "type": "string"
+        },
+        {
+          "const": "research",
+          "type": "string"
+        },
+        {
+          "const": "writing",
+          "type": "string"
+        },
+        {
+          "const": "review",
+          "type": "string"
+        }
+      ]
+    },
+    "decision": {
+      "anyOf": [
+        {
+          "const": "complete",
+          "type": "string"
+        },
+        {
+          "const": "skip",
+          "type": "string"
+        },
+        {
+          "const": "defer",
+          "type": "string"
+        },
+        {
+          "const": "batch_yield",
+          "type": "string"
+        },
+        {
+          "const": "manual",
+          "type": "string"
+        }
+      ]
+    },
+    "artifact_refs": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "path",
+          "hash"
+        ],
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hash": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "resume_hint": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

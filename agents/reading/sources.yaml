@@ -1,0 +1,15 @@
+schema_version: 1
+manual_url:
+  enabled: true
+sources:
+  langchain_blog:
+    enabled: true
+    entry: https://www.langchain.com/blog
+    domains: [www.langchain.com, langchain.com, blog.langchain.com]
+  claude_resources:
+    enabled: true
+    entry: https://claude.com/resources
+    domains: [claude.com, www.claude.com, claude.dev, anthropic.com, www.anthropic.com]
+initial_lookback_days: 7
+page_size: 50
+overlap_minutes: 10

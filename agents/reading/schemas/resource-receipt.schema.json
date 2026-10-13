@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "reading/resource-receipt",
+  "type": "object",
+  "properties": {
+    "object_key": {
+      "type": "string"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "mime": {
+      "enum": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/svg+xml"
+      ]
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^https://"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "version_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confirmed_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "object_key",
+    "sha256",
+    "bytes",
+    "mime",
+    "url",
+    "project_id",
+    "version_id",
+    "confirmed_at"
+  ],
+  "additionalProperties": false
+}

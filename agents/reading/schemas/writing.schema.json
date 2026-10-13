@@ -1,0 +1,212 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "note_path",
+    "markdown",
+    "claims",
+    "figure_plan",
+    "resources",
+    "degradations"
+  ],
+  "properties": {
+    "note_path": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "markdown": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "line",
+          "evidence_ids",
+          "claim_type"
+        ],
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "line": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "evidence_ids": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "claim_type": {
+            "anyOf": [
+              {
+                "const": "source_statement",
+                "type": "string"
+              },
+              {
+                "const": "code_observation",
+                "type": "string"
+              },
+              {
+                "const": "experiment_report",
+                "type": "string"
+              },
+              {
+                "const": "agent_inference",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "figure_plan": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "section",
+          "type",
+          "goal",
+          "resource_path",
+          "no_figure_reason"
+        ],
+        "properties": {
+          "section": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "goal": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "resource_path": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "no_figure_reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "path",
+          "hash",
+          "mime",
+          "source_path",
+          "caption",
+          "visual_check",
+          "core",
+          "url"
+        ],
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hash": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "mime": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source_path": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "caption": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "visual_check": {
+            "anyOf": [
+              {
+                "const": "passed",
+                "type": "string"
+              },
+              {
+                "const": "failed",
+                "type": "string"
+              },
+              {
+                "const": "skipped",
+                "type": "string"
+              }
+            ]
+          },
+          "core": {
+            "type": "boolean"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "degradations": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    }
+  }
+}

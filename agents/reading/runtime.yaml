@@ -1,0 +1,42 @@
+schema_version: 1
+paused: false
+paused_projects: []
+denied_domains: []
+allowed_domains:
+  - langchain.com
+  - www.langchain.com
+  - blog.langchain.com
+  - claude.com
+  - www.claude.com
+  - claude.dev
+  - anthropic.com
+  - www.anthropic.com
+  - code.claude.com
+  - platform.claude.com
+  - github.com
+  - api.github.com
+  - raw.githubusercontent.com
+  - arxiv.org
+  - export.arxiv.org
+  - docs.langchain.com
+  - python.langchain.com
+  - js.langchain.com
+cost_policy: observe_only
+storage_limit_bytes: 50000000000
+storage_warning_bytes: 45000000000
+storage_stop_generation_bytes: 49000000000
+max_run_minutes: 60
+shutdown_reserve_minutes: 5
+max_tools_per_batch: 40
+max_references_per_batch: 8
+max_revision_rounds: 2
+max_no_progress_batches: 3
+classification_queries: 2
+format_repairs: 1
+policy_refresh_seconds: 60
+sources_freshness_hours: 24
+watchdog_gap_hours: 36
+
+max_output_tokens: 8192
+max_download_bytes: 64000000
+max_resources: 40

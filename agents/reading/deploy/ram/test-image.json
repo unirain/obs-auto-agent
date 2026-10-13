@@ -1,0 +1,54 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetBucketAcl",
+        "oss:GetBucketVersioning",
+        "oss:GetBucketLifecycle",
+        "oss:GetBucketPolicy"
+      ],
+      "Resource": [
+        "acs:oss:*:*:configure-image-bucket"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:ListObjects",
+        "oss:ListObjectVersions"
+      ],
+      "Resource": [
+        "acs:oss:*:*:configure-image-bucket"
+      ],
+      "Condition": {
+        "StringLike": {
+          "oss:Prefix": [
+            "reading-agent/integration/*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetObject",
+        "oss:PutObject"
+      ],
+      "Resource": [
+        "acs:oss:*:*:configure-image-bucket/reading-agent/integration/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "oss:DeleteObject",
+        "oss:DeleteObjectVersion"
+      ],
+      "Resource": [
+        "acs:oss:*:*:configure-image-bucket/reading-agent/integration/*"
+      ]
+    }
+  ]
+}

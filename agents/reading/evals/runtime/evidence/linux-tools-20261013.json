@@ -1,0 +1,110 @@
+{
+  "status": "linux_tool_verified",
+  "environment": "Linux Docker with network none, read-only root, no controller secrets",
+  "image_id": "sha256:66bc2e4d14f732be1da3e685e0337844c8c1dce01cbf3014094489e6561d1a7a",
+  "skill_commit": "843e05b8ec7b926767484c06f8da01ded5d11383",
+  "skill_bundle_hash": "4b33d010d85e6d2e04fb477c903651640c6a72b351d9076363af60c9ceeef938",
+  "skill_read": true,
+  "playbook_read": true,
+  "cloud_skill_adapted": false,
+  "doctor": {
+    "animation_export": {
+      "ok": false,
+      "optional": true
+    },
+    "cairosvg": {
+      "ok": false
+    },
+    "capabilities": {
+      "gif": false,
+      "html": true,
+      "png": true,
+      "svg": true
+    },
+    "ffmpeg": {
+      "ok": false
+    },
+    "motion_renderer": {
+      "encoders": [],
+      "error": "Error: Puppeteer is unavailable. Install puppeteer-core or set FIREWORKS_PUPPETEER_PATH. puppeteer:MODULE_NOT_FOUND; puppeteer-core:MODULE_NOT_FOUND\n    at loadRenderer (/workspace/.agents/skills/fireworks-tech-graph/scripts/renderer_runtime.js:46:9)\n    at probe (/workspace/.agents/skills/fireworks-tech-graph/scripts/svg2gif.js:554:18)\n    at main (/workspace/.agents/skills/fireworks-tech-graph/scripts/svg2gif.js:2805:37)\n    at Object.<anonymous> (/workspace/.agents/skills/fireworks-tech-graph/scripts/svg2gif.js:2809:1)\n    at Module._compile (node:internal/modules/cjs/loader:1760:14)\n    at Object..js (node:internal/modules/cjs/loader:1893:10)\n    at Module.load (node:internal/modules/cjs/loader:1480:32)\n    at Module._load (node:internal/modules/cjs/loader:1299:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:328:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:244:24)",
+      "ffmpeg": null,
+      "ffprobe": null,
+      "format": {
+        "gif": false
+      },
+      "node": "/usr/local/bin/node",
+      "node_version": "24.10.0",
+      "ok": false,
+      "renderer": {},
+      "worker": "/workspace/.agents/skills/fireworks-tech-graph/scripts/svg2gif.js"
+    },
+    "node": {
+      "ok": true
+    },
+    "python": {
+      "ok": true,
+      "value": "3.11.2"
+    },
+    "raster_export": {
+      "ok": true
+    },
+    "rsvg-convert": {
+      "ok": true
+    },
+    "version": {
+      "node_for_motion": ">=22.12.0",
+      "schema_version": 1,
+      "skill_root": "/workspace/.agents/skills/fireworks-tech-graph",
+      "source": "installed-package",
+      "styles": {
+        "1": "Flat Icon",
+        "2": "Dark Terminal",
+        "3": "Blueprint",
+        "4": "Notion Clean",
+        "5": "Glassmorphism",
+        "6": "Claude Official",
+        "7": "OpenAI",
+        "8": "Dark Luxury",
+        "9": "C4 Review Canvas",
+        "10": "Cloud Fabric",
+        "11": "Event Transit",
+        "12": "Ops Pulse"
+      },
+      "version": "1.2.0"
+    }
+  },
+  "rendered": {
+    "source": "linux-tools.svg",
+    "png": "linux-tools.png",
+    "source_hash": "94a14765c0164164001b6498f6cb58be13ac3095bdc4ab58d66a2d1cb4200a6d",
+    "png_hash": "41c8cd3fb49bf9f88ef54260156c0d6e932bd56f8439abe08e87c651a48e2d90",
+    "width": 1920,
+    "height": 1440,
+    "structural_check": "{\n  \"checks\": {\n    \"collisions\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"composition\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"geometry\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"markers\": {\n      \"details\": [],\n      \"ok\": true\n    },\n    \"xml\": {\n      \"details\": [],\n      \"ok\": true\n    }\n  },\n  \"ok\": true\n}\n",
+    "visual_check": "pending"
+  },
+  "browser_snapshot_hash": "525374654513ddc1f8ec203c4a301414c45c643c412996314826bb79dfeff93f",
+  "browser_text": "中文工程流程\n可信网关提供正文，浏览器没有网络和凭据。",
+  "isolation": {
+    "controller_secrets_absent": true,
+    "readonly_root_enforced": true,
+    "outbound_network_denied": true,
+    "host_filesystem_absent": true
+  },
+  "sdk_skill_activation": "not_exercised",
+  "model_review": "not_exercised",
+  "human_visual_review": "pending",
+  "g2": "not_passed",
+  "agent_visual_review": {
+    "status": "passed",
+    "image_hash": "41c8cd3fb49bf9f88ef54260156c0d6e932bd56f8439abe08e87c651a48e2d90",
+    "observed": "Chinese labels complete/readable, dark contrast and spacing clear, all node boxes and arrow directions match fixture. Reused inspection of identical hash. CairoSVG CJK tofu and librsvg glow-filter failures preserved in earlier local reports; final fixture uses librsvg and no glow.",
+    "quality_scope": "Technical fixture only; no real article or user acceptance"
+  },
+  "local_source_reports": [
+    ".reading-local/linux-spike/report.json",
+    ".reading-local/linux-spike-chinese/report.json",
+    ".reading-local/linux-spike-cjk-rsvg/report.json",
+    ".reading-local/linux-spike-verified/report.json"
+  ]
+}

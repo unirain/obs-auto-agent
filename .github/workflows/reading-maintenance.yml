@@ -1,0 +1,51 @@
+name: Reading Agent Maintenance
+on:
+  workflow_dispatch:
+    inputs:
+      deployment:
+        type: choice
+        options: [preview, integration, production]
+        default: preview
+        required: true
+      preview_id:
+        description: Existing preview identity required for preview cleanup
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: reading-workspace-writer
+  cancel-in-progress: false
+jobs:
+  cleanup:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: ${{ inputs.deployment == 'preview' && 'reading-preview' || inputs.deployment == 'integration' && 'reading-integration' || 'reading-production' }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.10.0'
+          cache: npm
+      - run: npm ci
+      - name: Retain referenced data and collect only eligible workspace objects
+        env:
+          READING_PROFILE: ${{ inputs.deployment }}
+          READING_PREVIEW_ID: ${{ inputs.preview_id }}
+          READING_SHARED_MUTEX_HELD: 'true'
+          OSS_PREVIEW_CREDENTIALS: ${{ inputs.deployment == 'preview' && secrets.OSS_PREVIEW_CREDENTIALS || '' }}
+          OSS_TEST_CREDENTIALS: ${{ inputs.deployment == 'integration' && secrets.OSS_TEST_CREDENTIALS || '' }}
+          OSS_WORKSPACE_CREDENTIALS: ${{ inputs.deployment == 'production' && secrets.OSS_WORKSPACE_CREDENTIALS || '' }}
+          READING_GITHUB_APP: ${{ inputs.deployment == 'production' && secrets.READING_GITHUB_APP || '' }}
+          TEST_GITHUB_APP: ${{ inputs.deployment == 'integration' && secrets.TEST_GITHUB_APP || '' }}
+          READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
+        run: |
+          case "$READING_PROFILE" in
+            preview) npm run reading -- maintenance --deployment agents/reading/deploy/examples/preview.json --mode preview --preview-id "$READING_PREVIEW_ID" ;;
+            integration) npm run reading -- maintenance --deployment agents/reading/deploy/examples/integration.json --mode scheduled ;;
+            production) npm run reading -- maintenance --deployment agents/reading/deploy/examples/production.json --mode scheduled ;;
+            *) exit 1 ;;
+          esac

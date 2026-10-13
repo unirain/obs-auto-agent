@@ -1,0 +1,93 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetBucketAcl",
+        "oss:GetBucketVersioning",
+        "oss:GetBucketLifecycle",
+        "oss:GetBucketPolicy"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetBucketAcl",
+        "oss:GetBucketVersioning",
+        "oss:GetBucketLifecycle",
+        "oss:GetBucketPolicy"
+      ],
+      "Resource": [
+        "acs:oss:*:*:configure-image-bucket"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:ListObjects"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent"
+      ],
+      "Condition": {
+        "StringLike": {
+          "oss:Prefix": [
+            "reading/production/*",
+            "reading/preview/*",
+            "reading/integration/*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:ListObjects",
+        "oss:ListObjectVersions"
+      ],
+      "Resource": [
+        "acs:oss:*:*:configure-image-bucket"
+      ],
+      "Condition": {
+        "StringLike": {
+          "oss:Prefix": [
+            "reading-agent/integration/*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetObject"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent/reading/production/obs-notes-hub/*/commits/*",
+        "acs:oss:*:*:obs-agent/reading/production/obs-notes-hub/*/manifests/*",
+        "acs:oss:*:*:obs-agent/reading/production/obs-notes-hub/*/blobs/*",
+        "acs:oss:*:*:obs-agent/reading/preview/obs-notes-hub/*/commits/*",
+        "acs:oss:*:*:obs-agent/reading/preview/obs-notes-hub/*/manifests/*",
+        "acs:oss:*:*:obs-agent/reading/preview/obs-notes-hub/*/blobs/*",
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*/commits/*",
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*/manifests/*",
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*/blobs/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "oss:PutObject",
+        "oss:DeleteObject",
+        "oss:DeleteObjectVersion"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent/*",
+        "acs:oss:*:*:configure-image-bucket/*"
+      ]
+    }
+  ]
+}

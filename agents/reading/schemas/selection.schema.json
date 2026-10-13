@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "decision",
+    "reason_codes",
+    "reason",
+    "dimension_ratings",
+    "questions",
+    "related_note_ids",
+    "evidence_ids"
+  ],
+  "properties": {
+    "decision": {
+      "anyOf": [
+        {
+          "const": "research",
+          "type": "string"
+        },
+        {
+          "const": "skip",
+          "type": "string"
+        },
+        {
+          "const": "defer",
+          "type": "string"
+        }
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "reason": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "dimension_ratings": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "relevance",
+        "mechanism",
+        "evidence",
+        "transferability",
+        "increment"
+      ],
+      "properties": {
+        "relevance": {
+          "anyOf": [
+            {
+              "const": "strong",
+              "type": "string"
+            },
+            {
+              "const": "partial",
+              "type": "string"
+            },
+            {
+              "const": "absent",
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ]
+        },
+        "mechanism": {
+          "anyOf": [
+            {
+              "const": "strong",
+              "type": "string"
+            },
+            {
+              "const": "partial",
+              "type": "string"
+            },
+            {
+              "const": "absent",
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ]
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "const": "strong",
+              "type": "string"
+            },
+            {
+              "const": "partial",
+              "type": "string"
+            },
+            {
+              "const": "absent",
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ]
+        },
+        "transferability": {
+          "anyOf": [
+            {
+              "const": "strong",
+              "type": "string"
+            },
+            {
+              "const": "partial",
+              "type": "string"
+            },
+            {
+              "const": "absent",
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ]
+        },
+        "increment": {
+          "anyOf": [
+            {
+              "const": "strong",
+              "type": "string"
+            },
+            {
+              "const": "partial",
+              "type": "string"
+            },
+            {
+              "const": "absent",
+              "type": "string"
+            },
+            {
+              "const": "unknown",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "questions": {
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "related_note_ids": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    }
+  }
+}

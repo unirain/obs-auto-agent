@@ -1,0 +1,48 @@
+import {digest,EvidenceSchema,ResearchSchema,parseModel,type Evidence,type ResearchPacket} from '../stages/contracts.js';
+export type MaterialSnapshot={url:string;text:string;hash:string;retrieved_at:string;links:string[];link_locators?:{url:string;page:number|null}[];kind:'web'|'pdf'|'code';pages?:string[];commit?:string;file?:string;requested_url?:string;figures?:{url:string;caption:string}[];canonical_url?:string|null;title?:string};
+export class EvidenceRegistry {
+  private snapshots=new Map<string,MaterialSnapshot>();
+  constructor(initial:MaterialSnapshot[]=[]) {for(const material of initial)this.register(material);}
+  register(snapshot:MaterialSnapshot):void {if(digest(snapshot.text)!==snapshot.hash)throw new Error('snapshot_hash_invalid');this.snapshots.set(snapshot.hash,snapshot);}
+  get(hash:string):MaterialSnapshot {const snapshot=this.snapshots.get(hash);if(!snapshot)throw new Error('snapshot_missing');return snapshot;}
+  follow(from_hash:string,url:string):void {if(!this.get(from_hash).links.includes(url))throw new Error('reference_not_in_material');}
+  validate(raw:unknown,prior:Evidence[]):Evidence {
+    const evidence=parseModel<Evidence>(EvidenceSchema,raw);const snapshot=this.get(evidence.snapshot_hash);
+    if(snapshot.url!==evidence.source_url||snapshot.retrieved_at!==evidence.retrieved_at)throw new Error('evidence_source_mismatch');
+    let text=snapshot.text;
+    if(snapshot.kind==='pdf'){if(!evidence.locator.page||!snapshot.pages?.[evidence.locator.page-1])throw new Error('pdf_page_invalid');text=snapshot.pages[evidence.locator.page-1]!;}
+    if(snapshot.kind==='code'&&(evidence.locator.commit!==snapshot.commit||evidence.locator.file!==snapshot.file||evidence.claim_type!=='code_observation'))throw new Error('code_locator_invalid');
+    if(snapshot.kind!=='code'&&evidence.claim_type==='code_observation')throw new Error('code_observation_without_code');
+    const lines=text.split('\n');if(evidence.locator.end_line<evidence.locator.start_line||evidence.locator.end_line>lines.length||!lines.slice(evidence.locator.start_line-1,evidence.locator.end_line).join('\n').includes(evidence.excerpt))throw new Error('excerpt_not_locatable');
+    if(evidence.claim_type==='agent_inference'&&(!evidence.based_on.length||evidence.based_on.some(id=>!prior.some(item=>item.evidence_id===id))))throw new Error('inference_support_missing');
+    if(evidence.claim_type!=='agent_inference'&&evidence.based_on.length)throw new Error('unexpected_inference_dependencies');return evidence;
+  }
+  validatePartialResearch(raw:unknown):ResearchPacket {
+    const packet=parseModel<ResearchPacket>(ResearchSchema,raw);const validated:Evidence[]=[];
+    for(const evidence of packet.evidence){if(validated.some(item=>item.evidence_id===evidence.evidence_id))throw new Error('duplicate_evidence');validated.push(this.validate(evidence,validated));}
+    const ids=new Set(validated.map(item=>item.evidence_id));
+    if(new Set(packet.questions.map(question=>question.id)).size!==packet.questions.length)throw new Error('duplicate_question');
+    for(const answer of packet.answers)if(!packet.questions.some(question=>question.id===answer.question_id)||answer.evidence_ids.some(id=>!ids.has(id)))throw new Error('answer_evidence_invalid');
+    for(const source of packet.source_versions.filter(source=>source.status==='read'))if(this.get(source.hash).url!==source.url)throw new Error('source_version_mismatch');
+    const knownUrls=new Set([...this.snapshots.values()].flatMap(snapshot=>[snapshot.url,...snapshot.links]));
+    if(packet.source_versions.some(source=>!knownUrls.has(source.url))||packet.gaps.some(gap=>!knownUrls.has(gap.url)))throw new Error('research_material_not_registered');
+    return packet;
+  }
+  validateResearch(raw:unknown):ResearchPacket {
+    const packet=this.validatePartialResearch(raw);const ids=new Set(packet.evidence.map(item=>item.evidence_id));
+    if(!packet.source_versions.some(source=>source.main&&source.status==='read'))throw new Error('main_source_unread');
+    if(packet.source_versions.some(source=>source.core&&source.status!=='read')||packet.gaps.some(gap=>gap.core))throw new Error('core_material_gap');
+    for(const question of packet.questions.filter(question=>question.priority==='required')) {
+      const answers=packet.answers.filter(answer=>answer.question_id===question.id);if(answers.length!==1)throw new Error('required_answer_missing');const answer=answers[0]!;
+      if(answer.source_not_provided){if(answer.answer!==null||answer.evidence_ids.length)throw new Error('source_not_provided_became_claim');}
+      else if(!answer.answer||!answer.evidence_ids.length)throw new Error('answer_not_supported');
+    }
+    if(!packet.mechanism_evidence_ids.length||!packet.boundary_evidence_ids.length||[...packet.mechanism_evidence_ids,...packet.boundary_evidence_ids].some(id=>!ids.has(id)))throw new Error('mechanism_or_boundary_unverified');
+    return packet;
+  }
+}
+export async function reverifyCore(packet:ResearchPacket,read:(url:string)=>Promise<{hash:string}>,now:Date,mode:string,classificationCurrent:boolean):Promise<{sources_verified_at:string;source_hashes:Record<string,string>}> {
+  if(!classificationCurrent)throw new Error(mode==='publish-only'?'resume_required':'classification_required');const source_hashes:Record<string,string>={};
+  for(const source of packet.source_versions.filter(item=>item.core||item.main)){const fresh=await read(source.url);if(fresh.hash!==source.hash)throw new Error(mode==='publish-only'?'resume_required':'core_source_changed');source_hashes[source.url]=fresh.hash;}
+  return {sources_verified_at:now.toISOString(),source_hashes};
+}

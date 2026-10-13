@@ -1,0 +1,12 @@
+{
+  "observed_at": "2026-10-13T08:33:41.512Z",
+  "sdk": "ali-oss@6.23.0",
+  "runtime": "local TypeScript tsx",
+  "region": "oss-cn-beijing",
+  "isolated_prefix": "reading-agent-tests/c33b9d10-c81b-48fa-9a10-a42c58f96238/",
+  "bucket_configuration": {"private": true, "versioning": "never", "lifecycle_safe": true},
+  "passed": ["two-client immutable race: one success, one conflict", "forbid-overwrite behavioral contract", "complete multi-page native ListObjectsV2", "anonymous existing object denied with HTTP403", "explicit NoSuchKey classification", "immutable consecutive checkpoint restore", "controlled post-response loss readback against live objects"],
+  "live_unverified": ["transport-level response loss", "separate RAM production/preview/monitor/GC identities", "preview credential cannot write production prefix", "commit-prefix delete denial at RAM level"],
+  "gate_g1": "incomplete",
+  "notes": "This test used an existing user-provided bucket and an explicit isolated prefix. No bucket settings or cloud resources were created. Permanent commit objects remain in the isolated test namespace. This evidence does not authorize paid SDK calls or production cron."
+}

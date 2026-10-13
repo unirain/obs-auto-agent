@@ -1,0 +1,26 @@
+{
+  "recorded_at": "2026-10-13T10:52:15.078025+00:00",
+  "implementation_sha256": "f952428a4b6778f507b1cca9d9ee7c96867bb9ed278ca7214f7382f363fedaea",
+  "fingerprint_files": 156,
+  "commands": {
+    "npm run typecheck": "passed",
+    "npm test": "passed",
+    "npm run build": "passed",
+    "npm run coverage:spec": "passed",
+    "npm run test:live": "skipped"
+  },
+  "local_tests": {
+    "passed": 187,
+    "failed": 0
+  },
+  "live_tests": {
+    "executed": 0,
+    "skipped": 3
+  },
+  "spec_cases": {
+    "mapped": 87,
+    "complete": 0,
+    "pending": 87
+  },
+  "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance."
+}

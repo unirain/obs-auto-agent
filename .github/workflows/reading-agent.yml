@@ -1,0 +1,229 @@
+name: Reading Agent
+run-name: "reading:${{ github.event_name == 'schedule' && 'scheduled' || inputs.mode }}:${{ inputs.mode == 'preview' && 'preview' || 'production' }}:${{ github.event_name == 'schedule' && 'production' || inputs.deployment }}"
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode (manual defaults to isolated preview)"
+        type: choice
+        options: [preview, scheduled, resume, publish-only]
+        default: preview
+        required: true
+      deployment:
+        description: "Trusted profile (integration only for isolated production-scope tests)"
+        type: choice
+        options: [preview, production, integration]
+        default: preview
+        required: true
+      input_urls:
+        description: "JSON URL array; no URLs accepted by resume/publish-only"
+        type: string
+        default: "[]"
+      project_id:
+        description: "Existing production project for resume/publish-only"
+        type: string
+      preview_id:
+        description: "Existing preview identity (only preview mode)"
+        type: string
+      submission_id:
+        description: "Stable manual production submission identity (optional)"
+        type: string
+  # G5 gate: enable only after the signed-off live acceptance evidence and first manual run.
+  # schedule:
+  #   - cron: '17 0 * * *' # Asia/Shanghai 08:17
+permissions:
+  contents: read
+concurrency:
+  group: reading-workspace-writer
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      READING_MODE: ${{ github.event_name == 'schedule' && 'scheduled' || inputs.mode }}
+      READING_SHARED_MUTEX_HELD: 'true'
+      READING_TRIGGER: ${{ github.event_name == 'schedule' && 'schedule' || 'manual' }}
+      READING_PROFILE: ${{ github.event_name == 'schedule' && 'production' || inputs.deployment }}
+      READING_INPUT_URLS_JSON: ${{ github.event_name == 'schedule' && '[]' || inputs.input_urls }}
+      READING_PROJECT_ID: ${{ inputs.project_id }}
+      READING_PREVIEW_ID: ${{ inputs.preview_id }}
+      READING_SUBMISSION_ID: ${{ inputs.submission_id }}
+    steps:
+      - name: Record job deadline origin
+        run: echo "READING_JOB_STARTED_AT=$(date +%s000)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.10.0"
+          cache: npm
+      - run: npm ci
+      - name: Reject invalid mode/profile combinations before any secret-bearing job
+        run: |
+          case "$READING_PROFILE" in
+            preview) npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/preview.json ;;
+            production) npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/production.json ;;
+            integration) npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/integration.json ;;
+            *) exit 1 ;;
+          esac
+  preview:
+    needs: validate
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.mode == 'preview' &&
+      inputs.deployment == 'preview' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: reading-preview
+    env:
+      READING_MODE: preview
+      READING_SHARED_MUTEX_HELD: 'true'
+      READING_TRIGGER: manual
+      READING_INPUT_URLS_JSON: ${{ inputs.input_urls }}
+      READING_PROJECT_ID: ${{ inputs.project_id }}
+      READING_PREVIEW_ID: ${{ inputs.preview_id }}
+      READING_SUBMISSION_ID: ${{ inputs.submission_id }}
+    steps:
+      - name: Record job deadline origin
+        run: echo "READING_JOB_STARTED_AT=$(date +%s000)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.10.0"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck && npm test && npm run build
+      - name: Validate scope without secrets
+        run: npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/preview.json
+      - name: Checkout quality examples and skills with readonly credential
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: unirain/obs-notes-hub
+          fetch-depth: 0
+          path: .reading-local/notes
+          token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
+          persist-credentials: false
+      - name: Build fixed tool container without credentials
+        run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
+      - name: Run isolated preview
+        run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/preview.json
+        env:
+          OSS_PREVIEW_CREDENTIALS: ${{ secrets.OSS_PREVIEW_CREDENTIALS }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
+          GITHUB_TOKEN: ${{ github.token }}
+          READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
+          READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
+          READING_TOOLS_IMAGE: reading-tools:local
+  production:
+    needs: validate
+    if: >-
+      (github.event_name == 'schedule' || (inputs.mode != 'preview' && inputs.deployment == 'production')) &&
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: reading-production
+    env:
+      READING_MODE: ${{ github.event_name == 'schedule' && 'scheduled' || inputs.mode }}
+      READING_SHARED_MUTEX_HELD: 'true'
+      READING_TRIGGER: ${{ github.event_name == 'schedule' && 'schedule' || 'manual' }}
+      READING_INPUT_URLS_JSON: ${{ github.event_name == 'schedule' && '[]' || inputs.input_urls }}
+      READING_PROJECT_ID: ${{ inputs.project_id }}
+      READING_PREVIEW_ID: ${{ inputs.preview_id }}
+      READING_SUBMISSION_ID: ${{ inputs.submission_id }}
+    steps:
+      - name: Record job deadline origin
+        run: echo "READING_JOB_STARTED_AT=$(date +%s000)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.10.0"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck && npm test && npm run build
+      - name: Validate scope without secrets
+        run: npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/production.json
+      - name: Checkout quality examples and skills with readonly credential
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: unirain/obs-notes-hub
+          fetch-depth: 0
+          path: .reading-local/notes
+          token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
+          persist-credentials: false
+      - name: Build fixed tool container without credentials
+        run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
+      - name: Run trusted production host
+        run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/production.json
+        env:
+          OSS_WORKSPACE_CREDENTIALS: ${{ secrets.OSS_WORKSPACE_CREDENTIALS }}
+          OSS_IMAGE_CREDENTIALS: ${{ secrets.OSS_IMAGE_CREDENTIALS }}
+          READING_GITHUB_APP: ${{ secrets.READING_GITHUB_APP }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
+          GITHUB_TOKEN: ${{ github.token }}
+          READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
+          READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
+          READING_TOOLS_IMAGE: reading-tools:local
+  integration:
+    needs: validate
+    if: >-
+      github.event_name == 'workflow_dispatch' && inputs.mode != 'preview' &&
+      inputs.deployment == 'integration' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: reading-integration
+    env:
+      READING_MODE: ${{ inputs.mode }}
+      READING_SHARED_MUTEX_HELD: 'true'
+      READING_TRIGGER: manual
+      READING_INPUT_URLS_JSON: ${{ inputs.input_urls }}
+      READING_PROJECT_ID: ${{ inputs.project_id }}
+      READING_PREVIEW_ID: ${{ inputs.preview_id }}
+      READING_SUBMISSION_ID: ${{ inputs.submission_id }}
+    steps:
+      - name: Record job deadline origin
+        run: echo "READING_JOB_STARTED_AT=$(date +%s000)" >> "$GITHUB_ENV"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "24.10.0"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck && npm test && npm run build
+      - name: Validate scope without secrets
+        run: npm run reading -- validate-dispatch --deployment agents/reading/deploy/examples/integration.json
+      - name: Checkout quality examples and skills with readonly credential
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: unirain/obs-notes-hub
+          fetch-depth: 0
+          path: .reading-local/notes
+          token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
+          persist-credentials: false
+      - name: Build fixed tool container without credentials
+        run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
+      - name: Run isolated production-scope acceptance
+        run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/integration.json
+        env:
+          OSS_TEST_CREDENTIALS: ${{ secrets.OSS_TEST_CREDENTIALS }}
+          OSS_TEST_IMAGE_CREDENTIALS: ${{ secrets.OSS_TEST_IMAGE_CREDENTIALS }}
+          TEST_GITHUB_APP: ${{ secrets.TEST_GITHUB_APP }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
+          GITHUB_TOKEN: ${{ github.token }}
+          READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
+          READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
+          READING_TOOLS_IMAGE: reading-tools:local

@@ -1,0 +1,63 @@
+{
+  "Version": "1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetBucketAcl",
+        "oss:GetBucketVersioning",
+        "oss:GetBucketLifecycle",
+        "oss:GetBucketPolicy"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:ListObjects"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent"
+      ],
+      "Condition": {
+        "StringLike": {
+          "oss:Prefix": [
+            "reading/integration/*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:GetObject",
+        "oss:PutObject"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "oss:DeleteObject"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*/blobs/*",
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*/manifests/*"
+      ]
+    },
+    {
+      "Effect": "Deny",
+      "Action": [
+        "oss:DeleteObject",
+        "oss:DeleteObjectVersion"
+      ],
+      "Resource": [
+        "acs:oss:*:*:obs-agent/reading/integration/obs-notes-hub/*/commits/*"
+      ]
+    }
+  ]
+}

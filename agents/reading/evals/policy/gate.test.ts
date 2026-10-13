@@ -1,0 +1,26 @@
+import {describe,it,expect} from 'vitest';
+import {PolicyGate,type TrustedPolicy,type PolicySubject,type PolicyCheck} from '../../src/policy/gate.js';
+import {classificationBinding,reserveClassification,acceptClassification,requireClassificationTool} from '../../src/policy/classification.js';
+import {digest,parseModel,ClassificationSchema} from '../../src/stages/contracts.js';
+import {policyFixture,subjectFixture} from '../runtime/policy-fixtures.js';
+describe('latest trusted policy and bounded classification',()=>{
+  it('unknown semantics grants only classification, then manual main remains usable for research',async()=>{const policy=policyFixture(),checks:PolicyCheck[]=[];const gate=new PolicyGate(async()=>policy,async check=>{checks.push(check);});const subject=subjectFixture();
+    expect((await gate.check(subject,'classify_only','before')).execution_permission).toBe('allowed');expect((await gate.check(subject,'research','before')).reason_codes).toContain('classification_required');
+    subject.source_snapshot_hash='body';subject.classification={candidate_id:'c1',source_snapshot_hash:'body',semantic_policy_hash:'s1',content_eligibility:'allowed',evidence_hash:'e1'};
+    expect((await gate.check(subject,'research','before')).execution_permission).toBe('allowed');policy.paused=true;expect((await gate.check(subject,'research','after')).reason_codes).toContain('global_paused');expect(checks).toHaveLength(4);
+  });
+  it('disabled provenance cannot be repackaged as manual, redirect cannot expand allowance',async()=>{const policy=policyFixture();policy.sources.claude_resources!.enabled=false;const gate=new PolicyGate(async()=>policy,async()=>{});
+    expect((await gate.check({...subjectFixture(),urls:['https://claude.dev/post'],main_url:'https://claude.dev/post'},'classify_only','intake')).reason_codes).toContain('source_disabled:claude_resources');
+    expect((await gate.check({...subjectFixture(),urls:['https://elsewhere.dev/redirect']},'main_read','redirect')).reason_codes).toContain('domain_outside_scope:elsewhere.dev');
+  });
+  it('latest expanded domains do not silently expand a frozen project tool scope',async()=>{const policy=policyFixture();policy.allowed_domains.push('new-docs.dev');const gate=new PolicyGate(async()=>policy,async()=>{});const subject={...subjectFixture(),urls:['https://new-docs.dev/doc'],original_domains:['arxiv.org']};expect((await gate.check(subject,'main_read','reference')).reason_codes).toContain('domain_outside_original_scope:new-docs.dev');});
+  it('unreadable latest policy and failed policy checkpoint never grant an effect',async()=>{const gate=new PolicyGate(async()=>{throw new Error('network');},async()=>{});expect((await gate.check(subjectFixture(),'classify_only','query')).execution_permission).toBe('unavailable');
+    await expect(new PolicyGate(async()=>policyFixture(),async()=>{throw new Error('checkpoint_unknown');}).require(subjectFixture(),'main_read','fetch')).rejects.toThrow('checkpoint_unknown');
+  });
+  it('refresh invalidates semantic/body binding, preserves counts on unrelated policy update',()=>{const text='Technical mechanism with tradeoffs';let state=classificationBinding(null,'c1',digest(text),'s1');state=reserveClassification(state);state=acceptClassification(state,{content_eligibility:'allowed',content_type:'tutorial',topic:'agents',reason_codes:[],evidence:[{start_line:1,end_line:1,excerpt:'Technical mechanism'}]},text).state;
+    expect(classificationBinding(state,'c1',digest(text),'s1').attempts).toBe(1);expect(classificationBinding(state,'c1',digest(text),'s2').credential).toBeNull();expect(classificationBinding(state,'c1',digest(text+'!'),'s1').attempts).toBe(0);
+  });
+  it('two queries include one format repair and attempts persist across resume',()=>{let state=classificationBinding(null,'c1','body','s1');state=reserveClassification(state);state=reserveClassification(state,true);expect(state.attempts).toBe(2);expect(state.format_repairs).toBe(1);expect(()=>reserveClassification(classificationBinding(state,'c1','body','s1'))).toThrow('policy_review_required');});
+  it('classification denies follow-ups, executable controls and fabricated locators',()=>{expect(()=>requireClassificationTool('follow_reference')).toThrow();expect(()=>parseModel(ClassificationSchema,{content_eligibility:'allowed',content_type:'tutorial',topic:'agents',reason_codes:[],evidence:[],ready_for_delivery:true})).toThrow('invalid_model_result');
+    expect(()=>acceptClassification(classificationBinding(null,'c1',digest('body'),'s1'),{content_eligibility:'allowed',content_type:'tutorial',topic:'agents',reason_codes:[],evidence:[{start_line:1,end_line:2,excerpt:'fake'}]},'body')).toThrow('classification_evidence_invalid');});
+});

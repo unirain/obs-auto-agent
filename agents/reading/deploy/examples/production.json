@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "name": "production",
+  "execution_scope": "production",
+  "workspace_id": "obs-notes-hub/reading",
+  "workspace": {
+    "bucket": "obs-agent",
+    "region": "oss-cn-beijing",
+    "endpoint": "oss-cn-beijing.aliyuncs.com",
+    "prefix": "reading/production/",
+    "credential_ref": "OSS_WORKSPACE_CREDENTIALS",
+    "versioning_verified": "unknown",
+    "private_verified": false,
+    "lifecycle_verified": false
+  },
+  "image": {
+    "bucket": "configure-image-bucket",
+    "region": "oss-cn-beijing",
+    "endpoint": "oss-cn-beijing.aliyuncs.com",
+    "prefix": "reading-agent/",
+    "public_url": "https://configure-image-host.example/",
+    "credential_ref": "OSS_IMAGE_CREDENTIALS",
+    "sole_writer_verified": false,
+    "versioning": "unknown"
+  },
+  "target_repository": "unirain/obs-notes-hub",
+  "github_app_credential_ref": "READING_GITHUB_APP",
+  "implementation_repository": "unirain/obs-auto-agent",
+  "watchdog_credential_ref": "WATCHDOG_GITHUB_TOKEN",
+  "model_credential_ref": "DEEPSEEK_API_KEY",
+  "model": "deepseek-flash",
+  "cost_policy": "observe_only",
+  "storage_limit_bytes": 50000000000,
+  "cron_enabled": false,
+  "enabled_at": null,
+  "g5_evidence": null,
+  "watchdog_repository": null,
+  "model_provider": "deepseek",
+  "model_base_url": "https://api.deepseek.com/anthropic"
+}

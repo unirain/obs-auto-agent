@@ -1,0 +1,39 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "verified",
+    "observed_at",
+    "occupied_bytes",
+    "reserved_bytes",
+    "limit_bytes",
+    "warning",
+    "accepts_generation"
+  ],
+  "properties": {
+    "verified": {
+      "type": "boolean"
+    },
+    "observed_at": {
+      "type": "string"
+    },
+    "occupied_bytes": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "reserved_bytes": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "limit_bytes": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "warning": {
+      "type": "boolean"
+    },
+    "accepts_generation": {
+      "type": "boolean"
+    }
+  }
+}

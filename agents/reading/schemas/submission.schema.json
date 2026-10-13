@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "submission_id",
+    "execution_scope",
+    "submitted_by",
+    "submitted_at",
+    "input_hash",
+    "items"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "number"
+    },
+    "submission_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "execution_scope": {
+      "const": "production",
+      "type": "string"
+    },
+    "submitted_by": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "submitted_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "input_hash": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url",
+          "status",
+          "candidate_id",
+          "reason_codes",
+          "candidate_status",
+          "project_id",
+          "pr_number"
+        ],
+        "properties": {
+          "url": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "queued",
+                "type": "string"
+              },
+              {
+                "const": "already_known",
+                "type": "string"
+              },
+              {
+                "const": "rejected",
+                "type": "string"
+              }
+            ]
+          },
+          "candidate_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "candidate_status": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pr_number": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

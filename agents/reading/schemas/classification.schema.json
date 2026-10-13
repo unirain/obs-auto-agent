@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "content_eligibility",
+    "content_type",
+    "topic",
+    "reason_codes",
+    "evidence"
+  ],
+  "properties": {
+    "content_eligibility": {
+      "anyOf": [
+        {
+          "const": "allowed",
+          "type": "string"
+        },
+        {
+          "const": "excluded",
+          "type": "string"
+        },
+        {
+          "const": "unresolved",
+          "type": "string"
+        }
+      ]
+    },
+    "content_type": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "topic": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start_line",
+          "end_line",
+          "excerpt"
+        ],
+        "properties": {
+          "start_line": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "end_line": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "excerpt": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

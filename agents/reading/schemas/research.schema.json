@@ -1,0 +1,300 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "project_id",
+    "questions",
+    "answers",
+    "evidence",
+    "gaps",
+    "source_versions",
+    "mechanism_evidence_ids",
+    "boundary_evidence_ids",
+    "knowledge_increment"
+  ],
+  "properties": {
+    "project_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "questions": {
+      "minItems": 3,
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "priority"
+        ],
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "const": "required",
+                "type": "string"
+              },
+              {
+                "const": "optional",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "answers": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question_id",
+          "answer",
+          "evidence_ids",
+          "source_not_provided"
+        ],
+        "properties": {
+          "question_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "source_not_provided": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "evidence_id",
+          "source_url",
+          "retrieved_at",
+          "snapshot_hash",
+          "locator",
+          "excerpt",
+          "claim",
+          "claim_type",
+          "limits",
+          "based_on"
+        ],
+        "properties": {
+          "evidence_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "source_url": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "retrieved_at": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "snapshot_hash": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "locator": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "start_line",
+              "end_line"
+            ],
+            "properties": {
+              "start_line": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "end_line": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "page": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "section": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "commit": {
+                "pattern": "^[a-f0-9]{40}$",
+                "type": "string"
+              },
+              "file": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          },
+          "excerpt": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "claim": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "claim_type": {
+            "anyOf": [
+              {
+                "const": "source_statement",
+                "type": "string"
+              },
+              {
+                "const": "code_observation",
+                "type": "string"
+              },
+              {
+                "const": "experiment_report",
+                "type": "string"
+              },
+              {
+                "const": "agent_inference",
+                "type": "string"
+              }
+            ]
+          },
+          "limits": {
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "based_on": {
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url",
+          "reason",
+          "core"
+        ],
+        "properties": {
+          "url": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "core": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "source_versions": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url",
+          "hash",
+          "main",
+          "core",
+          "status"
+        ],
+        "properties": {
+          "url": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hash": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "main": {
+            "type": "boolean"
+          },
+          "core": {
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "read",
+                "type": "string"
+              },
+              {
+                "const": "failed",
+                "type": "string"
+              },
+              {
+                "const": "registered",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "mechanism_evidence_ids": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "boundary_evidence_ids": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "knowledge_increment": {
+      "minLength": 1,
+      "type": "string"
+    }
+  }
+}

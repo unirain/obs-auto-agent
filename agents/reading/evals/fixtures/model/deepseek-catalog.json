@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-10-13T09:00:26.407Z",
+  "provider": "deepseek",
+  "model": "deepseek-flash",
+  "endpoint": "https://api.deepseek.com/models",
+  "operation": "read_only_model_catalog",
+  "status": 200,
+  "model_available": true,
+  "generation_test": "not_exercised"
+}

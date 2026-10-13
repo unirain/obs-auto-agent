@@ -1,0 +1,8 @@
+schema_version: 1
+excluded_topics: []
+excluded_content_types:
+  - product_announcement
+  - marketing
+note_examples: 3
+notes_directory: Organize Notes By AI/
+diagram_directory: 图文件/

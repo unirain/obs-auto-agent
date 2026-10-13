@@ -1,0 +1,147 @@
+{
+  "verification": "readonly_online_source_first_page",
+  "history_complete": "not_exercised",
+  "results": [
+    {
+      "source_id": "langchain_blog",
+      "sampled_at": "2026-10-13T09:51:42.817Z",
+      "transport": "real HTTPS via pinned DNS native Node transport; no auth",
+      "candidate_count": 5,
+      "result": {
+        "source_id": "langchain_blog",
+        "status": "partial",
+        "reason_code": "pagination_pending",
+        "attempted_at": "2026-10-13T09:51:41.883Z",
+        "last_success_at": null,
+        "cursor_before": {
+          "page_url": "https://www.langchain.com/blog",
+          "offset": 0,
+          "page_hash": null,
+          "seen_pages": [],
+          "window_start": "2026-10-06T09:51:41.883Z",
+          "started_at": "2026-10-13T09:51:41.883Z"
+        },
+        "cursor_after": {
+          "page_url": "https://www.langchain.com/blog?8457a1db_page=2",
+          "offset": 0,
+          "page_hash": null,
+          "seen_pages": [
+            "https://www.langchain.com/blog"
+          ],
+          "window_start": "2026-10-06T09:51:41.883Z",
+          "started_at": "2026-10-13T09:51:41.883Z"
+        },
+        "coverage": {
+          "from": "2026-10-06T09:51:41.883Z",
+          "to": "2026-10-13T09:51:41.883Z"
+        },
+        "coverage_gap": null,
+        "unsupported": []
+      },
+      "progress": {
+        "schema_version": 1,
+        "active": {
+          "page_url": "https://www.langchain.com/blog?8457a1db_page=2",
+          "offset": 0,
+          "page_hash": null,
+          "seen_pages": [
+            "https://www.langchain.com/blog"
+          ],
+          "window_start": "2026-10-06T09:51:41.883Z",
+          "started_at": "2026-10-13T09:51:41.883Z"
+        },
+        "last_complete_watermark": null,
+        "watermark_ids": [],
+        "last_success_at": null
+      },
+      "candidate_urls": [
+        "https://www.langchain.com/blog/slack-sdk-managed-deep-agents",
+        "https://www.langchain.com/blog/how-snyk-turned-an-internal-support-agent-into-a-customer-feature",
+        "https://www.langchain.com/blog/agents-that-can-pay-with-stripe-link",
+        "https://www.langchain.com/blog/revamping-skills-in-deep-agents",
+        "https://www.langchain.com/blog/managed-deep-agents-schedules-per-run-configuration-slack"
+      ]
+    },
+    {
+      "source_id": "claude_resources",
+      "sampled_at": "2026-10-13T09:51:44.946Z",
+      "transport": "real HTTPS via pinned DNS native Node transport; no auth",
+      "candidate_count": 30,
+      "result": {
+        "source_id": "claude_resources",
+        "status": "partial",
+        "reason_code": "source_no_history_pagination",
+        "attempted_at": "2026-10-13T09:51:42.817Z",
+        "last_success_at": "2026-10-13T09:51:42.817Z",
+        "cursor_before": {
+          "page_url": "https://claude.com/resources",
+          "offset": 0,
+          "page_hash": null,
+          "seen_pages": [],
+          "window_start": "2026-10-06T09:51:42.817Z",
+          "started_at": "2026-10-13T09:51:42.817Z"
+        },
+        "cursor_after": null,
+        "coverage": {
+          "from": "2026-10-06T09:51:42.817Z",
+          "to": "2026-10-13T09:51:42.817Z"
+        },
+        "coverage_gap": {
+          "reason": "source_no_history_pagination",
+          "from": "2026-10-06T09:51:42.817Z",
+          "to": "2026-10-13T09:51:42.817Z"
+        },
+        "unsupported": [
+          "https://claude.com/resources/webinars/claude-code-maximizing-value",
+          "https://claude.com/resources/webinars/claude-tag-on-call-a-new-teammate-in-your-incident-channel",
+          "https://claude.com/resources/webinars/measuring-ai-fluency-at-your-organization",
+          "https://claude.com/resources/webinars/dri-ing-your-career",
+          "https://claude.com/resources/webinars/ai-as-an-engineering-leadership-multiplier",
+          "https://claude.com/resources/webinars/inside-the-cyber-verification-program",
+          "https://claude.com/resources/webinars/scaling-ai-across-the-portfolio-anthropic-and-aws-for-private-equity",
+          "https://claude.com/resources/webinars/tokenomics-on-aws-control-and-optimize-your-claude-spend",
+          "https://claude.com/resources/webinars/claude-in-microsoft-foundry-control-the-cost-prove-the-value"
+        ]
+      },
+      "progress": {
+        "schema_version": 1,
+        "active": null,
+        "last_complete_watermark": "2026-10-13T09:51:42.817Z",
+        "watermark_ids": [],
+        "last_success_at": "2026-10-13T09:51:42.817Z"
+      },
+      "candidate_urls": [
+        "https://claude.dev/blog/how-we-made-claude-ai-faster/",
+        "https://claude.com/resources/articles/how-healthcare-organizations-use-claude-tag",
+        "https://claude.com/resources/articles/the-ai-native-sdlc-playbook",
+        "https://claude.com/resources/articles/claude-code-guide-for-startups",
+        "https://www.youtube.com/watch?v=FoteuzPpx7E",
+        "https://www.youtube.com/watch?v=Ov-B6K1EsaI",
+        "https://claude.com/resources/articles/dashboards-and-motion",
+        "https://www.anthropic.com/claude-haiku-5-5",
+        "https://claude.com/resources/articles/claude-now-works-in-google-docs-sheets-and-slides",
+        "https://www.anthropic.com/news/cyber-verification-program",
+        "https://www.youtube.com/watch?v=bVXiNb9RyyI",
+        "https://claude.com/resources/articles/claude-code-mods",
+        "https://claude.dev/blog/building-effective-agent-automations/",
+        "https://claude.com/resources/guides/the-ai-investment-firm",
+        "https://claude.dev/blog/automating-eval-design-and-hillclimbing/",
+        "https://claude.dev/blog/claude-code-in-the-cloud/",
+        "https://claude.com/resources/articles/how-comcast-booz-allen-use-claude-mythos-to-secure-their-codebases",
+        "https://claude.dev/blog/what-a-task-costs-on-opus-5-5/",
+        "https://claude.com/resources/articles/claude-opus-5-5-built-for-coding-sessions-that-use-more-context",
+        "https://claude.com/resources/articles/claude-for-commerce-agents",
+        "https://claude.com/resources/articles/how-people-are-using-claude-cowork",
+        "https://claude.com/resources/articles/how-block-orchestrates-claude-fable-across-thousands-of-pull-requests",
+        "https://claude.com/resources/guides/claude-science-product-guide",
+        "https://claude.com/resources/guides/the-enterprise-ai-transformation-guide-for-life-sciences",
+        "https://claude.com/resources/guides/claude-cowork-product-guide",
+        "https://claude.com/resources/guides/zero-trust-for-ai-agents",
+        "https://www.youtube.com/watch?v=z7cNbsr3b5s",
+        "https://www.youtube.com/watch?v=_f_rtbW_uFM",
+        "https://www.youtube.com/watch?v=s5nkj-L2vAw",
+        "https://www.youtube.com/watch?v=mQZB0l-rhxE"
+      ]
+    }
+  ]
+}

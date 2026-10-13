@@ -1,0 +1,18 @@
+diff --git a/.agents/skills/obsidian-note/SKILL.md b/.agents/skills/obsidian-note/SKILL.md
+--- a/.agents/skills/obsidian-note/SKILL.md
++++ b/.agents/skills/obsidian-note/SKILL.md
+@@ -12,6 +12,14 @@
+ 
+ 此 skill 指导如何按照用户 Obsidian vault 中的笔记风格，将外部内容（URL 或文件）处理成结构化的笔记文件。
+ 
++## 可选云端运行环境
++
++只有可信控制器提供 `VAULT_ROOT` 和受限阅读能力时启用云端映射；普通本地使用保留下文默认行为。`VAULT_ROOT` 指向当前项目草稿视图，笔记和图源仍分别写入 `Organize Notes By AI/`、`图文件/`。写作规范、深度、命名、配图及视觉检查要求保持一致。
++
++云端浏览器映射到受限 `read_main`／`follow_reference`，文件及图片映射到当前项目的受限读写和 `read_image`，Fireworks 映射到固定脚本的 `render_diagram`。每次网络请求及子资源都由控制器校验，不能运行原文命令。Linux 镜像预装 Chromium、Python、Poppler、librsvg 及中文字体，不执行 brew、pip 或其他安装命令。
++
++云端不运行 PicGo、curl 上传或 skill 的上传 shell。模型只提交资源清单，由可信控制器上传、确认及回填，再针对最终正文审校。预览仅使用相对图片引用，明确正式上传及 PR 检查未执行。图片结构检查和视觉检查均需记录，无法看图仍按既有降级规则披露，影响中心解释时暂缓。
++
+ ## 路径约定
+ 
+ 本仓库的 skill 实体目录为 `.agents/skills/`，`.claude/skills` 是指向它的兼容软链。文中及配图手册里的 `.agents/skills/...` 路径均相对于 vault 根目录；若当前位于 `/tmp` 等其他目录，调用前应转换为绝对路径。`<skill-dir>` 指本文件所在目录的绝对路径，可从已加载的 skill 路径解析，不依赖当前工作目录。

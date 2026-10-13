@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "reading/delivery",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "delivery_id": {
+      "type": "string"
+    },
+    "execution_scope": {
+      "const": "production"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "generation_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "workspace_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_id": {
+      "type": "string"
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "sources_verified_at": {
+      "type": "string"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "note",
+              "diagram_source"
+            ]
+          },
+          "mime": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "content_base64": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "role",
+          "mime",
+          "bytes",
+          "sha256",
+          "content_base64"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "object_key": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "mime": {
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "image/svg+xml"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "version_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "confirmed_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "object_key",
+          "sha256",
+          "bytes",
+          "mime",
+          "url",
+          "project_id",
+          "version_id",
+          "confirmed_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "quality_report": {
+      "type": "object"
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "knowledge_increment": {
+      "type": "string"
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "image_degradations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "usage": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "known",
+            "unknown",
+            "partial"
+          ]
+        },
+        "estimated_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status",
+        "estimated_usd"
+      ],
+      "additionalProperties": false
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validated_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "delivery_id",
+    "execution_scope",
+    "workspace_id",
+    "project_id",
+    "generation_version",
+    "workspace_revision",
+    "context_id",
+    "base_commit",
+    "sources_verified_at",
+    "files",
+    "resources",
+    "sources",
+    "quality_report",
+    "rationale",
+    "knowledge_increment",
+    "gaps",
+    "image_degradations",
+    "usage",
+    "warnings",
+    "validated_hash"
+  ],
+  "additionalProperties": false
+}

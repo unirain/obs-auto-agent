@@ -1,0 +1,804 @@
+{
+  "schema_version": 1,
+  "spec_sha256": "4c8074eaad1b5eb9121983599063cee34a3bef8069e766ccc0138bb0c6cbcd32",
+  "groups": [
+    {
+      "id": "V01",
+      "gate": "G0",
+      "status": "pending"
+    },
+    {
+      "id": "V02",
+      "gate": "G1",
+      "status": "pending"
+    },
+    {
+      "id": "V03",
+      "gate": "G1",
+      "status": "pending"
+    },
+    {
+      "id": "V04",
+      "gate": "G2",
+      "status": "pending"
+    },
+    {
+      "id": "V05",
+      "gate": "G3",
+      "status": "pending"
+    },
+    {
+      "id": "V06",
+      "gate": "G2",
+      "status": "pending"
+    },
+    {
+      "id": "V07",
+      "gate": "G3",
+      "status": "pending"
+    },
+    {
+      "id": "V08",
+      "gate": "G2",
+      "status": "pending"
+    },
+    {
+      "id": "V09",
+      "gate": "G2",
+      "status": "pending"
+    },
+    {
+      "id": "V10",
+      "gate": "G4",
+      "status": "pending"
+    },
+    {
+      "id": "V11",
+      "gate": "G3",
+      "status": "pending"
+    },
+    {
+      "id": "V12",
+      "gate": "G3",
+      "status": "pending"
+    },
+    {
+      "id": "V13",
+      "gate": "G3",
+      "status": "pending"
+    },
+    {
+      "id": "V14",
+      "gate": "G3",
+      "status": "pending"
+    },
+    {
+      "id": "V15",
+      "gate": "G4",
+      "status": "pending"
+    },
+    {
+      "id": "V16",
+      "gate": "G4",
+      "status": "pending"
+    },
+    {
+      "id": "V17",
+      "gate": "G4",
+      "status": "pending"
+    },
+    {
+      "id": "V18",
+      "gate": "G4",
+      "status": "pending"
+    },
+    {
+      "id": "V19",
+      "gate": "G4",
+      "status": "pending"
+    },
+    {
+      "id": "V20",
+      "gate": "G5",
+      "status": "pending"
+    }
+  ],
+  "cases": [
+    {
+      "id": "C001",
+      "group": "V10",
+      "scenario": "合格文章有论文和代码",
+      "expected": "读取主文与相关材料，形成机制解释、证据和配图，创建一个 PR",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C002",
+      "group": "V10",
+      "scenario": "文章只有营销描述",
+      "expected": "输出明确淘汰理由，不为凑数生成笔记",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C003",
+      "group": "V10",
+      "scenario": "LangChain 或 Claude 入口出现产品发布公告",
+      "expected": "以 `product_announcement` 排除，来源官方不构成收录理由",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C004",
+      "group": "V10",
+      "scenario": "技术教程提到产品名，但主体解释机制与取舍",
+      "expected": "正常评估，不按产品关键词误删",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C005",
+      "group": "V06",
+      "scenario": "新候选没有标签，正文同时介绍新产品与技术机制",
+      "expected": "执行许可通过后自动进入 classify_only，补读主文完成主体分类，不要求人工前置审批",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C006",
+      "group": "V05",
+      "scenario": "内容未知但来源被停用、域名被拒绝或项目暂停",
+      "expected": "禁止分类 query，不把 classify_only 当作绕过执行限制的入口",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C007",
+      "group": "V06",
+      "scenario": "受限分类判为技术实践／产品发布／仍未决",
+      "expected": "分别进入价值判断、明确 skip、达到分类上限后转人工；未知不直接进入研究",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C008",
+      "group": "V06",
+      "scenario": "分类过程中尝试跟读论文、绘图、写笔记或发布",
+      "expected": "受限工具集拒绝，分类能力不会扩大为深入研究能力",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C009",
+      "group": "V06",
+      "scenario": "语义规则更新令旧分类失效",
+      "expected": "停止深读与交付；执行许可允许时重新受限分类，不沿用旧 allowed",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C010",
+      "group": "V07",
+      "scenario": "首次正式提交首批信源之外、早于七天窗口的公开 URL",
+      "expected": "scheduled + input_urls 持久化人工身份和候选回执，进入正式选题；不推进订阅游标",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C011",
+      "group": "V07",
+      "scenario": "两次正式提交同一 URL，或提交回执响应丢失后重试",
+      "expected": "返回相同候选／项目及真实状态，不重复研究、重置状态或创建第二个 PR",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C012",
+      "group": "V07",
+      "scenario": "同一 URL 经人工和订阅发现，或跳转后确认同一文章",
+      "expected": "归并身份与 provenance，不因来源 ID 不同重复交付",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C013",
+      "group": "V07",
+      "scenario": "人工提交命中禁用来源或全局暂停",
+      "expected": "返回拒绝原因，不添加一次性许可绕过限制",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C014",
+      "group": "V07",
+      "scenario": "预览成功后使用 scheduled + input_urls 正式提交",
+      "expected": "重新走正式许可与去重；预览状态不污染正式入队",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C015",
+      "group": "V15",
+      "scenario": "Claude 目录条目指向允许的外部官方正文域名",
+      "expected": "按配置和真实链接读取；导航链接不扩展发现范围",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C016",
+      "group": "V15",
+      "scenario": "列表只有活动或无文字视频，或正文日期未知",
+      "expected": "前者记录格式不支持；后者保留空日期并正常判断，不伪造日期",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C017",
+      "group": "V15",
+      "scenario": "首次窗口内超过五十个条目",
+      "expected": "持久化分页位置继续采集，不把分批大小当总量上限",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C018",
+      "group": "V12",
+      "scenario": "同轮已有三篇产出或已有十个待审 PR",
+      "expected": "时间、容量允许时继续处理新的合格内容",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C019",
+      "group": "V10",
+      "scenario": "加载质量正例",
+      "expected": "从指定目录召回相关笔记并优先近期整理样例，记录日期依据和版本",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C020",
+      "group": "V15",
+      "scenario": "历史正例来自本轮排除的内容或来源类型",
+      "expected": "只参考写作质量，不扩大自动选题和采集范围",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C021",
+      "group": "V15",
+      "scenario": "摘要不完整但全文有价值",
+      "expected": "进入研究，不因摘要缺少细节而提前淘汰",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C022",
+      "group": "V10",
+      "scenario": "多站转载同一文章",
+      "expected": "归并来源，只交付一个项目",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C023",
+      "group": "V10",
+      "scenario": "同主题文章有不同实验或相反结论",
+      "expected": "保留新增证据，不能按主题相似直接删除",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C024",
+      "group": "V10",
+      "scenario": "核心论文读取失败",
+      "expected": "项目暂缓并说明缺口，不声称已读论文",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C025",
+      "group": "V10",
+      "scenario": "单个信源失败",
+      "expected": "保留其游标，其他来源继续，运行报告标为部分成功",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C026",
+      "group": "V17",
+      "scenario": "一个来源连续失败，另一个持续创建 PR，Actions 成功退出",
+      "expected": "按 source_id + reason_code 创建去重告警，不被总体成功掩盖",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C027",
+      "group": "V17",
+      "scenario": "同一来源同一原因多轮失败，之后实际读取恢复",
+      "expected": "故障期间不重复评论；实际读取及持久化成功后才关闭对应读取故障",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C028",
+      "group": "V17",
+      "scenario": "故障在两次监控之间发生并恢复",
+      "expected": "从持久事件发现，发送合并的发生及恢复记录，不遗漏",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C029",
+      "group": "V17",
+      "scenario": "当前来源读取恢复但历史 coverage_gap 未补齐",
+      "expected": "关闭读取故障，保留缺口 Issue；补采验证或用户明确接受缺口才处置",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C030",
+      "group": "V17",
+      "scenario": "停用来源、全局暂停、publish-only 或其他来源成功",
+      "expected": "不假装来源恢复；停用／暂停标明策略抑制，未尝试不清除事件",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C031",
+      "group": "V03",
+      "scenario": "发现候选后进程崩溃",
+      "expected": "候选与游标一致，恢复后不丢失候选",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C032",
+      "group": "V08",
+      "scenario": "SDK query 内包含多步模型请求",
+      "expected": "一个调用意图关联多个消息，usage 去重，汇总不重复累加",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C033",
+      "group": "V08",
+      "scenario": "SDK query 结果不明或仅存启动意图",
+      "expected": "保留已知响应和消耗，人工核对，不自动重复付费",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C034",
+      "group": "V08",
+      "scenario": "未配置模型金额上限或价格未知",
+      "expected": "正常运行；前者为 observe_only，后者费用标未知而非零",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C035",
+      "group": "V09",
+      "scenario": "四十次工具调用后仍有必需工作，或补充材料超过八份",
+      "expected": "保存已完成子任务，下批继续，累计计数保留",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C036",
+      "group": "V09",
+      "scenario": "跨天恢复持续无进展或已用完两轮修订的项目",
+      "expected": "不重置保护计数，进入人工处理，不每日自动重试",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C037",
+      "group": "V08",
+      "scenario": "剩余五分钟但 SDK 仍在执行",
+      "expected": "主动收束或中止，保存已完成产物，不确定调用进入对账",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C038",
+      "group": "V12",
+      "scenario": "PR 创建成功但响应丢失",
+      "expected": "下轮通过交付标识找回原 PR，不创建第二个",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C039",
+      "group": "V12",
+      "scenario": "PR 已待审多日",
+      "expected": "保持待审状态，不重新生成同一篇",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C040",
+      "group": "V10",
+      "scenario": "用户关闭未合并",
+      "expected": "不记为已入库，不自动重提",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C041",
+      "group": "V12",
+      "scenario": "用户手工修改 PR 分支",
+      "expected": "机器人不覆盖用户修改",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C042",
+      "group": "V12",
+      "scenario": "用户合并 PR",
+      "expected": "对账后标记已入库，索引默认分支里的实际笔记",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C043",
+      "group": "V02",
+      "scenario": "首次运行且提交链为空、零号对象不存在",
+      "expected": "显式初始化 workspace，禁止覆盖创建保证只有一个初始提交",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C044",
+      "group": "V02",
+      "scenario": "读取 OSS 超时、403 或 manifest 损坏",
+      "expected": "停止恢复，不当成空 workspace 覆盖",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C045",
+      "group": "V03",
+      "scenario": "产物已上传但提交记录尚未发布时退出",
+      "expected": "下次仍恢复旧快照，不把孤立对象当成已完成阶段",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C046",
+      "group": "V03",
+      "scenario": "提交记录创建成功但响应丢失",
+      "expected": "按固定序号读回确认内容，不重复创建版本或误判旧快照",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C047",
+      "group": "V03",
+      "scenario": "两个客户端争写同一提交序号",
+      "expected": "仅一方成功；相同意图可补回执，不同意图一方停止，不能跳序号",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C048",
+      "group": "V05",
+      "scenario": "workspace bucket 版本控制已开启或已暂停",
+      "expected": "拒绝启动，不依赖已失效的禁止覆盖头，不改动既有 bucket 设置",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C049",
+      "group": "V02",
+      "scenario": "提交前缀列举中断、提交链有缺口或哈希不符",
+      "expected": "停止恢复，不按最后修改时间选版本、不回退为空 workspace",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C050",
+      "group": "V04",
+      "scenario": "workspace bucket 不存在或匿名可读",
+      "expected": "拒绝初始化或运行，不能当作普通缺少对象处理",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C051",
+      "group": "V16",
+      "scenario": "GC 清理超过保留期的历史数据",
+      "expected": "提交记录全部保留，受保护版本可恢复，逻辑 HEAD 可重建",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C052",
+      "group": "V10",
+      "scenario": "Actions 超时或被取消",
+      "expected": "Agent 停止，下轮从最后已提交的 workspace 检查点恢复",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C053",
+      "group": "V10",
+      "scenario": "工具容器在绘图中退出",
+      "expected": "保留已有证据和已检查图源，恢复未完成操作",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C054",
+      "group": "V10",
+      "scenario": "同时触发两个 Actions",
+      "expected": "同一 concurrency 组串行运行，固定序号禁止覆盖创建拒绝过期发布",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C055",
+      "group": "V12",
+      "scenario": "PR 已创建但回执失败",
+      "expected": "下一轮查找已有 PR 并补回执，不重新调用模型",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C056",
+      "group": "V13",
+      "scenario": "回执丢失超过二十四小时且 PR 已存在",
+      "expected": "先补回执，不因来源核验过期重生成",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C057",
+      "group": "V13",
+      "scenario": "超过二十四小时且 GitHub 结果无法确认",
+      "expected": "保持 publishing，不新建版本、PR 或删除资源",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C058",
+      "group": "V12",
+      "scenario": "仅有机器人分支／commit，尚无 PR",
+      "expected": "完整 diff 与预期一致才续建；人工修改导致冲突待处理",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C059",
+      "group": "V13",
+      "scenario": "未发布结果过期，来源未变／发生变化",
+      "expected": "未变仅刷新交付核验记录；变化建立新生成版本并重审，旧分支不覆盖",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C060",
+      "group": "V14",
+      "scenario": "下载不完整或文件哈希不符",
+      "expected": "拒绝提交，可重新下载同一不可变产物",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C061",
+      "group": "V14",
+      "scenario": "manifest 指向工作流文件或非法路径",
+      "expected": "Actions 的独立校验拒绝交付",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C062",
+      "group": "V10",
+      "scenario": "skill、样例等生成配置更新但旧项目尚未完成",
+      "expected": "旧项目沿用固定生成 context，同时执行最新用户限制；新项目用新生成配置",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C063",
+      "group": "V17",
+      "scenario": "用户新增排除主题或停用来源，旧项目正在积压",
+      "expected": "恢复时暂停受影响项目，不再付费研究、上传图片或发布",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C064",
+      "group": "V05",
+      "scenario": "本轮已启动后用户撤销许可",
+      "expected": "下一 query、来源工具、上传和发布前重新检查；运行中的 query 在策略刷新发现后中止，保留不确定回执",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C065",
+      "group": "V05",
+      "scenario": "已持久化 publishing 意图后用户全局暂停",
+      "expected": "只读核对既有分支和 PR，保存事实，不创建或补推远端结果",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C066",
+      "group": "V06",
+      "scenario": "最新策略读取失败或受限分类后语义排除仍未决",
+      "expected": "前者阻止新付费与发布，后者在已完成分类额度后转人工复核；不回退旧许可",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C067",
+      "group": "V05",
+      "scenario": "新限制命中已创建 PR 或之后解除限制",
+      "expected": "已有 PR 不自动重写／关闭；未完成项目重新获准后按原证据和 skill 恢复",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C068",
+      "group": "V10",
+      "scenario": "默认手动触发单 URL 试运行",
+      "expected": "进入 preview，隔离 workspace，仅输出私有测试产物，无正式上传和 GitHub 写入",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C069",
+      "group": "V10",
+      "scenario": "预览把某 URL 判为 skip 或已完成，随后正式处理同 URL",
+      "expected": "正式游标、去重与项目状态未被污染，按正式规则重新判断",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C070",
+      "group": "V11",
+      "scenario": "preview 产物声明 ready_for_delivery，或传入正式发布参数",
+      "expected": "scope 校验和缺失写凭据共同阻止发布；不能更改 scope 提升为 production",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C071",
+      "group": "V01",
+      "scenario": "对 preview_id 调用正式 resume／publish-only",
+      "expected": "拒绝；只能用 preview 模式续跑原预览",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C072",
+      "group": "V11",
+      "scenario": "预览图文审校通过",
+      "expected": "输出相对图片路径，正式上传和 PR 检查标为 not_exercised，不宣称交付链路通过",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C073",
+      "group": "V10",
+      "scenario": "正式与预览同时请求存储",
+      "expected": "共享写入互斥与 50 GB 容量视图，费用按 scope 记录，不回写彼此控制状态",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C074",
+      "group": "V04",
+      "scenario": "OSS 快照包含伪造 skill 或可执行配置",
+      "expected": "拒绝覆盖只读运行规则，执行代码只来自受信任 Git 版本",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C075",
+      "group": "V16",
+      "scenario": "清理时旧 blob 仍被 HEAD 或待审版本引用",
+      "expected": "保留该对象，不按创建日期误删",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C076",
+      "group": "V16",
+      "scenario": "OSS workspace 与新图床资源合计接近容量上限",
+      "expected": "包括受管图床历史版本，按合计字节预检，不分别占用 50 GB",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C077",
+      "group": "V16",
+      "scenario": "容量不足且所有对象仍被保护",
+      "expected": "暂停新增存储并报告，保留待处理候选，空间释放后恢复",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C078",
+      "group": "V16",
+      "scenario": "上传成功但容量回执丢失",
+      "expected": "按稳定对象键对账，不双计或提前释放预留",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C079",
+      "group": "V16",
+      "scenario": "已发布图片在重生成中发生变化",
+      "expected": "使用含新哈希的新 URL，旧 PR 和已合并笔记的图片不变",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C080",
+      "group": "V04",
+      "scenario": "凭据、浏览器登录信息或缓存出现在工作目录",
+      "expected": "同步清单排除，不上传 OSS",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C081",
+      "group": "V10",
+      "scenario": "原文带恶意指令",
+      "expected": "仍只作为材料处理，工具权限不扩大",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C082",
+      "group": "V04",
+      "scenario": "生成目录包含符号链接或 workflow 文件",
+      "expected": "交付程序拒绝提交",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C083",
+      "group": "V11",
+      "scenario": "图片无法渲染或无法视觉检查",
+      "expected": "按 skill 降级并披露；影响中心解释时暂缓",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C084",
+      "group": "V10",
+      "scenario": "模型连续修订仍有事实错误",
+      "expected": "达到两轮上限后暂缓，不发布不合格笔记",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C085",
+      "group": "V10",
+      "scenario": "当天没有合格文章",
+      "expected": "正常完成并记录零产出，不创建空 PR",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C086",
+      "group": "V18",
+      "scenario": "阅读调度未触发而监控工作流正常",
+      "expected": "超过三十六小时告警，同一故障不重复通知；不能依赖阅读任务自报",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C087",
+      "group": "V17",
+      "scenario": "故障恢复或 GitHub 平台整体不可用",
+      "expected": "前者关闭对应故障；后者明确属于同平台监控无法保障的范围",
+      "status": "pending",
+      "evidence": []
+    }
+  ]
+}

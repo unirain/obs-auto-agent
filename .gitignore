@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.reading-local/
+coverage/
+agents/reading/evals/results/private/
+*.log

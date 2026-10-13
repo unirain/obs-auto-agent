@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+.reading-local
+.env
+.env.*
+*.pem
+*.key
+*.log
+coverage
+agents/reading/evals/results/private
