@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "at": "2026-10-13T13:06:56.467Z",
+  "scope": "local_installed_sdk_and_linux_tools",
+  "sdk": {
+    "sdk_version": "0.3.296",
+    "sdk_hash": "e8f1e99cef4332d6bc61cb15b5cac5d8ec094ab3d41230a5ebb25f0a03691bd5",
+    "node_version": "v26.0.0"
+  },
+  "tools": {
+    "image_id": "sha256:66bc2e4d14f732be1da3e685e0337844c8c1dce01cbf3014094489e6561d1a7a",
+    "manifest_hash": "92d57bffdd511c2d44e20380d25ab1c285b96a9781b2a8a1fbe1dc51ecabefeb",
+    "manifest": {
+      "node_version": "v24.10.0",
+      "python_version": "Python 3.11.2",
+      "chromium_version": "Chromium 155.0.8059.39 built on Debian GNU/Linux 12 (bookworm)",
+      "poppler_version": "pdfinfo version 22.12.0",
+      "system_packages_hash": "825381112b5009d68861c26fedd12bb3d1133f6751cc74abd03293e03dace5a7",
+      "browser_worker_hash": "a9759645877260d4c93a6628981098da71a3f146735e4ae29cb6da6f68dfe09b",
+      "package_lock_hash": "33c6f293967784f04436a362ef7fa78d2a7b359b75c0e41b02ed608c7e04e771"
+    }
+  },
+  "fixed_manifest_mismatch_refused": true,
+  "model_version_fixed": false,
+  "model_exercised": false,
+  "live_external_service_exercised": false
+}

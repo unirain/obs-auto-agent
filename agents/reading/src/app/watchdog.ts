@@ -1,4 +1,6 @@
 import { Octokit } from "@octokit/rest";
+import {parse as parseYaml} from 'yaml';
+import {parseRuntimeLimits as parseOperationalLimits} from '../config/runtime-limits.js';
 import { parseDeployment, type Deployment } from "../config/deployment.js";
 import {
   GitHubPolicySource,
@@ -19,6 +21,7 @@ import {
   validateCommit,
   validateManifest,
   assertBytes,
+  readManifestFile,
 } from "../workspace/manifest.js";
 import { IssueProjector, OctokitIssuePort } from "../monitor/issues.js";
 import { runWatchdog } from "../monitor/main.js";
@@ -96,7 +99,7 @@ export async function readMonitorProjection(
       f.path === "state/sources/health.json" ||
       (f.path.startsWith("state/runs/") && f.path.endsWith(".json")),
   )) {
-    const value = await store.read(prefix + "blobs/" + file.sha256);
+    const value = await readManifestFile(store,prefix,file);
     assertBytes(value, file.sha256, file.size);
     let parsed: unknown;
     try {
@@ -254,13 +257,16 @@ export async function runWatchdogApplication(
   const projection = () =>
     (projectionPromise ??= readMonitorProjection(store, deployment));
   const readPolicy = async () => {
-    const policy = parseTrustedPolicy(await source.readSnapshot());
+    const snapshot=await source.readSnapshot();
+    const policy = parseTrustedPolicy(snapshot);
+    const limits=parseOperationalLimits(parseYaml(snapshot.files['runtime.yaml']));
     return {
       global: policy.paused,
       disabled_sources: Object.entries(policy.sources)
         .filter(([, s]) => !s.enabled)
         .map(([id]) => id),
       enabled_at: deployment.enabled_at,
+      watchdog_gap_hours:limits.watchdog_gap_hours,
     };
   };
   const projector = new IssueProjector(

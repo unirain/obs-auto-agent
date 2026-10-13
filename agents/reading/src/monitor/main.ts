@@ -65,6 +65,7 @@ export class Watchdog {
 
 import type { Octokit } from "@octokit/rest";
 import { runHealth, type ActionsRun } from "./run-health.js";
+import { runtimeHours } from "../config/runtime-limits.js";
 export interface WatchdogRunnerOptions {
   actions: Octokit;
   repository: string;
@@ -78,6 +79,7 @@ export interface WatchdogRunnerOptions {
     disabled_sources: string[];
     enabled_at: string | null;
     resumed_at?: string | null;
+    watchdog_gap_hours?: number;
   }>;
   now?: () => Date;
 }
@@ -96,6 +98,7 @@ export async function runWatchdog(options: WatchdogRunnerOptions): Promise<{
   let runs: ActionsRun[];
   try {
     policy = await options.readPolicy();
+    runtimeHours(policy.watchdog_gap_hours ?? 36, "watchdog_gap_hours");
     reportIds = await options.readReportRunIds();
     events = await options.readEvents();
     const remote = await options.actions.paginate(
@@ -191,6 +194,7 @@ export async function runWatchdog(options: WatchdogRunnerOptions): Promise<{
     workspace,
     policy.enabled_at,
     now(),
+    policy.watchdog_gap_hours ?? 36,
   );
   const runProjection = new Watchdog(
     options.projector,
@@ -211,6 +215,7 @@ export async function runWatchdog(options: WatchdogRunnerOptions): Promise<{
         enabled_at: policy.enabled_at,
         globally_paused: policy.global,
         resumed_at: effectiveResume,
+        watchdog_gap_hours: policy.watchdog_gap_hours ?? 36,
       },
       now(),
     );
@@ -238,6 +243,7 @@ export async function runWatchdog(options: WatchdogRunnerOptions): Promise<{
     {
       enabled_at: policy.enabled_at,
       globally_paused: policy.global,
+      watchdog_gap_hours: policy.watchdog_gap_hours ?? 36,
       ...(effectiveResume ? { resumed_at: effectiveResume } : {}),
     },
     now(),

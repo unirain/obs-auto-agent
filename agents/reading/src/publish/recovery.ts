@@ -1,4 +1,5 @@
 import type { DeliveryRecord, SealedDelivery } from "./types.js";
+import { runtimeHours } from "../config/runtime-limits.js";
 export type RecoveryRoute =
   | "read_only"
   | "publish"
@@ -11,7 +12,9 @@ export function recoveryRoute(
   currentClassification: boolean,
   now: Date,
   mode: "scheduled" | "resume" | "publish-only",
+  sourcesFreshnessHours = 24,
 ): { route: RecoveryRoute; reason: string | null; model_allowed: boolean } {
+  const freshnessMs = runtimeHours(sourcesFreshnessHours, "sources_freshness_hours") * 3_600_000;
   if (records.some((r) => r.uncertain_action))
     return {
       route: "read_only",
@@ -36,7 +39,10 @@ export function recoveryRoute(
       reason: "classification_invalid",
       model_allowed: mode !== "publish-only",
     };
-  if (now.getTime() - Date.parse(d.sources_verified_at) > 24 * 60 * 60 * 1000)
+  const verifiedAt = Date.parse(d.sources_verified_at);
+  if (!Number.isFinite(verifiedAt) || !Number.isFinite(now.getTime()))
+    throw new Error("Invalid source verification time");
+  if (now.getTime() - verifiedAt > freshnessMs)
     return {
       route: "resume_source_verification",
       reason: "sources_expired",

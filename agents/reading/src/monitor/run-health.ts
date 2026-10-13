@@ -1,5 +1,6 @@
 export type RunRecord = RunReport;
 import type { RunReport } from "../app/controller.js";
+import { runtimeHours } from "../config/runtime-limits.js";
 export interface ActionsRun {
   id: string;
   mode: string;
@@ -22,9 +23,11 @@ export function runHealth(
     enabled_at: string | null;
     globally_paused: boolean;
     resumed_at?: string | null;
+    watchdog_gap_hours?: number;
   },
   now: Date,
 ): { faults: HealthFault[]; suppressed: boolean } {
+  const gapHours = runtimeHours(policy.watchdog_gap_hours ?? 36, "watchdog_gap_hours");
   if (policy.globally_paused) return { faults: [], suppressed: true };
   if (!policy.enabled_at) return { faults: [], suppressed: false };
   const anchor = Math.max(
@@ -45,11 +48,11 @@ export function runHealth(
     ...scheduled.map((r) => Date.parse(r.started_at)),
   );
   const faults: HealthFault[] = [];
-  if (now.getTime() - last > 36 * 3600000)
+  if (now.getTime() - last > gapHours * 3600000)
     faults.push({
       key: "run:missed_schedule",
       reason_code: "missed_schedule",
-      detail: "No production scheduled startup for 36 hours",
+      detail: `No production scheduled startup for ${gapHours} hours`,
       occurred_at: new Date(last).toISOString(),
     });
   // A later completed scheduled run can recover a run fault; publish-only cannot.

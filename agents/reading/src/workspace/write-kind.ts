@@ -2,6 +2,7 @@ import type {
   CheckpointChange,
   WorkspaceManifest,
 } from "../contracts/index.js";
+import { manifestBlobs } from "./manifest.js";
 /** Only host event names select the control reserve. Model DTOs never expose this function or write_kind. */
 const control = new Set([
   "initialize",
@@ -53,7 +54,8 @@ export function checkpointWriteKind(
   if (
     manifest.files.some(
       (f) =>
-        newBlobHashes.has(f.sha256) && !["control", "report"].includes(f.role),
+        manifestBlobs(f).some((blob) => newBlobHashes.has(blob.sha256)) &&
+        !["control", "report"].includes(f.role),
     )
   )
     return "generation";

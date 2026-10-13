@@ -57,7 +57,10 @@ npm run reading -- recover --deployment agents/reading/deploy/examples/productio
 - `confirm_not_started` 只接受已由可信宿主记录 `request_started=false` 和已知零用量的调用；缺回执不能作为未发出的证据。
 - `record_result` 仅用于可信人工核验过的实际调用结果，需绑定 invocation/input、`status`、完整 query 汇总 `usage`，成功时还需 `structured_response`。旧记录归档，真实费用未知时仍用 null。模型阶段继续自行校验结果。此请求仅由受保护本机文件导入，不能把私有模型正文放进公开 workflow inputs。
 
-这些命令不重置质量计数或默默替换生成输入。显式新生成版本管理和人工审阅反馈入口仍列在实施任务中；不要手改 blob、HEAD 或预算来绕过现有限制。
+- `new_generation` 需要非空 `guidance`；可选 `approved_skill_commit` 必须为已审阅的完整 Git commit，`refresh_runtime` 明确重绑实际 SDK／工具版本。原固定偏好、样例、模型及工具域名保持；新输入指纹相同则拒绝。旧版本、revision、调用费用归档，新版本重置生成修订／无进展计数，但同一正文与语义策略的分类次数保留。正式模式要求完整实际 GitHub readiness；已交付项目不得绕过远端限制。完成的 preview 可以用不同指导显式重新生成。此请求仅从受保护本机文件导入。
+- `record_feedback` 需要 `delivery_id`，可选 `feedback_reason` 为 `topic_irrelevant`、`duplicate`、`too_shallow`、`incorrect_fact`、`missing_source`、`image_or_text_quality` 或 `more_like_this`，`review_minutes` 为实际非负分钟或 null。宿主核验真实 PR 与可信操作人后，反馈和请求审计同一 checkpoint 保存；不修改偏好或重新调度已交付项目。
+
+现有 Actions Recovery 入口只接受前三种非秘密元数据动作。含正文的 `record_result`、`new_generation` 以及需 App 核验的 `record_feedback` 使用本机受保护请求文件与相应身份；不要将私有材料放入公开 workflow inputs，也不要手改 blob、HEAD 或预算。
 
 ## 图片与容量
 
@@ -82,3 +85,9 @@ enabled/suspended bucket 的旧 `null` version 必须使用显式 `versionId=nul
 新建 DeliveryRecord、UploadIntent 的 `schema_version` 固定为 1。未知或未版本化记录拒绝读取；没有隐式填版本或空初始化。只有显式迁移到新的连续 checkpoint 才能升级格式，且保留原提交与外部事实。
 
 每个远端发布动作和上传意图保存当前 PolicyCheck 引用与 Git ref/hash/时间；`legacy_unverified` 只用于无策略回执的测试适配器，不能宣称正式许可证据完整。来源材料中出现的 delivery/project 注释不成为控制输入；PR 身份只解析可信程序写出的 leading machine marker。
+
+## 显式请求新生成版本与人工反馈
+
+可信 Root 管理入口的 `new_generation` 必须先用 `checkGenerationReadiness` 核对全部历史 seals/records 和实际 GitHub 项目范围，不只看当前 generation。任何历史 PR（包括已关闭和已合并）、未决写入、未知 API 结果、额外或人工修改分支均拒绝。匹配原 expected commit 的旧枝只保留；不强推或删除。只读 readiness audit 必须与新版本请求原子记录；下一发布仍重新核验所有历史，不能把一次旧允许当永久授权。
+
+反馈管理入口使用 `prepareHumanReviewFeedback` 的原子 bundle，与请求回执同一 checkpoint 保存。它重新读取真实 PR 当前状态/HEAD，并绑定已确认的 PR ID 和可信操作人；普通评论不执行管理动作，反馈也不修改 prefs。不能先调用旧 standalone feedback helper 再另存请求成功回执，否则中断会留下无法一致重放的部分结果。

@@ -1,13 +1,18 @@
+import {MaterialBodyCache,type SnapshotBodyReader,type BodyCacheLimits} from './bodies.js';
 import {digest,EvidenceSchema,ResearchSchema,parseModel,type Evidence,type ResearchPacket} from '../stages/contracts.js';
-export type MaterialSnapshot={url:string;text:string;hash:string;retrieved_at:string;links:string[];link_locators?:{url:string;page:number|null}[];kind:'web'|'pdf'|'code';capture_method?:'http'|'browser';pages?:string[];commit?:string;file?:string;requested_url?:string;figures?:{url:string;caption:string}[];canonical_url?:string|null;title?:string};
+export type SnapshotBodyReference={schema_version:1;path:string;sha256:string;bytes:number};
+export type MaterialSnapshot={url:string;text:string;body_reference?:SnapshotBodyReference;body_metadata?:{line_count:number;page_count:number|null};hash:string;retrieved_at:string;links:string[];link_locators?:{url:string;page:number|null}[];kind:'web'|'pdf'|'code';capture_method?:'http'|'browser';pages?:string[];commit?:string;file?:string;requested_url?:string;figures?:{url:string;caption:string}[];canonical_url?:string|null;title?:string};
 export class EvidenceRegistry {
   private snapshots=new Map<string,MaterialSnapshot[]>();
-  constructor(initial:MaterialSnapshot[]=[]) {for(const material of initial)this.register(material);}
-  register(snapshot:MaterialSnapshot):void {if(digest(snapshot.text)!==snapshot.hash)throw new Error('snapshot_hash_invalid');const prior=this.snapshots.get(snapshot.hash)??[];if(!prior.some(item=>item.url===snapshot.url&&item.retrieved_at===snapshot.retrieved_at))prior.push(snapshot);this.snapshots.set(snapshot.hash,prior);}
+  readonly bodies:MaterialBodyCache;
+  constructor(initial:MaterialSnapshot[]=[],reader?:SnapshotBodyReader,project_id?:string,limits?:Partial<BodyCacheLimits>) {this.bodies=new MaterialBodyCache(reader,project_id,limits);for(const material of initial)this.register(material);}
+  register(snapshot:MaterialSnapshot):void {if(!snapshot.body_reference&&digest(snapshot.text)!==snapshot.hash)throw new Error('snapshot_hash_invalid');const prior=this.snapshots.get(snapshot.hash)??[];if(!prior.some(item=>item.url===snapshot.url&&item.retrieved_at===snapshot.retrieved_at))prior.push(snapshot);this.snapshots.set(snapshot.hash,prior);}
   get(hash:string,source_url?:string,retrieved_at?:string):MaterialSnapshot {const matches=(this.snapshots.get(hash)??[]).filter(item=>(source_url===undefined||item.url===source_url||item.requested_url===source_url)&&(retrieved_at===undefined||item.retrieved_at===retrieved_at));if(!matches.length)throw new Error('snapshot_missing');if(matches.length>1)throw new Error('snapshot_identity_ambiguous');return matches[0]!;}
   follow(from_hash:string,url:string):void {if(!(this.snapshots.get(from_hash)??[]).some(snapshot=>snapshot.links.includes(url)))throw new Error('reference_not_in_material');}
-  validate(raw:unknown,prior:Evidence[]):Evidence {
-    const evidence=parseModel<Evidence>(EvidenceSchema,raw);const snapshot=this.get(evidence.snapshot_hash,evidence.source_url,evidence.retrieved_at);
+  withSnapshot<T>(snapshot:MaterialSnapshot,consume:(material:MaterialSnapshot)=>T|Promise<T>):Promise<T>{return this.bodies.withSnapshot(snapshot,consume);}
+  async validateAsync(raw:unknown,prior:Evidence[]):Promise<Evidence>{const evidence=parseModel<Evidence>(EvidenceSchema,raw);return this.withSnapshot(this.get(evidence.snapshot_hash,evidence.source_url,evidence.retrieved_at),snapshot=>this.validateAgainst(evidence,prior,snapshot));}
+  validate(raw:unknown,prior:Evidence[]):Evidence {const evidence=parseModel<Evidence>(EvidenceSchema,raw);const snapshot=this.get(evidence.snapshot_hash,evidence.source_url,evidence.retrieved_at);if(snapshot.body_reference&&snapshot.text==='')throw new Error('material_body_not_hydrated');return this.validateAgainst(evidence,prior,snapshot);}
+  private validateAgainst(evidence:Evidence,prior:Evidence[],snapshot:MaterialSnapshot):Evidence {
     if(snapshot.url!==evidence.source_url||snapshot.retrieved_at!==evidence.retrieved_at)throw new Error('evidence_source_mismatch');
     let text=snapshot.text;
     if(snapshot.kind==='pdf'){if(!evidence.locator.page||!snapshot.pages?.[evidence.locator.page-1])throw new Error('pdf_page_invalid');text=snapshot.pages[evidence.locator.page-1]!;}
@@ -20,6 +25,10 @@ export class EvidenceRegistry {
   validatePartialResearch(raw:unknown):ResearchPacket {
     const packet=parseModel<ResearchPacket>(ResearchSchema,raw);const validated:Evidence[]=[];
     for(const evidence of packet.evidence){if(validated.some(item=>item.evidence_id===evidence.evidence_id))throw new Error('duplicate_evidence');validated.push(this.validate(evidence,validated));}
+    return this.validatePacketReferences(packet,validated);
+  }
+  async validatePartialResearchAsync(raw:unknown):Promise<ResearchPacket>{const packet=parseModel<ResearchPacket>(ResearchSchema,raw);const validated:Evidence[]=[];for(const evidence of packet.evidence){if(validated.some(item=>item.evidence_id===evidence.evidence_id))throw new Error('duplicate_evidence');validated.push(await this.validateAsync(evidence,validated));}return this.validatePacketReferences(packet,validated);}
+  private validatePacketReferences(packet:ResearchPacket,validated:Evidence[]):ResearchPacket{
     const ids=new Set(validated.map(item=>item.evidence_id));
     if(new Set(packet.questions.map(question=>question.id)).size!==packet.questions.length)throw new Error('duplicate_question');
     for(const answer of packet.answers)if(!packet.questions.some(question=>question.id===answer.question_id)||answer.evidence_ids.some(id=>!ids.has(id)))throw new Error('answer_evidence_invalid');
@@ -29,7 +38,10 @@ export class EvidenceRegistry {
     return packet;
   }
   validateResearch(raw:unknown):ResearchPacket {
-    const packet=this.validatePartialResearch(raw);const ids=new Set(packet.evidence.map(item=>item.evidence_id));
+    return this.validateCompleteness(this.validatePartialResearch(raw));
+  }
+  async validateResearchAsync(raw:unknown):Promise<ResearchPacket>{return this.validateCompleteness(await this.validatePartialResearchAsync(raw));}
+  private validateCompleteness(packet:ResearchPacket):ResearchPacket{const ids=new Set(packet.evidence.map(item=>item.evidence_id));
     if(!packet.source_versions.some(source=>source.main&&source.status==='read'))throw new Error('main_source_unread');
     if(packet.source_versions.some(source=>source.core&&source.status!=='read')||packet.gaps.some(gap=>gap.core))throw new Error('core_material_gap');
     for(const question of packet.questions.filter(question=>question.priority==='required')) {

@@ -10,6 +10,40 @@ export interface InventoryObject extends ObjectMetadata {
 export interface InventoryProvider {
   inventory(): Promise<{ complete: boolean; objects: InventoryObject[] }>;
 }
+/** One physical object/version counts once, including OSS's legacy literal null version. */
+export function normalizeInventory(
+  entries: InventoryObject[],
+): InventoryObject[] {
+  const unique = new Map<string, InventoryObject>();
+  for (const o of entries) {
+    if (
+      !o ||
+      typeof o.bucket !== "string" ||
+      !o.bucket ||
+      typeof o.key !== "string" ||
+      !o.key ||
+      !Number.isSafeInteger(o.size) ||
+      o.size < 0 ||
+      typeof o.created_at !== "string" ||
+      !Number.isFinite(Date.parse(o.created_at)) ||
+      (o.version !== undefined &&
+        o.version !== null &&
+        (typeof o.version !== "string" || !o.version))
+    )
+      throw new AgentError("corrupt", "Inventory metadata invalid");
+    const { version, ...metadata } = o;
+    const normalized: InventoryObject =
+      version === undefined || version === null || version === "null"
+        ? metadata
+        : { ...metadata, version };
+    const key = JSON.stringify([o.bucket, o.key, normalized.version ?? null]);
+    const previous = unique.get(key);
+    if (previous && previous.size !== o.size)
+      throw new AgentError("corrupt", "Inventory object size changed");
+    unique.set(key, normalized);
+  }
+  return [...unique.values()];
+}
 export async function managedInventory(
   stores: { store: ObjectStore; prefix: string }[],
   providers: InventoryProvider[] = [],
@@ -25,15 +59,5 @@ export async function managedInventory(
       throw new AgentError("unknown", "Managed inventory incomplete");
     entries.push(...result.objects);
   }
-  const unique = new Map<string, InventoryObject>();
-  for (const o of entries) {
-    if (!Number.isSafeInteger(o.size) || o.size < 0)
-      throw new AgentError("corrupt", "Inventory size invalid");
-    const key = JSON.stringify([o.bucket, o.key, o.version ?? null]);
-    const previous = unique.get(key);
-    if (previous && previous.size !== o.size)
-      throw new AgentError("corrupt", "Inventory object size changed");
-    unique.set(key, o);
-  }
-  return [...unique.values()];
+  return normalizeInventory(entries);
 }

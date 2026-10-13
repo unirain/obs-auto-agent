@@ -21,7 +21,10 @@ type VersioningClient = OSS & {
   getBucketVersioning(bucket: string): Promise<{ versionStatus?: string }>;
 };
 export function classifyOssError(error: unknown): AgentError {
-  const e = error as { code?: string; status?: number };
+  const e = (error && typeof error === "object" ? error : {}) as {
+    code?: string;
+    status?: number;
+  };
   if (e.code === "NoSuchKey")
     return new AgentError("not_found", "OSS object absent");
   if (e.code === "FileAlreadyExists" || e.status === 409)
@@ -46,6 +49,13 @@ export class OssObjectStore implements ObjectStore {
     const url = new URL(this.endpoint);
     if (
       url.protocol !== "https:" ||
+      url.username ||
+      url.password ||
+      url.port ||
+      url.search ||
+      url.hash ||
+      url.pathname !== "/" ||
+      url.hostname !== `${options.region}.aliyuncs.com` ||
       url.hostname.includes("-internal.") ||
       !url.hostname.endsWith(".aliyuncs.com")
     )
@@ -67,6 +77,7 @@ export class OssObjectStore implements ObjectStore {
   private guard(key: string): void {
     if (
       !key ||
+      key.includes("\0") ||
       key.startsWith("/") ||
       key.includes("\\") ||
       key.split("/").some((s) => s === ".." || s === "." || s === "")

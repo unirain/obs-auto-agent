@@ -1,5 +1,6 @@
 import type { ActionsRun } from "./run-health.js";
 import type { MonitorEvent } from "./source-health.js";
+import { runtimeHours } from "../config/runtime-limits.js";
 export const RUN_REASONS = [
   "missed_schedule",
   "report_missing",
@@ -12,7 +13,9 @@ export function runIncidentEvents(
   workspace: string,
   enabledAt: string | null,
   now: Date,
+  watchdogGapHours = 36,
 ): MonitorEvent[] {
+  const gapMs = runtimeHours(watchdogGapHours, "watchdog_gap_hours") * 3_600_000;
   if (!enabledAt) return [];
   const anchor = Date.parse(enabledAt);
   if (!Number.isFinite(anchor))
@@ -64,12 +67,12 @@ export function runIncidentEvents(
     const started = Date.parse(run.started_at);
     if (!Number.isFinite(started))
       throw new Error("Invalid Actions startup time");
-    if (started - prior > 36 * 3600000) {
+    if (started - prior > gapMs) {
       emit(
         "missed_schedule",
         "occurred",
-        new Date(prior + 36 * 3600000).toISOString(),
-        `gap-${prior}`,
+        new Date(prior + gapMs).toISOString(),
+        `gap-${prior}-${gapMs}`,
       );
       missed = true;
     }
@@ -106,12 +109,12 @@ export function runIncidentEvents(
         active.delete(current);
       }
   }
-  if (now.getTime() - prior > 36 * 3600000)
+  if (now.getTime() - prior > gapMs)
     emit(
       "missed_schedule",
       "occurred",
-      new Date(prior + 36 * 3600000).toISOString(),
-      `gap-${prior}`,
+      new Date(prior + gapMs).toISOString(),
+      `gap-${prior}-${gapMs}`,
     );
   return events;
 }

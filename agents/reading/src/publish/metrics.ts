@@ -22,6 +22,14 @@ export interface HumanReviewFeedback {
   reason: (typeof FEEDBACK_REASONS)[number] | null;
   review_minutes: number | null;
   origin: "trusted_management";
+  pr_binding?: {
+    repository: string;
+    number: number;
+    url: string;
+    head_sha: string;
+    state: "open" | "merged" | "closed_unmerged";
+    checked_at: string;
+  };
 }
 export interface DeliveryMetrics {
   confirmed_prs: number;
@@ -160,7 +168,7 @@ export function deliveryMetrics(
   }
   return result;
 }
-/** Explicit human observations are recorded; they never modify preferences or source scope. */
+/** @deprecated Standalone legacy write only. Root management requests must use prepareHumanReviewFeedback and atomically commit its bundle with their request audit. */
 export async function recordHumanReviewFeedback(
   journal: OperationsJournal,
   feedback: HumanReviewFeedback,

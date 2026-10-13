@@ -141,6 +141,114 @@ export class OctokitGitHub implements GitHubPort {
       throw new Error("Incomplete Git tree");
     return { tree: result.tree as TreeEntry[], sha: data.tree.sha };
   }
+  async inspectPullRequest(number: number): Promise<PullRequestFact> {
+    if (!Number.isSafeInteger(number) || number < 1)
+      throw new Error("Invalid actual PR identity");
+    const p = (
+      await this.client.pulls.get({ ...this.args(), pull_number: number })
+    ).data;
+    if (!["open", "closed"].includes(p.state))
+      throw new Error("Unknown actual PR state");
+    return {
+      number: p.number,
+      url: p.html_url,
+      state: p.merged
+        ? "merged"
+        : p.state === "open"
+          ? "open"
+          : "closed_unmerged",
+      branch: p.head.ref,
+      head_sha: p.head.sha,
+      delivery_id: parseDeliveryMarker(p.body)?.delivery_id ?? null,
+      created_at: p.created_at,
+      closed_at: p.closed_at,
+      merged_at: p.merged_at,
+    };
+  }
+  async authority(): Promise<import("./regeneration.js").GitHubReadAuthority> {
+    const metadata = (await this.client.repos.get(this.args())).data;
+    if (
+      metadata.full_name.toLowerCase() !==
+        `${this.owner}/${this.repo}`.toLowerCase() ||
+      metadata.default_branch !== this.defaultBranch
+    )
+      throw new Error("Trusted publication repository/default branch changed");
+    const head = (
+      await this.client.git.getRef({
+        ...this.args(),
+        ref: `heads/${metadata.default_branch}`,
+      })
+    ).data.object.sha;
+    return {
+      schema_version: 1,
+      complete: true,
+      repository: metadata.full_name,
+      default_branch: metadata.default_branch,
+      default_commit_sha: head,
+      checked_at: new Date().toISOString(),
+    };
+  }
+  async projectSnapshot(
+    projectId: string,
+  ): Promise<import("./regeneration.js").ProjectRemoteSnapshot> {
+    if (!/^[A-Za-z0-9_-]+$/.test(projectId))
+      throw new Error("Invalid project identity for readonly snapshot");
+    const before = await this.authority();
+    const prefix = `notes/${projectId}/g`;
+    const refs = await this.client.git.listMatchingRefs({
+      ...this.args(),
+      ref: `heads/${prefix}`,
+    });
+    const branch_heads = refs.data
+      .filter((r) => r.ref.startsWith(`refs/heads/${prefix}`))
+      .map((r) => {
+        if (r.object.type !== "commit" || !/^[a-f0-9]{40}$/.test(r.object.sha))
+          throw new Error("Invalid project reference response");
+        return { ref: r.ref, sha: r.object.sha };
+      });
+    const all = await this.client.paginate(this.client.pulls.list, {
+      ...this.args(),
+      state: "all",
+      per_page: 100,
+    });
+    const prs: PullRequestFact[] = [];
+    for (const p of all.filter(
+      (p) =>
+        p.head.ref.startsWith(prefix) ||
+        parseDeliveryMarker(p.body)?.project_id === projectId,
+    )) {
+      const full = (
+        await this.client.pulls.get({ ...this.args(), pull_number: p.number })
+      ).data;
+      if (!["open", "closed"].includes(full.state))
+        throw new Error("Unknown PR state in readonly snapshot");
+      prs.push({
+        number: full.number,
+        url: full.html_url,
+        state: full.merged
+          ? "merged"
+          : full.state === "open"
+            ? "open"
+            : "closed_unmerged",
+        branch: full.head.ref,
+        head_sha: full.head.sha,
+        delivery_id: parseDeliveryMarker(full.body)?.delivery_id ?? null,
+        created_at: full.created_at,
+        closed_at: full.closed_at,
+        merged_at: full.merged_at,
+      });
+    }
+    const after = await this.authority();
+    return {
+      ...after,
+      complete:
+        before.default_commit_sha === after.default_commit_sha &&
+        before.default_branch === after.default_branch,
+      project_id: projectId,
+      branch_heads,
+      prs,
+    };
+  }
   async prepare(
     d: SealedDelivery,
     identity: GitIdentity,
@@ -357,6 +465,15 @@ export class OctokitGitHub implements GitHubPort {
     } else if (own)
       review_outcome = own.state === "closed_unmerged" ? "rejected" : "pending";
     return {
+      observation: {
+        schema_version: 1,
+        complete: true,
+        repository: `${this.owner}/${this.repo}`,
+        default_branch: this.defaultBranch,
+        default_commit_sha: defaultSHA,
+        project_id: d.project_id,
+        checked_at: new Date().toISOString(),
+      },
       prs,
       ...(review_outcome ? { review_outcome } : {}),
       branch_sha,

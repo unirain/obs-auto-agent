@@ -1,12 +1,7 @@
 import { createHash } from "node:crypto";
 export type ExecutionScope = "production" | "preview";
 export type JsonValue =
-  | null
-  | boolean
-  | number
-  | string
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+  null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 export type ErrorCode =
   | "not_found"
   | "conflict"
@@ -28,6 +23,15 @@ export class AgentError extends Error {
 }
 export const SCHEMA_VERSION = 1;
 export function canonicalJson(value: unknown): string {
+  return canonicalValue(value, new Set(), 0);
+}
+function canonicalValue(
+  value: unknown,
+  ancestors: Set<object>,
+  depth: number,
+): string {
+  if (depth > 100)
+    throw new AgentError("corrupt", "JSON nesting limit exceeded");
   if (value === null) return "null";
   if (typeof value === "string" || typeof value === "boolean")
     return JSON.stringify(value);
@@ -36,22 +40,45 @@ export function canonicalJson(value: unknown): string {
       throw new AgentError("corrupt", "Nonfinite JSON number");
     return JSON.stringify(value);
   }
-  if (Array.isArray(value))
-    return "[" + value.map(canonicalJson).join(",") + "]";
   if (typeof value === "object") {
-    return (
-      "{" +
-      Object.keys(value as object)
-        .sort()
-        .map(
-          (k) =>
-            JSON.stringify(k) +
-            ":" +
-            canonicalJson((value as Record<string, unknown>)[k]),
-        )
-        .join(",") +
-      "}"
-    );
+    if (ancestors.has(value))
+      throw new AgentError("corrupt", "Cyclic JSON value");
+    if (
+      !Array.isArray(value) &&
+      ![Object.prototype, null].includes(Object.getPrototypeOf(value))
+    )
+      throw new AgentError("corrupt", "Non-plain JSON object");
+    ancestors.add(value);
+    try {
+      if (Array.isArray(value)) {
+        const entries: string[] = [];
+        for (let i = 0; i < value.length; i++) {
+          if (!Object.hasOwn(value, i))
+            throw new AgentError("corrupt", "Sparse JSON array");
+          entries.push(canonicalValue(value[i], ancestors, depth + 1));
+        }
+        return "[" + entries.join(",") + "]";
+      }
+      return (
+        "{" +
+        Object.keys(value as object)
+          .sort()
+          .map(
+            (k) =>
+              JSON.stringify(k) +
+              ":" +
+              canonicalValue(
+                (value as Record<string, unknown>)[k],
+                ancestors,
+                depth + 1,
+              ),
+          )
+          .join(",") +
+        "}"
+      );
+    } finally {
+      ancestors.delete(value);
+    }
   }
   throw new AgentError("corrupt", "Not JSON");
 }
@@ -88,6 +115,8 @@ export interface ManifestFile {
   path: string;
   sha256: string;
   size: number;
+  /** Ordered physical blobs for logical files larger than the single-blob limit. */
+  chunks?: { sha256: string; size: number }[];
   role: "control" | "input" | "evidence" | "artifact" | "output" | "report";
   project_id: string | null;
 }
@@ -159,6 +188,12 @@ export interface CheckpointChange {
   files?: CheckpointFile[];
   remove_paths?: string[];
 }
+/** Host-only business validation; checkpoint receives the full proposed state plus deletion tombstones. */
+export type ScopedRecordValidator = (
+  records: Record<string, JsonValue | null>,
+  execution_scope: ExecutionScope,
+  workspace_id: string,
+) => void;
 export type CheckpointResult =
   | {
       status: "committed";

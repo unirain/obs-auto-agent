@@ -23,18 +23,18 @@ import {
 import { RunDeadline } from "../../src/runtime/deadline.js";
 import type { InvocationRecord } from "../../src/contracts/index.js";
 
-async function fixture() {
+async function fixture(scope: 'preview'|'production' = 'preview') {
   const root = await mkdtemp(join(tmpdir(), "recovery-eval-"));
   const store = new FileObjectStore(join(root, "objects"));
   const manager = new ImmutableWorkspaceManager({
     store,
-    scope: "preview",
+    scope,
     local_root: join(root, "local"),
     verify_preflight: false,
   });
   const journal = new WorkspaceJournal(
     manager,
-    await manager.restore("obs-notes-hub/reading-preview/recovery", {
+    await manager.restore(scope==='preview'?"obs-notes-hub/reading-preview/recovery":"obs-notes-hub/reading", {
       allow_initialize: true,
     }),
     "run1",
@@ -60,7 +60,7 @@ async function fixture() {
   const project: HostProject = {
     ...newRuntimeProject(candidate, {
       project_id: "p1",
-      execution_scope: "preview",
+      execution_scope: scope,
       workspace_id: journal.handle.workspace_id,
       context,
       now: new Date(),
@@ -85,7 +85,7 @@ async function fixture() {
     task: {
       project_id: "p1",
       stage: "research",
-      execution_scope: "preview",
+      execution_scope: scope,
       workspace_id: project.workspace_id,
       context_id: context.context_id,
       input_hash: "",
@@ -97,7 +97,7 @@ async function fixture() {
     subject: {
       subject_ref: "project:p1",
       project_id: "p1",
-      execution_scope: "preview",
+      execution_scope: scope,
       candidate_id: candidate.candidate_id,
       origin_source_ids: ["manual_url"],
       urls: [candidate.url],
@@ -132,7 +132,7 @@ async function fixture() {
   const original: InvocationRecord = {
     schema_version: 1,
     invocation_id: "old",
-    execution_scope: "preview",
+    execution_scope: scope,
     subject_id: "project:p1",
     capability: "research",
     input_hash: input.task.input_hash,
@@ -390,4 +390,46 @@ it("a failed recovery checkpoint cannot authorize any SDK request, and remote un
   } finally {
     await f.cleanup();
   }
+});
+
+it('explicit changed input creates one new generation, preserving prior fees and classification allowance while archiving exhausted counters',async()=>{
+ const f=await fixture();try{
+  await expect(applyRecovery(f.journal,f.request('new_generation','unsafe',{guidance:'Explain the failure mechanism more deeply'}),'operator')).rejects.toThrow('generation_invocation_unresolved');
+  await applyRecovery(f.journal,f.request('record_result','received',{invocation_id:'old',input_hash:f.input.task.input_hash,status:'succeeded',usage:{input_tokens:7,output_tokens:4,cost_status:'unknown',cost_usd:null},structured_response:{answer:'actual receipt'}}),'operator');
+  const old=(await f.journal.load<HostProject>('projects/p1'))!;old.classification={candidate_id:old.candidate.candidate_id,source_snapshot_hash:'body',semantic_policy_hash:'s1',attempts:2,format_repairs:1,pending:false,credential:null};await f.journal.commit('projects/p1',old);
+  const request=f.request('new_generation','new-input',{guidance:'Explain the failure mechanism more deeply'});expect(await applyRecovery(f.journal,request,'operator')).toMatchObject({generation_version:2});
+  const restored=new WorkspaceJournal(f.manager,await f.manager.restore(f.project.workspace_id),'run2');const next=(await restored.load<HostProject>('projects/p1'))!;
+  expect(next.generation_version).toBe(2);expect(next.counters.revisions).toBe(0);expect(next.counters.stalled_batches).toBe(0);expect(next.classification?.attempts).toBe(2);expect(next.context.example_texts).toEqual(old.context.example_texts);expect(next.context.context_id).not.toBe(old.context.context_id);
+  expect(await restored.load('generation-archives/p1/g1')).toMatchObject({project:{counters:{revisions:2,stalled_batches:2}}});expect(await restored.load('invocations/old')).toMatchObject({status:'succeeded',usage:{input_tokens:7,cost_status:'unknown'}});
+  expect(await applyRecovery(restored,request,'operator')).toMatchObject({status:'already_applied'});
+  await expect(applyRecovery(restored,{...request,recovery_id:'duplicate-input',expected_revision:restored.handle.revision},'operator')).rejects.toThrow('generation_input_unchanged');
+  next.state='preview_ready';await restored.commit('projects/p1',next);
+  await applyRecovery(restored,{...request,recovery_id:'second-guidance',guidance:'Add the observed operating limits',expected_revision:restored.handle.revision},'operator');
+  expect(await restored.load('projects/p1')).toMatchObject({generation_version:3,state:'discovered',classification:{attempts:2}});
+ }finally{await f.cleanup();}
+});
+
+it('terminal PR feedback remains a separate atomic fact and cannot regenerate the project',async()=>{
+ const f=await fixture();try{
+  await applyRecovery(f.journal,f.request('record_result','received',{invocation_id:'old',input_hash:f.input.task.input_hash,status:'succeeded',usage:{input_tokens:7,output_tokens:4,cost_status:'unknown',cost_usd:null},structured_response:{answer:'actual receipt'}}),'operator');
+  const old=(await f.journal.load<HostProject>('projects/p1'))!;old.state='pr_open';await f.journal.commit('projects/p1',old);
+  await expect(applyRecovery(f.journal,f.request('new_generation','new-input',{guidance:'More explanation'}),'operator')).rejects.toThrow('terminal_project');
+  await applyRecovery(f.journal,f.request('record_feedback','feedback',{delivery_id:'d1',feedback_reason:'too_shallow',review_minutes:9}),'operator',{prepare_feedback:async(request,actor,project)=>({'review-feedback/d1':{schema_version:1,actor,project_id:project.project_id,reason:request.feedback_reason,review_minutes:request.review_minutes,origin:'trusted_management'}})});
+  const restored=await f.manager.restore(f.project.workspace_id);expect(restored.records['review-feedback/d1']).toMatchObject({reason:'too_shallow',review_minutes:9});expect(restored.records['projects/p1']).toMatchObject({state:'pr_open',counters:{revisions:2,stalled_batches:2}});expect(restored.records['recoveries/feedback']).toBeDefined();
+ }finally{await f.cleanup();}
+});
+
+it('production regeneration requires complete remote readiness and persists its proof with the new input',async()=>{
+ const f=await fixture('production');try{
+  await applyRecovery(f.journal,f.request('record_result','received',{invocation_id:'old',input_hash:f.input.task.input_hash,status:'succeeded',usage:{input_tokens:7,output_tokens:4,cost_status:'unknown',cost_usd:null},structured_response:{answer:'actual receipt'}}),'operator');
+  const request=f.request('new_generation','new-input',{guidance:'Explain the failure mechanism'});
+  await expect(applyRecovery(f.journal,request,'operator')).rejects.toThrow('remote_readiness_unavailable');
+  await expect(applyRecovery(f.journal,request,'operator',{readiness:async()=>({complete:false,allowed:true,evidence:{}})})).rejects.toThrow('remote_readiness_denied');
+  await expect(applyRecovery(f.journal,request,'operator',{readiness:async()=>({complete:true,allowed:false,evidence:{}})})).rejects.toThrow('remote_readiness_denied');
+  expect(await f.journal.load('recoveries/new-input')).toBeUndefined();
+  const proof={kind:'readonly_remote_observations',default_head:'a'.repeat(40)};
+  await applyRecovery(f.journal,request,'operator',{readiness:async()=>({complete:true,allowed:true,evidence:proof})});
+  const restored=await f.manager.restore(f.project.workspace_id);
+  expect(restored.records['generation-archives/p1/g1']).toMatchObject({readiness:proof});expect(restored.records['projects/p1']).toMatchObject({generation_version:2,execution_scope:'production'});
+ }finally{await f.cleanup();}
 });

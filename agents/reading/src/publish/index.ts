@@ -13,3 +13,5 @@ export * from "./image-gc-oss.js";
 export * from "./image-gc-bootstrap.js";
 export * from "./metrics.js";
 export * from './primary-source.js';
+export * from './regeneration.js';
+export * from './feedback.js';

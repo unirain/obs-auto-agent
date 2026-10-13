@@ -3,6 +3,7 @@ import { canonicalJson, type InvocationRecord } from "../contracts/index.js";
 import { parseModel } from "../stages/contracts.js";
 import type { HostProject } from "./controller.js";
 import type { WorkspaceJournal } from "./journal.js";
+import {prepareNewGeneration,type NewGenerationPorts} from './generation.js';
 
 const identity = Type.String({
   pattern: "^[A-Za-z0-9_-]+$",
@@ -27,6 +28,8 @@ const common = {
   evidence_reference: Type.String({ minLength: 1, maxLength: 2000 }),
 };
 export const RecoveryRequestSchema = Type.Union([
+  Type.Object({...common,action:Type.Literal('new_generation'),guidance:Type.String({minLength:1,maxLength:8000}),approved_skill_commit:Type.Optional(Type.String({pattern:'^[a-f0-9]{40}$'})),refresh_runtime:Type.Optional(Type.Boolean())},{additionalProperties:false}),
+  Type.Object({...common,action:Type.Literal('record_feedback'),delivery_id:identity,feedback_reason:Type.Optional(Type.Union((['topic_irrelevant','duplicate','too_shallow','incorrect_fact','missing_source','image_or_text_quality','more_like_this'] as const).map(value=>Type.Literal(value)))),review_minutes:Type.Optional(Type.Union([Type.Number({minimum:0}),Type.Null()]))},{additionalProperties:false}),
   Type.Object(
     { ...common, action: Type.Literal("unblock") },
     { additionalProperties: false },
@@ -82,6 +85,7 @@ export async function applyRecovery(
   journal: WorkspaceJournal,
   value: unknown,
   actor: string,
+  ports:NewGenerationPorts&{prepare_feedback?:(request:Extract<RecoveryRequest,{action:'record_feedback'}>,actor:string,project:HostProject)=>Promise<Record<string,unknown>>}={},
 ) {
   const request = parseModel<RecoveryRequest>(RecoveryRequestSchema, value);
   if (
@@ -117,7 +121,8 @@ export async function applyRecovery(
     project.execution_scope !== journal.handle.execution_scope
   )
     throw new Error("recovery_project_scope_mismatch");
-  if (
+  if (request.action!=='record_feedback'&&request.action!=='record_result'&&
+    !(request.action==='new_generation'&&project.execution_scope==='preview'&&['preview_ready','skipped'].includes(project.state))&&
     [
       "publishing",
       "pr_open",
@@ -128,7 +133,7 @@ export async function applyRecovery(
     ].includes(project.state)
   )
     throw new Error("recovery_remote_or_terminal_project");
-  for (const key of journal.keys("delivery-")) {
+  for (const key of request.action==='record_feedback'||request.action==='record_result'||request.action==='new_generation'?[]:journal.keys("delivery-")) {
     const delivery = await journal.load<{
       project_id?: string;
       uncertain_action?: string | null;
@@ -153,7 +158,14 @@ export async function applyRecovery(
       recorded_at: new Date().toISOString(),
     },
   };
-  if (request.action === "unblock") {
+  if(request.action==='new_generation'){
+    const prepared=await prepareNewGeneration(journal,project,request,actor,request.recovery_id,request.evidence_reference,ports);
+    await journal.commitMany({...records,...prepared.updates},'operator_changed_input',[prepared.context_file],prepared.remove_paths);
+    return {recovery_id:request.recovery_id,status:'applied',revision:journal.handle.revision,generation_version:prepared.next.generation_version};
+  }else if(request.action==='record_feedback'){
+    if(!ports.prepare_feedback)throw new Error('recovery_feedback_port_unavailable');
+    Object.assign(records,await ports.prepare_feedback(request,actor,project));
+  }else if (request.action === "unblock") {
     if (project.state !== "deferred" || project.resume_policy !== "manual")
       throw new Error("recovery_not_manual_project");
     for (const key of journal.keys("invocations/")) {
@@ -207,11 +219,7 @@ export async function applyRecovery(
       "invocation-resolutions/" + call.invocation_id,
     );
     if (oldResolution) {
-      if (
-        oldResolution.action !== "record_result" ||
-        request.action !== "authorize_retry" ||
-        call.status !== "failed"
-      )
+      if (!((oldResolution.action==='record_result'&&request.action==='authorize_retry'&&call.status==='failed')||(oldResolution.action==='authorize_retry'&&request.action==='record_result')))
         throw new Error("recovery_invocation_already_resolved");
       records[
         "resolution-history/" +
@@ -228,7 +236,7 @@ export async function applyRecovery(
       )
         throw new Error("recovery_retry_requires_fixed_pending_input");
       if (call.capability === "classify_only") {
-        if (!project.classification || project.classification.attempts >= 2)
+        if (!project.classification || project.classification.attempts >= (project.context.runtime_limits?.classification_queries??2))
           throw new Error("recovery_classification_limit");
         records["projects/" + project.project_id] = {
           ...project,
@@ -283,6 +291,7 @@ export async function applyRecovery(
       if (request.status === "succeeded")
         records["responses/" + call.invocation_id] =
           request.structured_response;
+      if(call.context_hash!==project.context.context_id)records['binding-superseded/'+call.invocation_id]={subject_id:call.subject_id,input_hash:call.input_hash,reason:'late_receipt_previous_generation'};
     }
     records["invocation-resolutions/" + call.invocation_id] = resolution;
   }
@@ -314,13 +323,11 @@ export async function retryAuthorized(
   const project = await journal.load<HostProject>(
     "projects/" + call.subject_id.replace(/^project:/, ""),
   );
-  if (project?.generation_version !== resolution.generation_version)
-    return false;
   if (
     resolution.input_hash === input_hash &&
     resolution.capability === capability
   )
-    return true;
+    return project?.generation_version === resolution.generation_version;
   const replacement = resolution.replacement_invocation_id
     ? await journal.load<InvocationRecord>(
         "invocations/" + resolution.replacement_invocation_id,

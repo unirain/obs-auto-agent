@@ -158,3 +158,42 @@ it("only the trusted leading machine marker defines delivery identity; source qu
     ),
   ).toBe(null);
 });
+
+it("native readonly authority/project snapshot queries actual repo/default ref, all project branches and every PR state", async () => {
+  const fixture = clientFixture();
+  const calls: string[] = [];
+  const client = fixture.client as unknown as {
+    repos: { get: () => Promise<unknown> };
+    git: { listMatchingRefs: () => Promise<unknown> };
+  };
+  client.repos = {
+    get: async () => {
+      calls.push("repo");
+      return { data: { full_name: "test/repo", default_branch: "main" } };
+    },
+  };
+  client.git.listMatchingRefs = async () => {
+    calls.push("matching_refs");
+    return {
+      data: [
+        {
+          ref: "refs/heads/notes/p1/g1",
+          object: { type: "commit", sha: "b".repeat(40) },
+        },
+      ],
+    };
+  };
+  const github = new OctokitGitHub(fixture.client, "test/repo", "main");
+  const snapshot = await github.projectSnapshot("p1");
+  expect(snapshot.complete).toBe(true);
+  expect(snapshot.default_commit_sha).toBe("a".repeat(40));
+  expect(snapshot.branch_heads).toEqual([
+    { ref: "refs/heads/notes/p1/g1", sha: "b".repeat(40) },
+  ]);
+  expect(snapshot.prs[0]?.state).toBe("merged");
+  expect(calls).toEqual(["repo", "matching_refs", "repo"]);
+  client.repos.get = async () => ({
+    data: { full_name: "test/repo", default_branch: "changed" },
+  });
+  await expect(github.authority()).rejects.toThrow("default branch changed");
+});

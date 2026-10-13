@@ -21,6 +21,7 @@ import {
   type CheckpointResult,
   type JsonValue,
   type WorkspaceManager,
+  type ScopedRecordValidator,
 } from "../contracts/index.js";
 import {
   validateRecords,
@@ -35,6 +36,8 @@ import {
   assertBytes,
   validateCommit,
   validateManifest,
+  manifestBlobs,
+  readManifestFile,
 } from "./manifest.js";
 import {
   validateWorkspaceIdentity,
@@ -50,6 +53,8 @@ export interface ManagerOptions {
   trusted_workspace_id?: string;
   verify_preflight?: boolean;
   lazy_restore?: boolean;
+  /** Instance-specific schema policy. Checkpoint supplies merged records and null tombstones; restore supplies all existing records. */
+  record_validator?: ScopedRecordValidator;
   capacity_check?: (
     bytes: number,
     kind: "control" | "generation",
@@ -108,6 +113,11 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
         created_at: new Date().toISOString(),
         files: [],
       };
+      this.options.record_validator?.(
+        Object.create(null) as Record<string, JsonValue | null>,
+        this.options.scope,
+        workspaceId,
+      );
       const result = await this.publish(manifest, null, []);
       if (result.status === "unknown")
         throw new AgentError("unknown", result.reason);
@@ -244,12 +254,14 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
       : null;
     for (const file of snapshot.manifest.files) {
       if (inventory) {
-        const object = inventory.get(prefix + "blobs/" + file.sha256);
-        if (!object || object.size !== file.size)
-          throw new AgentError(
-            "corrupt",
-            "HEAD references missing or wrong-sized blob",
-          );
+        for (const chunk of manifestBlobs(file)) {
+          const object = inventory.get(prefix + "blobs/" + chunk.sha256);
+          if (!object || object.size !== chunk.size)
+            throw new AgentError(
+              "corrupt",
+              "HEAD references missing or wrong-sized blob",
+            );
+        }
       }
       if (file.role !== "control" && this.options.lazy_restore) continue;
       const bytes = await this.materializeFile(
@@ -272,6 +284,12 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
         }
       }
     }
+    validateRestoredRecords(records, snapshot.execution_scope);
+    this.options.record_validator?.(
+      records,
+      snapshot.execution_scope,
+      snapshot.workspace_id,
+    );
     if (this.options.lazy_restore) {
       const inactive = new Set<string>();
       for (const [key, value] of Object.entries(records))
@@ -305,7 +323,6 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
             refresh_cache,
           );
     }
-    validateRestoredRecords(records, snapshot.execution_scope);
     const handle = freeze({
       workspace_id: snapshot.workspace_id,
       execution_scope: snapshot.execution_scope,
@@ -333,10 +350,11 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
     const cache = join(cacheRoot, file.sha256);
     let bytes: Uint8Array | undefined;
     if (refresh_cache) {
-      bytes = await this.options.store.read(
-        this.prefix(workspaceId) + "blobs/" + file.sha256,
+      bytes = await readManifestFile(
+        this.options.store,
+        this.prefix(workspaceId),
+        file,
       );
-      assertBytes(bytes, file.sha256, file.size);
     }
     try {
       const cached = await readFile(cache);
@@ -348,10 +366,11 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
         (error as NodeJS.ErrnoException).code !== "ENOENT"
       )
         throw error;
-      bytes ??= await this.options.store.read(
-        this.prefix(workspaceId) + "blobs/" + file.sha256,
+      bytes ??= await readManifestFile(
+        this.options.store,
+        this.prefix(workspaceId),
+        file,
       );
-      assertBytes(bytes, file.sha256, file.size);
       await unlink(cache).catch((error) => {
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
       });
@@ -406,34 +425,50 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
       return { status: "conflict", reason: "Concurrent local checkpoint" };
     validateChange(handle, change);
     validateRecords(handle, change);
-    // Raw control files must obey the same reservation contract as record updates.
+    const proposed: Record<string, JsonValue | null> = Object.assign(
+      Object.create(null),
+      handle.records,
+    );
+    // Raw control files obey the same validators as record updates.
     for (const path of change.remove_paths ?? [])
-      if (path.startsWith("state/storage/reservations/"))
-        throw new AgentError(
-          "corrupt",
-          "Reservation audit record cannot be deleted",
-        );
+      if (path.startsWith("state/") && path.endsWith(".json")) {
+        proposed[path.slice(6, -5)] = null;
+        validateRecords(handle, {
+          ...change,
+          records: { [path.slice(6, -5)]: null },
+        });
+      }
     for (const file of change.files ?? []) {
-      if (
-        !file.path.startsWith("state/storage/reservations/") ||
-        !file.path.endsWith(".json")
-      )
+      if (!file.path.startsWith("state/") || !file.path.endsWith(".json"))
         continue;
       if (file.role !== "control")
-        throw new AgentError("corrupt", "Reservation must be a control record");
+        throw new AgentError("corrupt", "State file must be a control record");
+      const key = file.path.slice(6, -5);
+      if (Object.hasOwn(change.records ?? {}, key))
+        throw new AgentError(
+          "corrupt",
+          "Control record updated by both files and records",
+        );
       let value: JsonValue;
       try {
         value = JSON.parse(
           Buffer.from(file.bytes).toString("utf8"),
         ) as JsonValue;
       } catch {
-        throw new AgentError("corrupt", "Reservation control is not JSON");
+        throw new AgentError("corrupt", "Control file is not JSON");
       }
       validateRecords(handle, {
         ...change,
         records: { [file.path.slice(6, -5)]: value },
       });
+      proposed[key] = value;
     }
+    Object.assign(proposed, change.records ?? {});
+    this.options.record_validator?.(
+      proposed,
+      handle.execution_scope,
+      handle.workspace_id,
+    );
     this.writing.add(handle.workspace_id);
     try {
       if (this.options.verify_preflight !== false)
@@ -463,17 +498,30 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
         if (seen.has(f.path))
           throw new AgentError("corrupt", "Repeated checkpoint path");
         seen.add(f.path);
-        if (f.bytes.length > MAX_FILE_BYTES)
-          throw new AgentError("capacity", "File exceeds maximum");
         const hash = sha256(f.bytes);
+        const chunks: { sha256: string; size: number }[] = [];
+        if (f.bytes.length > MAX_FILE_BYTES) {
+          for (
+            let offset = 0;
+            offset < f.bytes.length;
+            offset += MAX_FILE_BYTES
+          ) {
+            const bytes = Uint8Array.from(
+              f.bytes.subarray(offset, offset + MAX_FILE_BYTES),
+            );
+            const sha = sha256(bytes);
+            chunks.push({ sha256: sha, size: bytes.length });
+            upload.push({ hash: sha, bytes });
+          }
+        } else upload.push({ hash, bytes: Uint8Array.from(f.bytes) });
         files.set(f.path, {
           path: f.path,
           sha256: hash,
           size: f.bytes.length,
+          ...(chunks.length ? { chunks } : {}),
           role: f.role,
           project_id: f.project_id ?? null,
         });
-        upload.push({ hash, bytes: Uint8Array.from(f.bytes) });
       }
       const manifest: WorkspaceManifest = {
         schema_version: 1,
@@ -559,7 +607,7 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
       newBytes + manifestBytes.length + commitBytes.length,
       checkpointWriteKind(manifest, newHashes, explicit_kind),
     );
-    for (const b of blobs)
+    for (const b of uniqueBlobs)
       await this.createOrVerify(prefix + "blobs/" + b.hash, b.bytes);
     await this.createOrVerify(manifestKey, manifestBytes);
     try {

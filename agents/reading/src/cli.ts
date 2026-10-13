@@ -72,14 +72,15 @@ async function main(): Promise<void> {
     const text = await readFile(resolve(options.request_file!), "utf8");
     if (Buffer.byteLength(text) > 4_000_000)
       throw new Error("recovery_request_too_large");
-    const { buildMaintenanceApplication } = await import("./app/bootstrap.js");
+    const { buildRecoveryApplication } = await import("./app/recovery-bootstrap.js");
     const { applyRecovery } = await import("./app/recovery.js");
-    const app = await buildMaintenanceApplication({
+    const app = await buildRecoveryApplication({
       deployment,
       dispatch: options.dispatch!,
       local: options.local,
       local_root: resolve(options.local_root),
       run_id: "recovery-" + randomUUID(),
+      ...(options.notes_repository?{notes_repository:resolve(options.notes_repository)}:{}),
     });
     console.log(
       JSON.stringify(
@@ -87,6 +88,7 @@ async function main(): Promise<void> {
           app.journal,
           JSON.parse(text),
           process.env.GITHUB_ACTOR ?? userInfo().username,
+          app.ports,
         ),
       ),
     );

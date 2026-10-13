@@ -225,6 +225,20 @@ describe("host lifecycle and durable mode boundaries", () => {
       await f.cleanup();
     }
   });
+  it('unavailable fixed runtime stops only its project and cold restart preserves the manual barrier',async()=>{
+    const f=await fixture('preview');try{
+      const environment=f.ports.environment;f.ports.environment=async(project,commit)=>{
+        if(project.candidate.url.endsWith('/blocked'))throw new Error('fixed_runtime_version_unavailable:sdk_hash');
+        return environment(project,commit);
+      };
+      const report=await new ReadingController(f.ports).run(parseDispatch({input_urls:['https://example.org/blocked','https://example.org/allowed']}),'user');
+      expect(report.outcome).toBe('partial');expect(report.blocked_projects).toMatchObject([{reason:'fixed_runtime_version_unavailable'}]);
+      const restored=await f.manager.restore(f.journal.handle.workspace_id);
+      const projects=Object.entries(restored.records).filter(([key])=>key.startsWith('projects/')).map(([,value])=>value as unknown as HostProject);
+      expect(projects.find(p=>p.candidate.url.endsWith('/blocked'))).toMatchObject({state:'deferred',resume_policy:'manual',reason:'fixed_runtime_version_unavailable',counters:{revisions:0}});
+      expect(projects.find(p=>p.candidate.url.endsWith('/allowed'))?.state).toBe('preview_ready');
+    }finally{await f.cleanup();}
+  });
   it("runs preview stages, seals private output and never calls Publisher", async () => {
     const f = await fixture("preview");
     try {

@@ -167,3 +167,11 @@
 图片保护读取前拒绝未版本化、未知 schema 及 schema 1 中未知未来 state 的 project/invocation/reservation/upload/delivery/GC 控制行；不把它们当已结束或无引用。12 个故障场景证明在 inventory/delete 前停止。共享 StorageReservation 已由 S 加 schema_version:1，Root 正式 producer 同步；不隐式填旧版本。
 
 本轮最终命令：2026-10-13 20:44 Asia/Shanghai，`npm test -- agents/reading/evals/delivery agents/reading/evals/operations` 19 文件 / 131 例通过，`npm run typecheck`、`npm run build` 通过。尚未执行本轮任何 live API/资源删除；这些仍是本地程序证据。
+
+## 21:18 显式新版本与人工反馈准备接口
+
+`publish/regeneration.ts` 的 `checkGenerationReadiness` 是纯只读准备：调用真实 adapter 的 repository/default authority、完整 project ref/PR snapshot，并逐条 inspect 所有可信历史 seals/records。未包含全部历史集合、缺 actual complete observation、任何 open/closed/merged PR、未决外部写入、差异冲突、未登记旧枝或检查前后引用变化均拒绝；错误不能成为“没有 PR”。证据含仓库/default/refheads/UTC 时间和 canonical audit hash，只保留笔记内容 hash，不把完整私有笔记塞进管理回执。匹配原 expected commit 且无 PR 的旧分支可以保留；未来 Publisher 仍必须检查历史。
+
+`publish/feedback.ts` 的 `prepareHumanReviewFeedback` 校验可信 actor、一致 workspace/project/delivery、真实 PR ID/仓库/URL/当前 HEAD 和状态，再返回 feedback、更新 delivery 及 feedback audit 的原子 records bundle。准备过程不提交 checkpoint；Root 将它与 management request receipt 一次提交。旧 standalone `recordHumanReviewFeedback` 已标记 deprecated，不能用于分两次写入的 Root 管理请求。人工分钟/原因只记录用户显式提供的信息，不改偏好。
+
+本轮 12 个换版本检查、11 个反馈准备和 native readonly snapshot 替身回归通过，覆盖多历史、读取响应丢失、旧 PR 后建再检、unknown/state、atomic bundle 失败无部分反馈、human HEAD 变化；不是 live App 权限验证。21:18 本地 O 目录 21 文件 / 155 测试、typecheck/build 通过；87 场景仍须各层实际证据。

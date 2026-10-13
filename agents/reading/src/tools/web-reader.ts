@@ -1,3 +1,4 @@
+import {parsePublicFeed,feedMaterial,requirePublicText} from './feed.js';
 import * as cheerio from 'cheerio';
 import {extractWebSnapshot,type WebSnapshot} from './fetch.js';
 
@@ -8,6 +9,7 @@ export function requiresJavascript(html:string):boolean {
   return scripts>0&&(text.length===0||(text.length<200&&marker));
 }
 export async function readWebMaterial(url:string,html:string,retrieved_at:string,browser:()=>Promise<WebSnapshot>):Promise<{snapshot:WebSnapshot;method:'http'|'browser'}>{
+  const feed=parsePublicFeed(html,url);if(feed)return {snapshot:feedMaterial(feed,url,retrieved_at),method:'http'};
   if(requiresJavascript(html)){const snapshot=await browser();if(snapshot.text.trim().length<20||/^(loading(?:\.{3}|…)?|please enable javascript)$/i.test(snapshot.text.trim()))throw new Error('browser_article_unavailable');if(snapshot.url!==url)throw new Error('browser_navigation_changed_requires_refetch');return {snapshot,method:'browser'};}
-  return {snapshot:extractWebSnapshot(url,html,retrieved_at),method:'http'};
+  requirePublicText(url,html);return {snapshot:extractWebSnapshot(url,html,retrieved_at),method:'http'};
 }

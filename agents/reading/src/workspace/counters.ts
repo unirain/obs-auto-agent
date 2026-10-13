@@ -19,10 +19,11 @@ export function advanceCounters(
     >
   >,
 ): ProjectCounters {
+  validateCounters(previous);
   for (const v of Object.values(delta))
     if (!Number.isSafeInteger(v) || v < 0)
       throw new AgentError("corrupt", "Counters cannot decrease");
-  return {
+  const next = {
     ...previous,
     tools: previous.tools + (delta.tools ?? 0),
     materials: previous.materials + (delta.materials ?? 0),
@@ -32,13 +33,28 @@ export function advanceCounters(
     total_tools: previous.total_tools + (delta.tools ?? 0),
     total_materials: previous.total_materials + (delta.materials ?? 0),
   };
+  validateCounters(next);
+  return next;
+}
+function validateCounters(value: ProjectCounters): void {
+  if (
+    !value.batch_id ||
+    Object.entries(value).some(
+      ([key, n]) =>
+        !["batch_id", "yield_revision"].includes(key) &&
+        (!Number.isSafeInteger(n) || Number(n) < 0),
+    )
+  )
+    throw new AgentError("corrupt", "Counters invalid or overflowed");
 }
 export function nextBatch(
   previous: ProjectCounters,
   batchId: string,
   committedYieldRevision: string,
 ): ProjectCounters {
+  validateCounters(previous);
   if (
+    !batchId ||
     !committedYieldRevision ||
     previous.yield_revision !== committedYieldRevision ||
     batchId === previous.batch_id

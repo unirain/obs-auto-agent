@@ -74,3 +74,22 @@ it("refresh cannot proceed with existing PR, unknown remote write, or non-atomic
     recoveryRoute(sealed(), [], false, new Date("2026-10-13"), "publish-only"),
   ).toMatchObject({ route: "resume_classification", model_allowed: false });
 });
+it("trusted source freshness duration persists resume routing and the next run reuses that duration", async () => {
+  const git = new FakeGitHub(), journal = new MemoryJournal();
+  const create = (freshness: number) => new Publisher(git, journal, async () => {}, {
+    workspace_id: sealed().workspace_id,
+    committedRevision: async () => sealed().workspace_revision,
+    verifyCommittedDelivery: async () => {},
+    classificationCurrent: async () => true,
+    identity: { name: "Bot", email: "bot@example.com" },
+    now: () => new Date("2026-10-13T01:00:00Z"),
+    sources_freshness_hours: freshness,
+  });
+  expect((await create(0.5).publish(sealed(), "publish-only")).status).toBe("needs_resume");
+  expect(await journal.load("delivery-d1")).toMatchObject({ status: "needs_resume", reason: "sources_expired" });
+  expect((await create(0.5).publish(sealed(), "publish-only")).status).toBe("needs_resume");
+  expect(git.calls).toEqual([]);
+  expect((await create(2).publish(sealed(), "publish-only")).status).toBe("awaiting_review");
+  expect(git.calls).toEqual(["objects", "branch", "pr"]);
+  expect(() => create(NaN)).toThrow("sources_freshness_hours");
+});

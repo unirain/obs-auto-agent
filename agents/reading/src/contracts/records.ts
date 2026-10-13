@@ -71,17 +71,27 @@ export type RecordValidator = (
   handle: WorkspaceHandle,
   change: CheckpointChange,
 ) => void;
-const validators: { prefix: string; validate: RecordValidator }[] = [];
+export type RestoredRecordValidator = (
+  value: JsonValue,
+  scope: WorkspaceHandle["execution_scope"],
+  key: string,
+) => void;
+const validators: {
+  prefix: string;
+  validate: RecordValidator;
+  restore?: RestoredRecordValidator;
+}[] = [];
 export function registerRecordValidator(
   prefix: string,
   validate: RecordValidator,
+  restore?: RestoredRecordValidator,
 ): void {
   if (validators.some((v) => v.prefix === prefix))
     throw new AgentError(
       "configuration",
       "Record validator already registered",
     );
-  validators.push({ prefix, validate });
+  validators.push({ prefix, validate, ...(restore ? { restore } : {}) });
 }
 const invocation: RecordValidator = (value, old, handle, change) => {
   if (value === null)
@@ -104,6 +114,14 @@ const invocation: RecordValidator = (value, old, handle, change) => {
     return;
   }
   const previous = validateSchema<InvocationRecord>("invocation", old);
+  if (
+    previous.request_started !== undefined &&
+    previous.request_started !== next.request_started
+  )
+    throw new AgentError(
+      "corrupt",
+      "Invocation request-started evidence changed",
+    );
   for (const field of [
     "schema_version",
     "invocation_id",
@@ -155,6 +173,14 @@ export function validateRecords(
   change: CheckpointChange,
 ): void {
   for (const [key, value] of Object.entries(change.records ?? {})) {
+    if (
+      (key.startsWith("invocations/") || key.startsWith("receipts/")) &&
+      value !== null
+    ) {
+      const record = validateSchema<InvocationRecord>("invocation", value);
+      if (key.slice(key.indexOf("/") + 1) !== record.invocation_id)
+        throw new AgentError("corrupt", "Invocation record identity mismatch");
+    }
     if (key.startsWith("storage/reservations/"))
       validateReservationChange(
         key,
@@ -172,6 +198,9 @@ export function validateRestoredRecords(
   scope: WorkspaceHandle["execution_scope"],
 ): void {
   for (const [key, value] of Object.entries(records)) {
+    for (const validator of validators)
+      if (key.startsWith(validator.prefix))
+        validator.restore?.(value, scope, key);
     if (key.startsWith("storage/reservations/")) {
       validatedReservation(key, value, scope);
       continue;
@@ -179,6 +208,8 @@ export function validateRestoredRecords(
     if (!key.startsWith("invocations/") && !key.startsWith("receipts/"))
       continue;
     const record = validateSchema<InvocationRecord>("invocation", value);
+    if (key.slice(key.indexOf("/") + 1) !== record.invocation_id)
+      throw new AgentError("corrupt", "Restored invocation identity mismatch");
     if (record.execution_scope !== scope)
       throw new AgentError("scope", "Restored invocation scope mismatch");
     const ids = new Set<string>();

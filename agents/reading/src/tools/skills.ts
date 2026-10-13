@@ -5,7 +5,7 @@ import path from 'node:path';
 import {digest} from '../stages/contracts.js';
 import {canonicalJson} from '../contracts/index.js';
 import {safeRelative,toolEnvironment} from './files.js';
-import {SandboxRunner,type SandboxMount} from './sandbox.js';
+import {SandboxRunner,type SandboxMount,type ToolRuntimeBinding} from './sandbox.js';
 const exec=promisify(execFile);
 const skills=['obsidian-note','fireworks-tech-graph'] as const;
 export type SkillBundle={commit:string;hash:string;files:Record<string,string>;root:string;adapted:boolean};
@@ -28,7 +28,7 @@ export async function readSkill(bundle:SkillBundle,skill:string,resource='SKILL.
   if(!skills.includes(skill as typeof skills[number]))throw new Error('skill_not_allowed');const relative=safeRelative(`.agents/skills/${skill}/${resource}`);const expected=bundle.files[relative];if(!expected)throw new Error('skill_resource_not_trusted');
   const bytes=await readFile(path.join(bundle.root,relative));if(digest(bytes)!==expected)throw new Error('skill_changed');return bytes.toString();
 }
-export async function runFireworks(bundle:SkillBundle,args:string[],deadline:number):Promise<string>{
+export async function runFireworks(bundle:SkillBundle,args:string[],deadline:number,binding?:ToolRuntimeBinding):Promise<string>{
   const allowed=new Set(['doctor','version','validate','render','check','export-png']);if(!args[0]||!allowed.has(args[0]))throw new Error('skill_command_denied');
   const script='.agents/skills/fireworks-tech-graph/scripts/fireworks.py';const bytes=await readFile(path.join(bundle.root,script));if(digest(bytes)!==bundle.files[script])throw new Error('skill_script_untrusted');
   const remaining=deadline-Date.now();if(remaining<=0)throw new Error('run_deadline');
@@ -36,6 +36,6 @@ export async function runFireworks(bundle:SkillBundle,args:string[],deadline:num
   const projects=new Set(args.flatMap(arg=>{const match=/^projects\/([a-zA-Z0-9_-]+)\//.exec(arg);return match?[match[1]!]:[];}));
   if(projects.size>1)throw new Error('tool_cross_project_mount');for(const project of projects)mounts.push({source:path.join(bundle.root,'projects',project),target:`/workspace/projects/${project}`,readonly:false});
   for(const arg of args)if(arg.includes('..')||arg.startsWith('/')||arg.includes('\\'))throw new Error('tool_argument_path_denied');
-  return new SandboxRunner().run('python3',['-S',`/workspace/${script}`,...args],mounts,deadline);
+  return new SandboxRunner(binding?.image_id,binding).run('python3',['-S',`/workspace/${script}`,...args],mounts,deadline);
 }
 export const cloudSkillMapping={vault:'VAULT_ROOT',browser:'mcp__reading__read_main / mcp__reading__follow_reference',image:'mcp__reading__read_image',render:'mcp__reading__render_diagram',upload:'controller ResourceManifest; preview relative paths',install:'build-time only'} as const;

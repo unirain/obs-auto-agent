@@ -41,7 +41,7 @@ export class UrlGateway {
         const location=response.headers.location;if(!location)throw new Error('redirect_without_location');redirects.push(url.href);url=new URL(location,url);continue;
       }
       if(response.status!==200)throw new Error(`source_http_${response.status}`);const mime=(response.headers['content-type']??'').split(';')[0]!.trim().toLowerCase();
-      const allowed=options.mime??['text/html','application/pdf','text/plain','application/json'];if(!allowed.includes(mime))throw new Error(`source_mime_denied:${mime}`);
+      const allowed=options.mime??['text/html','application/pdf','text/plain','application/json','application/rss+xml','application/atom+xml','application/xml','text/xml'];if(!allowed.includes(mime))throw new Error(`source_mime_denied:${mime}`);
       if(response.headers['content-encoding']&&response.headers['content-encoding']!=='identity')throw new Error('unsupported_content_encoding');
       const expected=Number(response.headers['content-length']);if(response.headers['content-length']&&(!Number.isFinite(expected)||expected!==response.body.length))throw new Error('truncated_download');
       return {url:url.href,mime,content_type:response.headers['content-type']??mime,bytes:response.body,hash:digest(response.body),redirects};

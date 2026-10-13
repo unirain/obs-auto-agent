@@ -98,6 +98,15 @@ export interface PullRequestFact {
   merged_at?: string | null;
 }
 export interface GitHubFact {
+  observation?: {
+    schema_version: 1;
+    complete: boolean;
+    repository: string;
+    default_branch: string;
+    default_commit_sha: string;
+    project_id: string;
+    checked_at: string;
+  };
   prs: PullRequestFact[];
   branch_sha: string | null;
   expected_commit_exists: boolean;

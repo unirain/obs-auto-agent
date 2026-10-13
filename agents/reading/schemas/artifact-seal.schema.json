@@ -1,0 +1,157 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "execution_scope",
+    "workspace_id",
+    "project_id",
+    "workspace_revision",
+    "files",
+    "validated_hash",
+    "publish_checks",
+    "resources"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "number"
+    },
+    "execution_scope": {
+      "anyOf": [
+        {
+          "const": "production",
+          "type": "string"
+        },
+        {
+          "const": "preview",
+          "type": "string"
+        }
+      ]
+    },
+    "workspace_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "project_id": {
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "type": "string"
+    },
+    "workspace_revision": {
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "type": "string"
+    },
+    "files": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "path",
+          "sha256",
+          "size",
+          "role",
+          "project_id"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "size": {
+            "minimum": 0,
+            "maximum": 50000000000,
+            "type": "integer"
+          },
+          "chunks": {
+            "minItems": 2,
+            "maxItems": 4096,
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "sha256",
+                "size"
+              ],
+              "properties": {
+                "sha256": {
+                  "pattern": "^[a-f0-9]{64}$",
+                  "type": "string"
+                },
+                "size": {
+                  "minimum": 1,
+                  "maximum": 33554432,
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "role": {
+            "anyOf": [
+              {
+                "const": "control",
+                "type": "string"
+              },
+              {
+                "const": "input",
+                "type": "string"
+              },
+              {
+                "const": "evidence",
+                "type": "string"
+              },
+              {
+                "const": "artifact",
+                "type": "string"
+              },
+              {
+                "const": "output",
+                "type": "string"
+              },
+              {
+                "const": "report",
+                "type": "string"
+              }
+            ]
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "validated_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "publish_checks": {
+      "anyOf": [
+        {
+          "const": "passed",
+          "type": "string"
+        },
+        {
+          "const": "not_exercised",
+          "type": "string"
+        }
+      ]
+    },
+    "resources": {}
+  }
+}

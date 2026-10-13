@@ -1,6 +1,6 @@
 import { Type, type Static, type TSchema } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { AgentError } from "./index.js";
+import { AgentError, canonicalJson, type InvocationRecord } from "./index.js";
 const identity = Type.String({
   minLength: 1,
   maxLength: 100,
@@ -14,7 +14,19 @@ export const ManifestFileSchema = Type.Object(
   {
     path: Type.String(),
     sha256: hash,
-    size: Type.Integer({ minimum: 0, maximum: 33554432 }),
+    size: Type.Integer({ minimum: 0, maximum: 50_000_000_000 }),
+    chunks: Type.Optional(
+      Type.Array(
+        Type.Object(
+          {
+            sha256: hash,
+            size: Type.Integer({ minimum: 1, maximum: 33554432 }),
+          },
+          exact,
+        ),
+        { minItems: 2, maxItems: 4096 },
+      ),
+    ),
     role: Type.Union(
       ["control", "input", "evidence", "artifact", "output", "report"].map(
         (v) => Type.Literal(v),
@@ -52,20 +64,32 @@ export const CheckpointSchema = Type.Object(
   },
   exact,
 );
-const usage = Type.Object(
-  {
-    input_tokens: Type.Integer({ minimum: 0 }),
-    output_tokens: Type.Integer({ minimum: 0 }),
-    cost_usd: nullable(Type.Number({ minimum: 0 })),
-    cost_status: Type.Union([Type.Literal("known"), Type.Literal("unknown")]),
-  },
-  exact,
-);
+const token = Type.Integer({ minimum: 0, maximum: Number.MAX_SAFE_INTEGER });
+const usage = Type.Union([
+  Type.Object(
+    {
+      input_tokens: token,
+      output_tokens: token,
+      cost_usd: Type.Number({ minimum: 0 }),
+      cost_status: Type.Literal("known"),
+    },
+    exact,
+  ),
+  Type.Object(
+    {
+      input_tokens: token,
+      output_tokens: token,
+      cost_usd: Type.Null(),
+      cost_status: Type.Literal("unknown"),
+    },
+    exact,
+  ),
+]);
 export const InvocationSchema = Type.Object(
   {
     request_started: Type.Optional(Type.Boolean()),
     schema_version: Type.Literal(1),
-    invocation_id: Type.String(),
+    invocation_id: identity,
     execution_scope: scope,
     subject_id: Type.String(),
     capability: Type.String(),
@@ -81,7 +105,11 @@ export const InvocationSchema = Type.Object(
     ),
     messages: Type.Array(
       Type.Object(
-        { message_id: Type.String(), usage, summary: Type.Boolean() },
+        {
+          message_id: Type.String({ minLength: 1 }),
+          usage,
+          summary: Type.Boolean(),
+        },
         exact,
       ),
     ),
@@ -122,6 +150,23 @@ export const StorageReservationSchema = Type.Object(
   },
   exact,
 );
+export const ArtifactSealSchema = Type.Object(
+  {
+    schema_version: Type.Literal(1),
+    execution_scope: scope,
+    workspace_id: Type.String({ minLength: 1 }),
+    project_id: identity,
+    workspace_revision: identity,
+    files: Type.Array(ManifestFileSchema, { minItems: 1 }),
+    validated_hash: hash,
+    publish_checks: Type.Union([
+      Type.Literal("passed"),
+      Type.Literal("not_exercised"),
+    ]),
+    resources: Type.Unknown(),
+  },
+  exact,
+);
 const validators = new Map<string, ReturnType<typeof TypeCompiler.Compile>>();
 export function registerSchema(name: string, schema: TSchema): void {
   if (validators.has(name))
@@ -129,10 +174,12 @@ export function registerSchema(name: string, schema: TSchema): void {
   validators.set(name, TypeCompiler.Compile(schema));
 }
 registerSchema("workspace", WorkspaceSchema);
+registerSchema("manifest_file", ManifestFileSchema);
 registerSchema("checkpoint", CheckpointSchema);
 registerSchema("invocation", InvocationSchema);
 registerSchema("storage", StorageSchema);
 registerSchema("storage_reservation", StorageReservationSchema);
+registerSchema("artifact_seal", ArtifactSealSchema);
 export function validateSchema<T>(name: string, value: unknown): T {
   const v = validators.get(name);
   if (!v) throw new AgentError("configuration", "Unknown schema");
@@ -141,6 +188,24 @@ export function validateSchema<T>(name: string, value: unknown): T {
       "corrupt",
       `Invalid ${name} schema: ${[...v.Errors(value)].map((e) => e.path).join(",")}`,
     );
+  if (name === "invocation") {
+    const invocation = value as InvocationRecord;
+    canonicalJson(invocation.limits);
+    if (invocation.request_started === false) {
+      const message = invocation.messages[0];
+      if (
+        invocation.messages.length !== 1 ||
+        !message?.summary ||
+        message.message_id !== `not_started_${invocation.invocation_id}` ||
+        message.usage.cost_status !== "known" ||
+        message.usage.cost_usd !== 0 ||
+        message.usage.input_tokens !== 0 ||
+        message.usage.output_tokens !== 0 ||
+        !["running", "failed"].includes(invocation.status)
+      )
+        throw new AgentError("corrupt", "Invocation not-started proof invalid");
+    }
+  }
   return value as T;
 }
 export type WorkspaceSchemaValue = Static<typeof WorkspaceSchema>;

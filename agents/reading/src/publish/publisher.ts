@@ -9,6 +9,7 @@ import { branchFor, writePolicyReceipt } from "./types.js";
 import { validateDelivery, validatePreparedFiles } from "./validate.js";
 import { reconcileRecord } from "./reconcile.js";
 import { recoveryRoute, assertRefreshAllowed } from "./recovery.js";
+import { runtimeHours } from "../config/runtime-limits.js";
 export interface PublisherOptions {
   workspace_id: string;
   committedRevision: () => Promise<string>;
@@ -17,6 +18,7 @@ export interface PublisherOptions {
   classificationCurrent: (delivery: SealedDelivery) => Promise<boolean>;
   identity: { name: string; email: string };
   now?: () => Date;
+  sources_freshness_hours?: number;
 }
 export class Publisher {
   private now: () => Date;
@@ -27,6 +29,7 @@ export class Publisher {
     private options: PublisherOptions,
   ) {
     this.now = options.now ?? (() => new Date());
+    runtimeHours(options.sources_freshness_hours ?? 24, "sources_freshness_hours");
   }
   private key(id: string): string {
     return `delivery-${id}`;
@@ -196,7 +199,7 @@ export class Publisher {
     );
     if (confirmedPR) return confirmedPR;
     const current = await this.options.classificationCurrent(d);
-    const route = recoveryRoute(d, records, current, this.now(), mode);
+    const route = recoveryRoute(d, records, current, this.now(), mode, this.options.sources_freshness_hours ?? 24);
     if (route.route !== "publish") {
       if (
         ["resume_source_verification", "resume_classification"].includes(

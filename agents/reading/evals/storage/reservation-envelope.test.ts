@@ -202,3 +202,43 @@ it.each([undefined, 2])(
     );
   },
 );
+it("metadata response loss keeps the persisted reservation pending and the next process confirms the same stable key", async () => {
+  const { root, store, manager, handle } = await fixture();
+  let h = committed(
+    await reserve(manager, handle, reservation, capacityView([], []), "run"),
+  );
+  await store.create(reservation.key, Buffer.from("123"));
+  store.faults.push({ operation: "stat", key: reservation.key, kind: "after" });
+  await expect(reconcileReservation(store, reservation)).rejects.toMatchObject({
+    code: "unknown",
+  });
+  const nextStore = new FileObjectStore(store.root);
+  const next = new ImmutableWorkspaceManager({
+    store: nextStore,
+    scope: "preview",
+    local_root: join(root, "metadata-restart"),
+    verify_preflight: false,
+  });
+  h = await next.restore(h.workspace_id);
+  const pending = parseStorageReservation(h.records["storage/reservations/r"]);
+  expect(pending.state).toBe("pending");
+  const confirmed = await reconcileReservation(nextStore, pending);
+  h = committed(
+    await next.checkpoint(h, {
+      expected_revision: h.revision,
+      reason: "storage_reconciled",
+      run_id: "next",
+      records: { "storage/reservations/r": confirmed as any },
+    }),
+  );
+  expect(
+    parseStorageReservation(
+      (await next.restore(h.workspace_id)).records["storage/reservations/r"],
+    ).state,
+  ).toBe("confirmed");
+  expect(
+    nextStore.calls.filter(
+      (c) => c.operation === "create" && c.key === reservation.key,
+    ),
+  ).toHaveLength(0);
+});

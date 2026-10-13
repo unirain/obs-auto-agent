@@ -18,7 +18,7 @@ import {
   type BucketConfiguration,
 } from "../contracts/index.js";
 export type Fault = {
-  operation: "create" | "read" | "list" | "delete";
+  operation: "create" | "read" | "stat" | "list" | "delete" | "configuration";
   key?: string;
   kind: "before" | "after" | "corrupt" | "permission";
   remaining?: number;
@@ -104,9 +104,16 @@ export class FileObjectStore implements ObjectStore {
     }
   }
   async stat(key: string): Promise<ObjectMetadata> {
+    this.calls.push({ operation: "stat", key });
+    const fault = this.fault("stat", key, false);
     try {
       const s = await stat(this.path(key));
-      return { key, size: s.size, created_at: s.birthtime.toISOString() };
+      this.fault("stat", key, true);
+      return {
+        key,
+        size: s.size + (fault?.kind === "corrupt" ? 1 : 0),
+        created_at: s.birthtime.toISOString(),
+      };
     } catch (e) {
       if ((e as NodeJS.ErrnoException).code === "ENOENT")
         throw new AgentError("not_found", "Object absent");
@@ -137,6 +144,7 @@ export class FileObjectStore implements ObjectStore {
     all.sort((a, b) => a.key.localeCompare(b.key));
     const start = cursor ? all.findIndex((o) => o.key > cursor) : 0;
     const objects = start < 0 ? [] : all.slice(start, start + this.page_size);
+    this.fault("list", prefix, true);
     return {
       objects,
       next_cursor:
@@ -146,6 +154,8 @@ export class FileObjectStore implements ObjectStore {
     };
   }
   async delete(key: string): Promise<void> {
+    if (key.includes("/commits/"))
+      throw new AgentError("permission", "Commit deletion forbidden");
     this.calls.push({ operation: "delete", key });
     this.fault("delete", key, false);
     try {
@@ -156,6 +166,14 @@ export class FileObjectStore implements ObjectStore {
     this.fault("delete", key, true);
   }
   async configuration(): Promise<BucketConfiguration> {
-    return structuredClone(this.config);
+    this.calls.push({ operation: "configuration", key: this.bucket });
+    const fault = this.fault("configuration", this.bucket, false);
+    this.fault("configuration", this.bucket, true);
+    return {
+      ...structuredClone(this.config),
+      ...(fault?.kind === "corrupt"
+        ? { versioning: "invalid" as BucketConfiguration["versioning"] }
+        : {}),
+    };
   }
 }

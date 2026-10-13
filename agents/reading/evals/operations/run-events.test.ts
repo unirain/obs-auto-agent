@@ -236,3 +236,23 @@ it("watchdog API/read failure is visible as a deduplicated monitoring incident a
   expect(port.items[0]?.state).toBe("closed");
   expect(port.notices).toHaveLength(1);
 });
+it("runner consumes trusted custom gap and deduplicates the same persistent incident on the next poll", async () => {
+  const port = new Issues();
+  const options = {
+    actions: { paginate: async () => [], actions: { listWorkflowRuns: () => {} } } as unknown as Octokit,
+    repository: "test/implementation",
+    workspace_id: "w",
+    projector: new IssueProjector(port, async () => {}),
+    readEvents: async () => [],
+    readReportRunIds: async () => new Set<string>(),
+    readPolicy: async () => ({ global: false, disabled_sources: [], enabled_at: "2026-10-13T00:00:00Z", watchdog_gap_hours: 2 }),
+    now: () => new Date("2026-10-13T03:00:00Z"),
+  };
+  expect((await runWatchdog(options)).run_faults).toBe(1);
+  expect(port.items).toHaveLength(1);
+  expect(port.items[0]?.state).toBe("open");
+  expect(decodeMetadata(port.items[0]!.body)?.events[0]?.occurred_at).toBe("2026-10-13T02:00:00.000Z");
+  expect((await runWatchdog(options)).run_faults).toBe(1);
+  expect(port.items).toHaveLength(1);
+  expect(port.notices).toEqual([]);
+});

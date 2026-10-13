@@ -30,6 +30,24 @@ export async function listAll(store: ObjectStore, prefix: string) {
   const cursors = new Set<string>();
   do {
     const page = await store.list(prefix, cursor);
+    if (
+      !page ||
+      !Array.isArray(page.objects) ||
+      (page.next_cursor !== null &&
+        (typeof page.next_cursor !== "string" || !page.next_cursor))
+    )
+      throw new AgentError("corrupt", "Invalid object listing envelope");
+    for (const object of page.objects)
+      if (
+        !object ||
+        typeof object.key !== "string" ||
+        !object.key.startsWith(prefix) ||
+        !Number.isSafeInteger(object.size) ||
+        object.size < 0 ||
+        typeof object.created_at !== "string" ||
+        !Number.isFinite(Date.parse(object.created_at))
+      )
+        throw new AgentError("corrupt", "Invalid object listing metadata");
     result.push(...page.objects);
     if (page.next_cursor === null) return result;
     if (cursors.has(page.next_cursor))

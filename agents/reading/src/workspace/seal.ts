@@ -8,6 +8,8 @@ import {
   type ManifestFile,
 } from "../contracts/index.js";
 import { safeLocalPath } from "./paths.js";
+import { validateSchema } from "../contracts/schema.js";
+import { validateManifestFile } from "./manifest.js";
 export interface SealCheck {
   review_passed: boolean;
   program_checks_passed: boolean;
@@ -92,6 +94,7 @@ export async function verifySeal(
   handle: WorkspaceHandle,
   value: ArtifactSeal,
 ): Promise<void> {
+  validateSchema("artifact_seal", value);
   if (
     value.execution_scope !== handle.execution_scope ||
     value.workspace_id !== handle.workspace_id ||
@@ -101,7 +104,22 @@ export async function verifySeal(
   const { validated_hash, ...body } = value;
   if (sha256(canonicalJson(body)) !== validated_hash)
     throw new AgentError("corrupt", "Seal hash changed");
+  const expectedFiles = handle.snapshot.manifest.files.filter(
+    (f) =>
+      f.project_id === value.project_id &&
+      ["artifact", "output"].includes(f.role),
+  );
+  if (
+    canonicalJson(expectedFiles) !== canonicalJson(value.files) ||
+    value.publish_checks !==
+      (handle.execution_scope === "production" ? "passed" : "not_exercised")
+  )
+    throw new AgentError(
+      "corrupt",
+      "Seal does not include the complete reviewed artifact set",
+    );
   for (const file of value.files) {
+    validateManifestFile(file);
     const committed = handle.snapshot.manifest.files.find(
       (f) => f.path === file.path,
     );

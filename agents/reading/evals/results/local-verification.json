@@ -1,16 +1,18 @@
 {
-  "recorded_at": "2026-10-13T12:52:05.417389+00:00",
-  "implementation_sha256": "0598c4f8a5b24ddd73d49f96ff402fb80be62539c103d2156b4f7054bc7bae52",
-  "fingerprint_files": 188,
+  "recorded_at": "2026-10-13T13:45:57.738278+00:00",
+  "implementation_sha256": "fc55330d2df1e5e4713702b71a0d7bd203a0175a18ac90fe4a5734da3f93879e",
+  "fingerprint_files": 239,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
-    "npm run test:live": "skipped"
+    "npm run test:live": "skipped",
+    "git diff --check": "passed"
   },
   "local_tests": {
-    "passed": 288,
+    "files": 60,
+    "passed": 360,
     "failed": 0
   },
   "live_tests": {
@@ -22,5 +24,6 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance."
+  "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
+  "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec."
 }

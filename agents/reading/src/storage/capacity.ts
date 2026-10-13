@@ -3,7 +3,7 @@ import {
   type ExecutionScope,
   type StorageCapacityView,
 } from "../contracts/index.js";
-import type { InventoryObject } from "./inventory.js";
+import { normalizeInventory, type InventoryObject } from "./inventory.js";
 import { validateSchema } from "../contracts/schema.js";
 export const STORAGE_LIMIT = 50_000_000_000;
 export const STORAGE_WARNING = 45_000_000_000;
@@ -27,6 +27,9 @@ export function capacityView(
   reservations: StorageReservation[],
   observedAt = new Date().toISOString(),
 ): StorageCapacityView {
+  if (!Number.isFinite(Date.parse(observedAt)))
+    throw new AgentError("corrupt", "Capacity observation timestamp invalid");
+  objects = normalizeInventory(objects);
   const occupied = objects.reduce((n, o) => n + o.size, 0);
   const normalizeVersion = (v: string | null | undefined) =>
     v === undefined || v === null || v === "null" ? null : v;
@@ -90,16 +93,23 @@ export function assertCapacity(
   additionalBytes: number,
   kind: "control" | "generation",
 ): void {
+  validateSchema("storage", view);
   if (
     !view.verified ||
+    view.limit_bytes !== STORAGE_LIMIT ||
+    !Number.isSafeInteger(view.occupied_bytes) ||
+    !Number.isSafeInteger(view.reserved_bytes) ||
+    !Number.isFinite(Date.parse(view.observed_at)) ||
     !Number.isSafeInteger(additionalBytes) ||
     additionalBytes < 0
   )
     throw new AgentError("unknown", "Capacity cannot be verified");
   const total = view.occupied_bytes + view.reserved_bytes + additionalBytes;
+  if (!Number.isSafeInteger(total))
+    throw new AgentError("corrupt", "Capacity numeric overflow");
   if (
     total > view.limit_bytes ||
-    (kind === "generation" && total > STORAGE_GENERATION_STOP)
+    (kind === "generation" && total >= STORAGE_GENERATION_STOP)
   )
     throw new AgentError("capacity", "Shared managed capacity insufficient");
 }

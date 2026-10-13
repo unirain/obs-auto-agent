@@ -6,7 +6,7 @@ import {
 } from "../contracts/index.js";
 import { OssObjectStore, type OssStoreOptions } from "./oss.js";
 import { listAll, preflight } from "./preflight.js";
-import type { InventoryObject } from "./inventory.js";
+import { normalizeInventory, type InventoryObject } from "./inventory.js";
 import {
   parseStorageReservation,
   type StorageReservation,
@@ -16,6 +16,7 @@ import {
   assertBytes,
   validateCommit,
   validateManifest,
+  readManifestFile,
 } from "../workspace/manifest.js";
 import type { Deployment } from "../config/deployment.js";
 export interface ManagedBinding {
@@ -183,8 +184,7 @@ export function capacityBrokerFromEnvironment(
             f.path.startsWith("state/storage/reservations/") &&
             f.path.endsWith(".json"),
         )) {
-          const bytes = await store.read(`${prefix}blobs/${f.sha256}`);
-          assertBytes(bytes, f.sha256, f.size);
+          const bytes = await readManifestFile(store, prefix, f);
           let reservation: StorageReservation;
           try {
             reservation = parseStorageReservation(
@@ -208,12 +208,10 @@ export function capacityBrokerFromEnvironment(
         }
       }
     }
-    const unique = new Map(
-      objects.map((o) => [
-        JSON.stringify([o.bucket, o.key, o.version ?? null]),
-        o,
-      ]),
-    );
-    return { complete: true, objects: [...unique.values()], reservations };
+    return {
+      complete: true,
+      objects: normalizeInventory(objects),
+      reservations,
+    };
   };
 }

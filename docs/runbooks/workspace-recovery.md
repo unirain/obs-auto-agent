@@ -56,3 +56,11 @@ SDK message ID 重放按规范化 JSON 比较；整个 query 的累计 summary �
 持久化基础 journal 的 prepare 会原子写入开始时间、run_id、scope metadata；恢复后观察或终态写入不会将旧调用归到新一轮。应用 journal 应复用 `aggregateUsage`，报告和 PR 分别使用 `usageForRun` 与 `usageForProject`。
 
 回归：`npm test -- agents/reading/evals/storage/usage-ledger.test.ts` 验证真实文件对象存储重启、跨 scope 分离、相同消息重放、未知消耗与缺 metadata。
+
+## 大逻辑文件的分块恢复
+
+32 MiB 是物理 blob 限制，不再是整个 source JSON／控制记录的限制。大文件的 manifest 条目保留逻辑路径、完整 SHA-256 和字节数，并包含顺序 `chunks`；每块不超过 32 MiB。`readManifestFile` 和 Manager.readFile 验证块哈希、大小、总量及整体哈希后才返回正文。不能截断字段、丢掉 PDF 页文本或仅恢复能读到的部分。
+
+容量与 GC 引用使用 `manifestBlobs(file)` 的物理集合；logical SHA 不一定有同名 OSS blob。旧单 blob 格式保持严格可读，超大的旧无 chunks 条目仍拒绝。任一块缺失／损坏时，HEAD 恢复停止；未发布 commit 的块只是孤立占用，不能作为恢复完成事实。历史保护版本的所有块都保留，解除引用后的宽限及 commit 永久保护不变。
+
+注册业务 record validators 时应同时提供 restore hook，且在 Manager.restore 前完成注册。S 的基础校验不代替项目、来源或交付 DTO 的业务解析；未知 schema 不能在恢复时自动升级。

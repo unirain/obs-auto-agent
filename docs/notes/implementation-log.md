@@ -1,5 +1,15 @@
 # Reading Agent implementation log
 
+## 2026-10-13 Continuation: persisted bodies and explicit generation input
+
+- Final local checkpoint at 21:44 Asia/Shanghai: 60 files / 360 tests passed; typecheck, build, acceptance mapping and diff checks passed. Three opt-in live tests remain skipped, and all 87 acceptance cases still lack complete layered proof. The prior implementation commit 1df6dfc passed Linux CI.
+- Logical files above 32 MiB use individually bounded immutable chunks with whole-file hashes. A 33 MiB source body survives a real FileObjectStore cold restart with a small project control row. History GC authenticates manifests through the complete commit chain and refuses a stale HEAD.
+- Host managers now validate full merged control records before writes and on current/historical restore. Active projects require typed runtime/host fields, exact scope and fixed context; retention metadata has a separate strict DTO. Null tombstones cannot bypass reference closure.
+- Source bodies are immutable referenced files. Runtime loads them on demand through a serial reader and a 64 MB / four-entry resident cache; source identity, byte hashes, text hashes, page boundaries and metadata remain validated. The 2,000-material test reads only the required body. The resident cache limit is not a total-process RSS claim: a single body may transiently exceed it. Serialized bodies above the default 512 MB admission or extracted PDF text above 128 MB require streaming/manual handling; no unlimited large-PDF support is claimed. Persisted body admission failures retain metadata and resume without downloading again after an explicit host allowance change.
+- Explicit new generation requests require different operator input, archive the old revision and fees, and preserve the same-source classification allowance. Operator guidance is validated against the fixed context and enters all four phases. Production uses complete native readonly GitHub readiness; atomic human feedback also verifies actual PR facts. Completed preview can explicitly regenerate with different guidance. Private request bodies stay out of workflow inputs.
+- Runtime contexts bind actual installed SDK/package/native bytes, the immutable Docker image/manifest and Node version. A unavailable fixed binding stops that project with a manual barrier while unrelated work continues. Model aliases remain unpinned and unknown billing remains unknown.
+- Trusted runtime tool limits are consumed without expansion on resume; freshness/watchdog durations and fixed storage declarations are validated. RSS/Atom and unsupported no-text media have local fixtures. Cloud-adapted target skill commit, restricted RAM, actual transport faults, separate delivery App/repository, image resources, real model previews and human quality remain pending. No production generation cron was enabled.
+
 ## 2026-10-13 Continuation: recovery and cross-module audit
 
 - Prior turn advanced authoritative state: commits 667fa1a/640894d pushed; both Linux Node 24 CI runs passed. This continuation retained the full goal and addressed identified implementation gaps with three module owners.

@@ -1,3 +1,4 @@
+import {readInstalledSdkVersion} from './versions.js';
 import {query,createSdkMcpServer,tool,type Options,type SDKMessage,type ModelUsage} from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
@@ -5,7 +6,7 @@ import type {Usage} from '../contracts/index.js';
 export const SDK_VERSION='0.3.296';
 export type RuntimeMessage={message_id:string;type:string;summary:boolean;usage:Usage;result?:unknown;success?:boolean;observable:Record<string,unknown>};
 export type ToolDefinition={name:string;description:string;run:(args:Record<string,unknown>)=>Promise<unknown>};
-export type QueryRequest={prompt:string;system_prompt:string;schema:object;cwd:string;model:string;signal:AbortSignal;tools:ToolDefinition[];skills?:string[];max_output_tokens?:number};
+export type QueryRequest={prompt:string;system_prompt:string;schema:object;cwd:string;model:string;signal:AbortSignal;tools:ToolDefinition[];skills?:string[];max_output_tokens?:number;max_turns?:number};
 export interface ModelAdapter {preflight?:()=>Promise<void>;stream(request:QueryRequest):AsyncIterable<RuntimeMessage> }
 /** Only a trusted host adapter may raise this before calling SDK query(); it is never inferred from an SDK/network error. */
 export class QueryNotStartedError extends Error {readonly request_started=false;constructor(readonly reason:string){super(reason);this.name='QueryNotStartedError';}}
@@ -46,7 +47,7 @@ export function sdkEnvironment(secrets:SdkSecrets,home:string):Record<string,str
     ...(secrets.base_url?{ANTHROPIC_BASE_URL:secrets.base_url}:{})};
 }
 export function sdkOptions(request:QueryRequest,secrets:SdkSecrets,home:string):Options {
-  const maxOutput=request.max_output_tokens??8192;if(!Number.isInteger(maxOutput)||maxOutput<256||maxOutput>131072)throw new Error('output_token_limit_invalid');
+  const maxTurns=request.max_turns??40;if(!Number.isSafeInteger(maxTurns)||maxTurns<1)throw new Error('sdk_turn_limit_invalid');const maxOutput=request.max_output_tokens??8192;if(!Number.isInteger(maxOutput)||maxOutput<256||maxOutput>131072)throw new Error('output_token_limit_invalid');
   const controller=new AbortController();if(request.signal.aborted)controller.abort();else request.signal.addEventListener('abort',()=>controller.abort(),{once:true});
   const mcp=createSdkMcpServer({name:'reading',version:'1.0.0',tools:request.tools.map(definition=>tool(definition.name,definition.description,
     {input:z.record(z.string(),z.unknown())},async({input})=>mcpToolContent(await definition.run(input))))});
@@ -62,12 +63,13 @@ export function sdkOptions(request:QueryRequest,secrets:SdkSecrets,home:string):
       await skillActivation.run({name});return {hookSpecificOutput:{hookEventName:'PreToolUse' as const,permissionDecision:'allow' as const}};
     }]}]}}:{}),
     canUseTool:async(name,input)=>allowed.includes(name)||(name==='Skill'&&typeof input.skill==='string'&&request.skills?.includes(input.skill))?{behavior:'allow',updatedInput:input}:{behavior:'deny',message:'Only controlled reading tools and fixed skills are available'},
-    systemPrompt:request.system_prompt,...(modelProvider(secrets)==='anthropic'?{outputFormat:{type:'json_schema' as const,schema:request.schema as Record<string,unknown>}}:{}),maxTurns:40};
+    systemPrompt:request.system_prompt,...(modelProvider(secrets)==='anthropic'?{outputFormat:{type:'json_schema' as const,schema:request.schema as Record<string,unknown>}}:{}),maxTurns};
 }
 export class ClaudeSdkAdapter implements ModelAdapter {
   constructor(private readonly secrets:SdkSecrets,private readonly home:string){}
+  preflight=async()=>{const installed=await readInstalledSdkVersion();if(installed.sdk_version!==SDK_VERSION)throw new QueryNotStartedError('installed_sdk_version_mismatch');};
   async *stream(request:QueryRequest):AsyncIterable<RuntimeMessage>{
-    const compatible=modelProvider(this.secrets)==='deepseek';
+    await this.preflight();const compatible=modelProvider(this.secrets)==='deepseek';
     const options=sdkOptions(request,this.secrets,this.home);if(compatible)options.env={...options.env,ANTHROPIC_MODEL:request.model,ANTHROPIC_SMALL_FAST_MODEL:request.model,ANTHROPIC_DEFAULT_HAIKU_MODEL:request.model,ANTHROPIC_DEFAULT_SONNET_MODEL:request.model,ANTHROPIC_DEFAULT_OPUS_MODEL:request.model};
     const prompt=compatible?`${request.prompt}\nReturn JSON only matching this exact schema. No Markdown fences or additional text.\n${JSON.stringify(request.schema)}`:request.prompt;
     const session=query({prompt,options});

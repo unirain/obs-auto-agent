@@ -48,6 +48,7 @@ import {
   usageForProject,
 } from "../workspace/usage.js";
 import { retryAuthorized } from "./recovery.js";
+import {storeProjectBodies} from './project-storage.js';
 
 export type HostProject = RuntimeProject & {
   generation_version: number;
@@ -269,7 +270,13 @@ export class ReadingController {
         }
       }
     }
-    await this.ports.journal.commitMany(records, reason, files);
+    const knownFiles=new Map(this.ports.journal.handle.snapshot.manifest.files.map(file=>[file.path,{sha256:file.sha256,size:file.size}]));
+    for(const file of files)knownFiles.set(file.path,{sha256:digest(file.bytes),size:file.bytes.length});
+    const stored=storeProjectBodies(project,knownFiles);
+    records['projects/'+project.project_id]=stored.project;
+    const sourcePrefix=`projects/${project.project_id}/sources/`;
+    const outputs=files.filter(file=>!(file.role==='evidence'&&file.path.startsWith(sourcePrefix)&&/^([a-f0-9]{64})\.json$/.test(file.path.slice(sourcePrefix.length))&&project.snapshots.some(snapshot=>snapshot.hash+'.json'===file.path.slice(sourcePrefix.length))));
+    await this.ports.journal.commitMany(records, reason, [...outputs,...stored.files]);
     if (duplicateId) throw new Error("duplicate_identity:" + duplicateId);
   }
   private async artifactFiles(
@@ -503,7 +510,14 @@ export class ReadingController {
             : undefined);
         await this.save(project, files, reason, formatCapability);
       };
-      const environment = await this.ports.environment(project, commit);
+      let environment:RuntimeEnvironment;
+      try {environment=await this.ports.environment(project,commit);}catch(error){
+        const reason=error instanceof Error?error.message:'';
+        if(!/^fixed_(runtime_version|runtime_versions|context|skill|skill_hash|provider|prompt_template|prompt_hash)_(unavailable|invalid|mismatch)(:|$)/.test(reason))throw error;
+        project.state='deferred';project.resume_policy='manual';project.reason=reason.split(':')[0]!;
+        await this.save(project,[],'fixed_generation_input_unavailable');
+        report.failures.push({subject:id,reason:project.reason});continue;
+      }
       if (dispatch.mode !== "publish-only" && !environment.deadline.mayStart())
         break;
       if (

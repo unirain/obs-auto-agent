@@ -1,3 +1,4 @@
+import { readInstalledSdkVersion } from "../../src/runtime/versions.js";
 import { FileObjectStore } from "../../src/storage/filesystem.js";
 import { ImmutableWorkspaceManager } from "../../src/workspace/manager.js";
 import { verifyContext, type ContextBundle } from "../../src/context/index.js";
@@ -167,6 +168,12 @@ it("wired local preview uses real durable manager, controlled source/classifier 
     notes_repository: f.notes,
     policy_source: f.policy,
     model_adapter: model,
+    // Controlled replay fixture: no Docker tool is exercised by this classifier.
+    runtime_versions_provider: async () => ({
+      ...(await readInstalledSdkVersion()),
+      tools_image_id: "sha256:" + "0".repeat(64),
+      tools_manifest_hash: "0".repeat(64),
+    }),
     gateway_resolver: async () => [{ address: "8.8.8.8", family: 4 }],
     gateway_transport: async () => ({
       status: 200,

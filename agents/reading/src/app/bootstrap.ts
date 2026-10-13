@@ -57,6 +57,12 @@ import {
   type NoteIndex,
 } from "../context/index.js";
 import { materializeSkills, type SkillBundle } from "../tools/skills.js";
+import {inspectToolsRuntime} from '../tools/sandbox.js';
+import {readInstalledSdkVersion,verifyRuntimeVersions,type RuntimeVersions} from '../runtime/versions.js';
+import {parseRuntimeLimits} from '../runtime/limits.js';
+import {parseRuntimeLimits as parseOperationalLimits} from '../config/runtime-limits.js';
+import {storeProjectBodies} from './project-storage.js';
+import {validateHostRecords} from './records.js';
 import { safeRelative } from "../tools/files.js";
 import {
   UrlGateway,
@@ -137,6 +143,7 @@ export interface BuildApplicationOptions {
   implementation_repository?: string;
   policy_source?: PolicySource;
   model_adapter?: ModelAdapter;
+  runtime_versions_provider?:()=>Promise<Omit<RuntimeVersions,'model_version_status'>>;
   run_id?: string;
   started_at?: number;
   capacity_provider?: () => Promise<GlobalCapacityInventory>;
@@ -175,7 +182,7 @@ function encodeDelivery(d: SealedDelivery): StoredDelivery {
     })),
   };
 }
-function decodeDelivery(d: StoredDelivery): SealedDelivery {
+export function decodeDelivery(d: StoredDelivery): SealedDelivery {
   return {
     ...d,
     files: d.files.map(({ content_base64, ...f }) => ({
@@ -471,6 +478,7 @@ export async function buildApplication(
     ? "workspaces"
     : deployment.workspace.prefix.replace(/\/$/, "");
   const manager = new ImmutableWorkspaceManager({
+    record_validator:validateHostRecords,
     store,
     scope: target.execution_scope,
     local_root: join(root, "restored"),
@@ -525,6 +533,9 @@ export async function buildApplication(
     string,
     unknown
   >;
+  const operationalLimits=parseOperationalLimits(runtime);
+  let runtimeReceipt:Promise<Omit<RuntimeVersions,'model_version_status'>>|undefined;
+  const actualRuntime=()=>runtimeReceipt??=(async()=>{if(options.runtime_versions_provider)return options.runtime_versions_provider();const sdk=await readInstalledSdkVersion();const tools=await inspectToolsRuntime(env.READING_TOOLS_IMAGE);return {...sdk,tools_image_id:tools.image_id,tools_manifest_hash:tools.manifest_hash};})();
   const deadline = new RunDeadline(
     startedAt,
     Number(runtime.max_run_minutes ?? 60) * 60_000,
@@ -898,12 +909,14 @@ export async function buildApplication(
         status: call.status,
       };
     }
+    const stored=storeProjectBodies({...host,...input.next},new Map(records.handle.snapshot.manifest.files.map(file=>[file.path,{sha256:file.sha256,size:file.size}])));
     await records.commitMany(
       {
         ...archives,
-        ["projects/" + host.project_id]: { ...host, ...input.next },
+        ["projects/" + host.project_id]: stored.project,
       },
       "invocation_reconciled",
+      stored.files,
     );
     return { status: "committed" as const, archived_invocation_ids: ids };
   };
@@ -926,7 +939,9 @@ export async function buildApplication(
         commit,
       );
       await mkdir(view, { recursive: true });
-      bundle = await materializeSkills(options.notes_repository, commit, view);
+      try {bundle = await materializeSkills(options.notes_repository, commit, view);}catch(error){
+        if(expectedHash)throw new Error('fixed_skill_unavailable',{cause:error});throw error;
+      }
       skillCache.set(key, bundle);
     }
     if (expectedHash && bundle.hash !== expectedHash)
@@ -1199,6 +1214,7 @@ export async function buildApplication(
     }
     publisher = new Publisher(github, records, permission, {
       workspace_id: target.workspace_id,
+      sources_freshness_hours:operationalLimits.sources_freshness_hours,
       committedRevision: async () => records.handle.revision,
       verifyCommittedDelivery: async (d) => {
         const historical = await manager.restoreRevision(
@@ -1374,17 +1390,9 @@ export async function buildApplication(
         skill_hash: contextBundle.hash,
         prompt_hash: promptHash,
         prompt_templates: promptTemplates,
-        runtime_limits: {
-          max_output_tokens: Number(runtime.max_output_tokens ?? 8192),
-          max_download_bytes: Number(
-            runtime.max_download_bytes_per_batch ??
-              runtime.max_download_bytes ??
-              64_000_000,
-          ),
-          max_resources: Number(
-            runtime.max_resources_per_batch ?? runtime.max_resources ?? 40,
-          ),
-        },
+        runtime_limits:parseRuntimeLimits(runtime),
+        runtime_versions:{...await actualRuntime(),model_version_status:'requested_alias'},
+        example_count: (parseYaml(policySnapshot.files['preferences.yaml']) as {note_examples?:number}).note_examples??3,
         model: deployment.model,
         ...providerBinding,
         evidence_versions: candidate.content_hash
@@ -1406,6 +1414,7 @@ export async function buildApplication(
       return bundle;
     },
     environment: async (project, commit) => {
+      if(options.dispatch.mode!=='publish-only')verifyRuntimeVersions(project.context.runtime_versions,await actualRuntime());
       verifyContext(
         project.context,
         options.dispatch.mode === "publish-only" ? undefined : providerBinding,
@@ -1421,7 +1430,7 @@ export async function buildApplication(
         project.context.skill_hash,
       );
       for (const file of records.handle.snapshot.manifest.files.filter((f) =>
-        f.path.startsWith(`projects/${project.project_id}/`),
+        f.path.startsWith(`projects/${project.project_id}/`)&&!f.path.startsWith(`projects/${project.project_id}/snapshots/`)&&!f.path.startsWith(`projects/${project.project_id}/sources/`),
       )) {
         const relative = safeRelative(file.path);
         const dest = join(skills.root, relative);
@@ -1447,7 +1456,9 @@ export async function buildApplication(
         skills,
         commit,
         read_current_knowledge: () => currentKnowledge(project),
+        current_limits:async()=>parseRuntimeLimits(parseYaml((await policySource.readSnapshot()).files['runtime.yaml']) as Record<string,unknown>),
         read_related_note: (id: string) => readRelatedNote(project, id),
+        read_snapshot_body:reference=>manager.readFile(records.handle,reference.path),
         settle_semantic_binding: settleSemanticBinding,
       } satisfies RuntimeEnvironment;
     },
@@ -1958,6 +1969,7 @@ export async function buildMaintenanceApplication(
       : undefined);
   let journal: WorkspaceJournal | undefined;
   const manager = new ImmutableWorkspaceManager({
+    record_validator:validateHostRecords,
     store,
     scope: target.execution_scope,
     local_root: join(root, "restored"),
