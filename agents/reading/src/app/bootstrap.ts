@@ -501,6 +501,8 @@ export async function buildApplication(
   journal = new WorkspaceJournal(manager, handle, runId);
   const records = journal;
   const implementation = options.implementation_repository ?? process.cwd();
+  let implementationCommit:string|null=null;
+  try {const status=await exec('git',['-C',implementation,'status','--porcelain','--untracked-files=no']);if(!status.stdout.trim())implementationCommit=await fixedGitCommit(implementation);}catch{}
   const policySource =
     options.policy_source ??
     (options.local
@@ -1379,6 +1381,7 @@ export async function buildApplication(
       },
     },
     journal: records,
+    report_provenance:{input_commit:policySnapshot.commit,implementation_commit:implementationCommit},
     gate,
     deadline,
     sources,

@@ -1,4 +1,5 @@
 import path from 'node:path';
+import type {ReadingProjectState} from '../contracts/transitions.js';
 import {canonicalJson} from '../contracts/index.js';
 import {readFile} from 'node:fs/promises';
 import {ClassificationSchema,SelectionSchema,ResearchSchema,ResearchStageSchema,ReviewSchema,digest,shanghaiDate,validateSelection,parseModel,type Candidate,type Scope,type Selection,type ResearchPacket,type StageTask,type Review} from './contracts.js';
@@ -29,7 +30,7 @@ import {hasResearchProgress} from './progress.js';
 import {prepareSemanticBinding,TypedSourceChange,type SemanticSettlement,type SemanticSettlementResult} from './eligibility.js';
 
 export type RuntimeProject={schema_version:1;project_id:string;candidate:Candidate;execution_scope:Scope;workspace_id:string;context:ContextBundle;reclassification_history?:{old_binding:ClassificationState|null;reason:string;new_semantic_hash:string;recorded_at:string}[];read_ranges:Record<string,ReadRange[]>;knowledge_urls:string[];material_registrations?:MaterialRegistration[];unsupported_format?:{format:string;evidence:{url:string;reason:string;excerpt:string}};material_failures?:Record<string,{reason:string;occurred_at:string}>;knowledge_notes?:Record<string,{path:string;commit:string;hash:string;source_urls:string[]}>;repository_versions:Record<string,{owner:string;repository:string;commit:string}>;repository_files:Record<string,string[]>;format_repairs:Partial<Record<StageTask['stage'],number>>;format_blocked:StageTask['stage'][];note_date:string|null;review_activity?:{resource_manifest_hash:string;visual_read_hashes:string[]};writing_activity:{round:number;skill_activated:boolean;playbook_read:boolean;visual_read_hashes:string[];visual_passed_hashes:string[]}|null;pending_query:{stage:StageTask['stage'];capability:StageTask['capability'];prompt:string;input_hash:string;semantic_policy_hash:string|null}|null;classification:ClassificationState|null;
-  selection:Selection|null;research:ResearchPacket|null;writing:Writing|null;review:Review|null;snapshots:MaterialSnapshot[];partial_evidence:import('./contracts.js').Evidence[];partial_questions:{id:string;text:string;priority:'required'|'optional'}[];counters:Counters;filename:string|null;created_at:string;state:string};
+  selection:Selection|null;research:ResearchPacket|null;writing:Writing|null;review:Review|null;snapshots:MaterialSnapshot[];partial_evidence:import('./contracts.js').Evidence[];partial_questions:{id:string;text:string;priority:'required'|'optional'}[];counters:Counters;filename:string|null;created_at:string;state:ReadingProjectState};
 export type RuntimeFile={path:string;bytes:Uint8Array;role:'evidence'|'artifact'|'report';project_id:string};
 export type RuntimeEnvironment={root:string;model:string;executor:StageExecutor;gate:PolicyGate;gateway:UrlGateway;deadline:RunDeadline;skills:SkillBundle|null;
   current_limits?:()=>Promise<RuntimeLimits>;

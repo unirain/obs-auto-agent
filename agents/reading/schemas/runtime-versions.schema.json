@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "sdk_version",
+    "sdk_hash",
+    "tools_image_id",
+    "tools_manifest_hash",
+    "node_version",
+    "model_version_status"
+  ],
+  "properties": {
+    "sdk_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sdk_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "tools_image_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tools_manifest_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "node_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "model_version_status": {
+      "anyOf": [
+        {
+          "const": "requested_alias",
+          "type": "string"
+        },
+        {
+          "const": "provider_reported_unpinned",
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

@@ -1,74 +1,76 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "reading/deployment",
-  "type": "object",
-  "properties": {
-    "schema_version": {
-      "const": 1
-    },
-    "name": {
-      "enum": [
-        "production",
-        "preview",
-        "integration"
-      ]
-    },
-    "execution_scope": {
-      "enum": [
-        "production",
-        "preview"
-      ]
-    },
-    "workspace_id": {
-      "type": "string"
-    },
-    "workspace": {
+  "anyOf": [
+    {
+      "additionalProperties": false,
       "type": "object",
+      "required": [
+        "schema_version",
+        "name",
+        "execution_scope",
+        "workspace_id",
+        "workspace",
+        "image",
+        "target_repository",
+        "github_app_credential_ref",
+        "implementation_repository",
+        "watchdog_credential_ref",
+        "model_credential_ref",
+        "model",
+        "cost_policy",
+        "storage_limit_bytes",
+        "cron_enabled",
+        "enabled_at",
+        "g5_evidence"
+      ],
       "properties": {
-        "bucket": {
-          "type": "string"
+        "schema_version": {
+          "const": 1,
+          "type": "number"
         },
-        "region": {
-          "type": "string"
-        },
-        "endpoint": {
-          "type": "string"
-        },
-        "prefix": {
-          "type": "string"
-        },
-        "credential_ref": {
-          "type": "string"
-        },
-        "versioning_verified": {
-          "enum": [
-            "never_enabled",
-            "unknown"
+        "name": {
+          "anyOf": [
+            {
+              "const": "production",
+              "type": "string"
+            },
+            {
+              "const": "preview",
+              "type": "string"
+            },
+            {
+              "const": "integration",
+              "type": "string"
+            }
           ]
         },
-        "private_verified": {
-          "type": "boolean"
+        "execution_scope": {
+          "anyOf": [
+            {
+              "const": "production",
+              "type": "string"
+            },
+            {
+              "const": "preview",
+              "type": "string"
+            }
+          ]
         },
-        "lifecycle_verified": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "bucket",
-        "region",
-        "endpoint",
-        "prefix",
-        "credential_ref",
-        "versioning_verified",
-        "private_verified",
-        "lifecycle_verified"
-      ],
-      "additionalProperties": false
-    },
-    "image": {
-      "anyOf": [
-        {
+        "workspace_id": {
+          "type": "string"
+        },
+        "workspace": {
+          "additionalProperties": false,
           "type": "object",
+          "required": [
+            "bucket",
+            "region",
+            "endpoint",
+            "prefix",
+            "credential_ref",
+            "versioning_verified",
+            "private_verified",
+            "lifecycle_verified"
+          ],
           "properties": {
             "bucket": {
               "type": "string"
@@ -82,160 +84,447 @@
             "prefix": {
               "type": "string"
             },
-            "public_url": {
-              "type": "string"
-            },
             "credential_ref": {
               "type": "string"
             },
-            "sole_writer_verified": {
+            "versioning_verified": {
+              "anyOf": [
+                {
+                  "const": "never_enabled",
+                  "type": "string"
+                },
+                {
+                  "const": "unknown",
+                  "type": "string"
+                }
+              ]
+            },
+            "private_verified": {
               "type": "boolean"
             },
-            "versioning": {
-              "enum": [
-                "disabled",
-                "enabled",
-                "suspended",
-                "unknown"
-              ]
+            "lifecycle_verified": {
+              "type": "boolean"
             }
-          },
+          }
+        },
+        "image": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "bucket",
+                "region",
+                "endpoint",
+                "prefix",
+                "public_url",
+                "credential_ref",
+                "sole_writer_verified",
+                "versioning"
+              ],
+              "properties": {
+                "bucket": {
+                  "type": "string"
+                },
+                "region": {
+                  "type": "string"
+                },
+                "endpoint": {
+                  "type": "string"
+                },
+                "prefix": {
+                  "type": "string"
+                },
+                "public_url": {
+                  "type": "string"
+                },
+                "credential_ref": {
+                  "type": "string"
+                },
+                "sole_writer_verified": {
+                  "type": "boolean"
+                },
+                "versioning": {
+                  "anyOf": [
+                    {
+                      "const": "disabled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "enabled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "suspended",
+                      "type": "string"
+                    },
+                    {
+                      "const": "unknown",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "github_app_credential_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "implementation_repository": {
+          "type": "string"
+        },
+        "watchdog_credential_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "watchdog_repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_credential_ref": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "cost_policy": {
+          "const": "observe_only",
+          "type": "string"
+        },
+        "storage_limit_bytes": {
+          "const": 50000000000,
+          "type": "number"
+        },
+        "cron_enabled": {
+          "type": "boolean"
+        },
+        "enabled_at": {
+          "anyOf": [
+            {
+              "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "g5_evidence": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_provider": {
+          "const": "claude",
+          "type": "string"
+        },
+        "model_base_url": {
+          "const": "https://api.anthropic.com",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "schema_version",
+        "name",
+        "execution_scope",
+        "workspace_id",
+        "workspace",
+        "image",
+        "target_repository",
+        "github_app_credential_ref",
+        "implementation_repository",
+        "watchdog_credential_ref",
+        "model_credential_ref",
+        "model",
+        "cost_policy",
+        "storage_limit_bytes",
+        "cron_enabled",
+        "enabled_at",
+        "g5_evidence",
+        "model_provider",
+        "model_base_url"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "type": "number"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "const": "production",
+              "type": "string"
+            },
+            {
+              "const": "preview",
+              "type": "string"
+            },
+            {
+              "const": "integration",
+              "type": "string"
+            }
+          ]
+        },
+        "execution_scope": {
+          "anyOf": [
+            {
+              "const": "production",
+              "type": "string"
+            },
+            {
+              "const": "preview",
+              "type": "string"
+            }
+          ]
+        },
+        "workspace_id": {
+          "type": "string"
+        },
+        "workspace": {
+          "additionalProperties": false,
+          "type": "object",
           "required": [
             "bucket",
             "region",
             "endpoint",
             "prefix",
-            "public_url",
             "credential_ref",
-            "sole_writer_verified",
-            "versioning"
+            "versioning_verified",
+            "private_verified",
+            "lifecycle_verified"
           ],
-          "additionalProperties": false
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "target_repository": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "github_app_credential_ref": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "implementation_repository": {
-      "type": "string"
-    },
-    "watchdog_credential_ref": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "model_credential_ref": {
-      "type": "string"
-    },
-    "model": {
-      "type": "string"
-    },
-    "cost_policy": {
-      "const": "observe_only"
-    },
-    "storage_limit_bytes": {
-      "const": 50000000000
-    },
-    "cron_enabled": {
-      "type": "boolean"
-    },
-    "enabled_at": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "g5_evidence": {
-      "anyOf": [
-        {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "watchdog_repository": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "model_provider": {
-      "enum": [
-        "claude",
-        "deepseek"
-      ]
-    },
-    "model_base_url": {
-      "enum": [
-        "https://api.anthropic.com",
-        "https://api.deepseek.com/anthropic"
-      ]
-    }
-  },
-  "required": [
-    "schema_version",
-    "name",
-    "execution_scope",
-    "workspace_id",
-    "workspace",
-    "image",
-    "target_repository",
-    "github_app_credential_ref",
-    "implementation_repository",
-    "watchdog_credential_ref",
-    "model_credential_ref",
-    "model",
-    "cost_policy",
-    "storage_limit_bytes",
-    "cron_enabled",
-    "enabled_at",
-    "g5_evidence"
-  ],
-  "additionalProperties": false,
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "model_provider": {
-            "const": "deepseek"
+          "properties": {
+            "bucket": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "credential_ref": {
+              "type": "string"
+            },
+            "versioning_verified": {
+              "anyOf": [
+                {
+                  "const": "never_enabled",
+                  "type": "string"
+                },
+                {
+                  "const": "unknown",
+                  "type": "string"
+                }
+              ]
+            },
+            "private_verified": {
+              "type": "boolean"
+            },
+            "lifecycle_verified": {
+              "type": "boolean"
+            }
           }
         },
-        "required": [
-          "model_provider"
-        ]
-      },
-      "then": {
-        "properties": {
-          "model_base_url": {
-            "const": "https://api.deepseek.com/anthropic"
-          }
+        "image": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "bucket",
+                "region",
+                "endpoint",
+                "prefix",
+                "public_url",
+                "credential_ref",
+                "sole_writer_verified",
+                "versioning"
+              ],
+              "properties": {
+                "bucket": {
+                  "type": "string"
+                },
+                "region": {
+                  "type": "string"
+                },
+                "endpoint": {
+                  "type": "string"
+                },
+                "prefix": {
+                  "type": "string"
+                },
+                "public_url": {
+                  "type": "string"
+                },
+                "credential_ref": {
+                  "type": "string"
+                },
+                "sole_writer_verified": {
+                  "type": "boolean"
+                },
+                "versioning": {
+                  "anyOf": [
+                    {
+                      "const": "disabled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "enabled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "suspended",
+                      "type": "string"
+                    },
+                    {
+                      "const": "unknown",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "required": [
-          "model_base_url"
-        ]
-      },
-      "else": {
-        "properties": {
-          "model_base_url": {
-            "const": "https://api.anthropic.com"
-          }
+        "target_repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "github_app_credential_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "implementation_repository": {
+          "type": "string"
+        },
+        "watchdog_credential_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "watchdog_repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_credential_ref": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "cost_policy": {
+          "const": "observe_only",
+          "type": "string"
+        },
+        "storage_limit_bytes": {
+          "const": 50000000000,
+          "type": "number"
+        },
+        "cron_enabled": {
+          "type": "boolean"
+        },
+        "enabled_at": {
+          "anyOf": [
+            {
+              "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "g5_evidence": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_provider": {
+          "const": "deepseek",
+          "type": "string"
+        },
+        "model_base_url": {
+          "const": "https://api.deepseek.com/anthropic",
+          "type": "string"
         }
       }
     }

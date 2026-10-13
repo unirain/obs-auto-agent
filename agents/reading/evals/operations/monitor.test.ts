@@ -232,11 +232,25 @@ it("editing Issue machine state cannot invent source recovery or skip persisted 
   await expect(watchdog(port, events).run()).rejects.toThrow(
     "contradicts persistent",
   );
-  port.issues[0]!.body = issueBody(
-    { ...original, last_position: 9999 },
-    port.issues[0]!.body,
+  // A human can edit raw machine metadata; the normal producer correctly refuses this invalid cursor.
+  expect(() => issueBody({ ...original, last_position: 9999 })).toThrow(
+    "cursor",
   );
-  await expect(watchdog(port, events).run()).rejects.toThrow(
-    "contradicts persistent",
+  port.issues[0]!.body = port.issues[0]!.body.replace(
+    /<!-- reading-monitor-metadata:[A-Za-z0-9+/=]+ -->/,
+    `<!-- reading-monitor-metadata:${Buffer.from(JSON.stringify({ ...original, last_position: 9999 })).toString("base64")} -->`,
   );
+  await expect(watchdog(port, events).run()).rejects.toThrow("cursor");
+});
+it("invalid persisted source UTC and future schema cannot create Issues on either failed run", async () => {
+  const port = new Issues();
+  const invalid = { ...event(1), occurred_at: "2026-02-30T00:00:00Z" };
+  await expect(watchdog(port, [invalid]).run()).rejects.toThrow("schema/UTC");
+  await expect(watchdog(port, [invalid]).run()).rejects.toThrow("schema/UTC");
+  const future = { ...event(1), schema_version: 2 };
+  await expect(watchdog(port, [future]).run()).rejects.toThrow("schema/UTC");
+  expect(port.writes).toBe(0);
+  expect(port.issues).toEqual([]);
+  await watchdog(port, [event(1)]).run();
+  expect(port.issues).toHaveLength(1);
 });

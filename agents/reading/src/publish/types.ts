@@ -1,4 +1,5 @@
 /** Operations state is persisted by the host using committed WorkspaceManager checkpoints. */
+import { assertUtcInstant, isUtcInstant } from "../contracts/utc.js";
 export interface OperationsJournal {
   load<T>(key: string): Promise<T | undefined>;
   commit<T>(key: string, value: T): Promise<void>;
@@ -179,6 +180,7 @@ export function writePolicyReceipt(
   check: void | PolicyEvidence,
   now: string,
 ): WritePolicyReceipt {
+  assertUtcInstant(now, "write receipt checked_at");
   if (!check)
     return {
       action,
@@ -192,7 +194,7 @@ export function writePolicyReceipt(
     !/^[a-f0-9]{40}$/.test(check.policy_commit) ||
     !check.policy_hash ||
     !/^[a-f0-9]{64}$/.test(check.policy_hash) ||
-    !Number.isFinite(Date.parse(check.checked_at)) ||
+    !isUtcInstant(check.checked_at) ||
     (check.execution_permission !== undefined &&
       check.execution_permission !== "allowed")
   )

@@ -1,6 +1,8 @@
 import { Type, type Static, type TSchema } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { AgentError, canonicalJson, type InvocationRecord } from "./index.js";
+import { UtcInstantSchema } from "./utc.js";
+export { UtcInstantSchema } from "./utc.js";
 const identity = Type.String({
   minLength: 1,
   maxLength: 100,
@@ -8,7 +10,7 @@ const identity = Type.String({
 });
 const hash = Type.String({ pattern: "^[a-f0-9]{64}$" });
 const scope = Type.Union([Type.Literal("production"), Type.Literal("preview")]);
-const nullable = (s: TSchema) => Type.Union([s, Type.Null()]);
+const nullable = <T extends TSchema>(s: T) => Type.Union([s, Type.Null()]);
 const exact = { additionalProperties: false };
 export const ManifestFileSchema = Type.Object(
   {
@@ -45,7 +47,7 @@ export const WorkspaceSchema = Type.Object(
     parent_revision: nullable(identity),
     run_id: Type.String(),
     checkpoint_reason: Type.String(),
-    created_at: Type.String(),
+    created_at: UtcInstantSchema,
     files: Type.Array(ManifestFileSchema),
   },
   exact,
@@ -85,6 +87,32 @@ const usage = Type.Union([
     exact,
   ),
 ]);
+export const UsageSchema = usage;
+export type UsageSchemaValue = Static<typeof UsageSchema>;
+const usageTotalFields = {
+  known_cost_usd: nullable(Type.Number({ minimum: 0 })),
+  token_status: Type.Union([
+    Type.Literal("known"),
+    Type.Literal("partial"),
+    Type.Literal("unknown"),
+  ]),
+  invocation_count: token,
+  unknown_invocations: token,
+  unresolved_invocations: token,
+  attribution_complete: Type.Boolean(),
+  unattributed_invocations: token,
+};
+export const UsageTotalsSchema = Type.Union([
+  Type.Object(
+    { ...UsageSchema.anyOf[0].properties, ...usageTotalFields },
+    exact,
+  ),
+  Type.Object(
+    { ...UsageSchema.anyOf[1].properties, ...usageTotalFields },
+    exact,
+  ),
+]);
+export type UsageTotalsSchemaValue = Static<typeof UsageTotalsSchema>;
 export const InvocationSchema = Type.Object(
   {
     request_started: Type.Optional(Type.Boolean()),
@@ -121,7 +149,7 @@ export const InvocationSchema = Type.Object(
 export const StorageSchema = Type.Object(
   {
     verified: Type.Boolean(),
-    observed_at: Type.String(),
+    observed_at: UtcInstantSchema,
     occupied_bytes: Type.Integer({ minimum: 0 }),
     reserved_bytes: Type.Integer({ minimum: 0 }),
     limit_bytes: Type.Integer({ minimum: 0 }),
@@ -173,13 +201,49 @@ export function registerSchema(name: string, schema: TSchema): void {
     throw new AgentError("configuration", "Schema registered twice");
   validators.set(name, TypeCompiler.Compile(schema));
 }
-registerSchema("workspace", WorkspaceSchema);
-registerSchema("manifest_file", ManifestFileSchema);
-registerSchema("checkpoint", CheckpointSchema);
-registerSchema("invocation", InvocationSchema);
-registerSchema("storage", StorageSchema);
-registerSchema("storage_reservation", StorageReservationSchema);
-registerSchema("artifact_seal", ArtifactSealSchema);
+/** The same table drives runtime registration, generated documents and drift tests. */
+export const SHARED_SCHEMA_DOCUMENTS = [
+  { name: "workspace", file: "workspace.schema.json", schema: WorkspaceSchema },
+  {
+    name: "manifest_file",
+    file: "manifest-file.schema.json",
+    schema: ManifestFileSchema,
+  },
+  {
+    name: "checkpoint",
+    file: "checkpoint.schema.json",
+    schema: CheckpointSchema,
+  },
+  {
+    name: "invocation",
+    file: "invocation.schema.json",
+    schema: InvocationSchema,
+  },
+  { name: "usage", file: "usage.schema.json", schema: UsageSchema },
+  {
+    name: "usage_totals",
+    file: "usage-totals.schema.json",
+    schema: UsageTotalsSchema,
+  },
+  { name: "storage", file: "storage.schema.json", schema: StorageSchema },
+  {
+    name: "storage_reservation",
+    file: "storage-reservation.schema.json",
+    schema: StorageReservationSchema,
+  },
+  {
+    name: "artifact_seal",
+    file: "artifact-seal.schema.json",
+    schema: ArtifactSealSchema,
+  },
+  {
+    name: "utc_instant",
+    file: "utc-instant.schema.json",
+    schema: UtcInstantSchema,
+  },
+] as const;
+for (const entry of SHARED_SCHEMA_DOCUMENTS)
+  registerSchema(entry.name, entry.schema);
 export function validateSchema<T>(name: string, value: unknown): T {
   const v = validators.get(name);
   if (!v) throw new AgentError("configuration", "Unknown schema");

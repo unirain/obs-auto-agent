@@ -1,4 +1,5 @@
 import { AgentError } from "../contracts/index.js";
+import { parseResourceReceipt, assertWritePolicyReceipt } from "./contracts.js";
 import { validateStaticSVG } from "./svg.js";
 import { sha256 } from "./validate.js";
 import { writePolicyReceipt } from "./types.js";
@@ -90,6 +91,12 @@ export class ResourcePublisher {
     let intent = await this.journal.load<UploadIntent>(journalKey);
     if (intent && intent.schema_version !== 1)
       throw new Error("Unsupported resource intent schema");
+    if (intent?.policy_checks !== undefined) {
+      if (!Array.isArray(intent.policy_checks))
+        throw new Error("Invalid resource intent policy receipts");
+      intent.policy_checks.forEach(assertWritePolicyReceipt);
+    }
+    if (intent?.receipt != null) parseResourceReceipt(intent.receipt);
     if (
       intent &&
       (!["reserved", "unknown", "confirmed"].includes(intent.status) ||
@@ -194,6 +201,7 @@ export class ResourcePublisher {
       version_id: existing.version_id,
       confirmed_at: this.now().toISOString(),
     };
+    parseResourceReceipt(receipt);
     await this.capacity.confirm(key, receipt);
     await this.journal.commit(journalKey, {
       ...intent,

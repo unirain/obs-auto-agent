@@ -8,7 +8,12 @@ import {
   type ExecutionScope,
   type JsonValue,
 } from "../contracts/index.js";
-import { validateSchema } from "../contracts/schema.js";
+import {
+  validateSchema,
+  type UsageTotalsSchemaValue,
+} from "../contracts/schema.js";
+export { UsageTotalsSchema } from "../contracts/schema.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export interface DetailedUsage extends Usage {
   /** Observed lower bound when total SDK cost is unavailable; null means no priced observation. */
   known_cost_usd: number | null;
@@ -166,24 +171,15 @@ export function aggregateInvocations(records: InvocationRecord[]): Usage {
   };
 }
 export function beijingDay(utcTimestamp: string): string {
-  if (!/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(utcTimestamp))
-    throw new AgentError(
-      "corrupt",
-      "Usage timestamp requires explicit UTC offset",
-    );
+  assertUtcInstant(utcTimestamp, "Invocation started_at");
   const time = Date.parse(utcTimestamp);
   if (!Number.isFinite(time))
     throw new AgentError("corrupt", "Invalid usage date");
   return new Date(time + 8 * 3600000).toISOString().slice(0, 10);
 }
-export interface UsageTotals extends Usage {
-  known_cost_usd: number | null;
-  token_status: "known" | "partial" | "unknown";
-  invocation_count: number;
-  unknown_invocations: number;
-  unresolved_invocations: number;
-  attribution_complete: boolean;
-  unattributed_invocations: number;
+export type UsageTotals = UsageTotalsSchemaValue;
+export function parseUsageTotals(value: unknown): UsageTotals {
+  return validateSchema<UsageTotals>("usage_totals", value);
 }
 export interface InvocationUsageFact {
   workspace_id: string;
@@ -248,7 +244,7 @@ export function sumUsage(
     output = values.reduce((n, v) => n + v.usage.output_tokens, 0);
   if (!Number.isSafeInteger(input) || !Number.isSafeInteger(output))
     throw new AgentError("corrupt", "Usage aggregate overflow");
-  return {
+  return parseUsageTotals({
     input_tokens: input,
     output_tokens: output,
     cost_usd: allPriced
@@ -267,7 +263,7 @@ export function sumUsage(
     unresolved_invocations: values.filter((v) => v.unresolved).length,
     attribution_complete: true,
     unattributed_invocations: 0,
-  };
+  });
 }
 const isObject = (
   value: JsonValue | undefined,

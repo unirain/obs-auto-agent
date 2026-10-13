@@ -1,6 +1,7 @@
 import type { ActionsRun } from "./run-health.js";
 import type { MonitorEvent } from "./source-health.js";
 import { runtimeHours } from "../config/runtime-limits.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export const RUN_REASONS = [
   "missed_schedule",
   "report_missing",
@@ -15,7 +16,14 @@ export function runIncidentEvents(
   now: Date,
   watchdogGapHours = 36,
 ): MonitorEvent[] {
-  const gapMs = runtimeHours(watchdogGapHours, "watchdog_gap_hours") * 3_600_000;
+  const gapMs =
+    runtimeHours(watchdogGapHours, "watchdog_gap_hours") * 3_600_000;
+  if (enabledAt !== null) assertUtcInstant(enabledAt, "monitor enabled_at");
+  for (const run of runs) {
+    assertUtcInstant(run.started_at, "Actions started_at");
+    if (run.finished_at !== undefined)
+      assertUtcInstant(run.finished_at, "Actions finished_at");
+  }
   if (!enabledAt) return [];
   const anchor = Date.parse(enabledAt);
   if (!Number.isFinite(anchor))

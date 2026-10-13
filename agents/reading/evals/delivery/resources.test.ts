@@ -55,6 +55,35 @@ class CapacityFake implements ResourceCapacity {
   }
 }
 describe("immutable resource publisher", () => {
+  it("a malformed persisted UTC receipt stops a fresh process before any new external effect", async () => {
+    const s = new ImageFake(),
+      c = new CapacityFake(),
+      j = new MemoryJournal();
+    const receipt = await new ResourcePublisher(s, j, c, async () => {}).upload(
+      input,
+    );
+    const [key, value] = [...j.data.entries()].find(([key]) =>
+      key.startsWith("resource-"),
+    )!;
+    const original = structuredClone(value) as { receipt: ResourceReceipt };
+    j.data.set(key, {
+      ...original,
+      receipt: { ...original.receipt, confirmed_at: "2026-02-30" },
+    });
+    await expect(
+      new ResourcePublisher(s, j, c, async () => {}).upload(input),
+    ).rejects.toThrow("schema/UTC");
+    expect(s.writes).toBe(1);
+    expect(c.receipts.size).toBe(1);
+    expect(
+      (j.data.get(key) as { receipt: ResourceReceipt }).receipt.confirmed_at,
+    ).toBe("2026-02-30");
+    j.data.set(key, original); // explicit trusted test repair; the producer does not silently normalize state
+    expect(
+      await new ResourcePublisher(s, j, c, async () => {}).upload(input),
+    ).toEqual(receipt);
+    expect(s.writes).toBe(1);
+  });
   it("lost response reconciles stable keys without double accounting in next run", async () => {
     const s = new ImageFake(),
       c = new CapacityFake(),

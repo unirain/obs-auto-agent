@@ -1,0 +1,438 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "delivery_id",
+    "project_id",
+    "generation_version",
+    "branch",
+    "status",
+    "prepared",
+    "pr",
+    "uncertain_action",
+    "reason",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "number"
+    },
+    "delivery_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "generation_version": {
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "const": "publishing",
+          "type": "string"
+        },
+        {
+          "const": "awaiting_review",
+          "type": "string"
+        },
+        {
+          "const": "closed_unmerged",
+          "type": "string"
+        },
+        {
+          "const": "merged",
+          "type": "string"
+        },
+        {
+          "const": "delivery_conflict",
+          "type": "string"
+        },
+        {
+          "const": "needs_resume",
+          "type": "string"
+        },
+        {
+          "const": "policy_blocked",
+          "type": "string"
+        },
+        {
+          "const": "superseded",
+          "type": "string"
+        }
+      ]
+    },
+    "prepared": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "base_commit",
+            "base_tree",
+            "tree_sha",
+            "commit_sha",
+            "message",
+            "identity",
+            "blobs",
+            "files"
+          ],
+          "properties": {
+            "base_commit": {
+              "pattern": "^[a-f0-9]{40}$",
+              "type": "string"
+            },
+            "base_tree": {
+              "pattern": "^[a-f0-9]{40}$",
+              "type": "string"
+            },
+            "tree_sha": {
+              "pattern": "^[a-f0-9]{40}$",
+              "type": "string"
+            },
+            "commit_sha": {
+              "pattern": "^[a-f0-9]{40}$",
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "identity": {
+              "additionalProperties": false,
+              "type": "object",
+              "required": [
+                "name",
+                "email",
+                "date"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "date": {
+                  "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+                  "type": "string"
+                }
+              }
+            },
+            "blobs": {
+              "type": "array",
+              "items": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "path",
+                  "sha",
+                  "content_base64"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "sha": {
+                    "pattern": "^[a-f0-9]{40}$",
+                    "type": "string"
+                  },
+                  "content_base64": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "files": {
+              "type": "array",
+              "items": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "path",
+                  "sha256"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pr": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "number",
+            "url",
+            "state",
+            "branch",
+            "head_sha",
+            "delivery_id"
+          ],
+          "properties": {
+            "number": {
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            "url": {
+              "type": "string"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "const": "open",
+                  "type": "string"
+                },
+                {
+                  "const": "closed_unmerged",
+                  "type": "string"
+                },
+                {
+                  "const": "merged",
+                  "type": "string"
+                }
+              ]
+            },
+            "branch": {
+              "type": "string"
+            },
+            "head_sha": {
+              "pattern": "^[a-f0-9]{40}$",
+              "type": "string"
+            },
+            "delivery_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_at": {
+              "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+              "type": "string"
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "merged_at": {
+              "anyOf": [
+                {
+                  "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "uncertain_action": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "policy_checks": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action",
+          "evidence",
+          "status",
+          "checked_at"
+        ],
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "check_id",
+                  "policy_commit",
+                  "policy_hash",
+                  "checked_at"
+                ],
+                "properties": {
+                  "check_id": {
+                    "pattern": "^[a-f0-9]{64}$",
+                    "type": "string"
+                  },
+                  "policy_commit": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{40}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "policy_hash": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "checked_at": {
+                    "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+                    "type": "string"
+                  },
+                  "execution_permission": {
+                    "anyOf": [
+                      {
+                        "const": "allowed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "denied",
+                        "type": "string"
+                      },
+                      {
+                        "const": "unavailable",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "verified",
+                "type": "string"
+              },
+              {
+                "const": "legacy_unverified",
+                "type": "string"
+              }
+            ]
+          },
+          "checked_at": {
+            "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "updated_at": {
+      "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+      "type": "string"
+    },
+    "superseded_by": {
+      "type": "string"
+    },
+    "review_outcome": {
+      "anyOf": [
+        {
+          "const": "accepted_without_changes",
+          "type": "string"
+        },
+        {
+          "const": "accepted_with_changes",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "type": "string"
+        },
+        {
+          "const": "pending",
+          "type": "string"
+        }
+      ]
+    },
+    "merged_notes": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "path",
+          "content",
+          "sha"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "sha": {
+            "pattern": "^[a-f0-9]{40}$",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

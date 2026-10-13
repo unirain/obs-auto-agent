@@ -1,3 +1,4 @@
+import {assertUtcInstant} from '../contracts/utc.js';
 import {MaterialBodyCache,type SnapshotBodyReader,type BodyCacheLimits} from './bodies.js';
 import {digest,EvidenceSchema,ResearchSchema,parseModel,type Evidence,type ResearchPacket} from '../stages/contracts.js';
 export type SnapshotBodyReference={schema_version:1;path:string;sha256:string;bytes:number};
@@ -6,7 +7,7 @@ export class EvidenceRegistry {
   private snapshots=new Map<string,MaterialSnapshot[]>();
   readonly bodies:MaterialBodyCache;
   constructor(initial:MaterialSnapshot[]=[],reader?:SnapshotBodyReader,project_id?:string,limits?:Partial<BodyCacheLimits>) {this.bodies=new MaterialBodyCache(reader,project_id,limits);for(const material of initial)this.register(material);}
-  register(snapshot:MaterialSnapshot):void {if(!snapshot.body_reference&&digest(snapshot.text)!==snapshot.hash)throw new Error('snapshot_hash_invalid');const prior=this.snapshots.get(snapshot.hash)??[];if(!prior.some(item=>item.url===snapshot.url&&item.retrieved_at===snapshot.retrieved_at))prior.push(snapshot);this.snapshots.set(snapshot.hash,prior);}
+  register(snapshot:MaterialSnapshot):void {assertUtcInstant(snapshot.retrieved_at,'material retrieved_at');if(!snapshot.body_reference&&digest(snapshot.text)!==snapshot.hash)throw new Error('snapshot_hash_invalid');const prior=this.snapshots.get(snapshot.hash)??[];if(!prior.some(item=>item.url===snapshot.url&&item.retrieved_at===snapshot.retrieved_at))prior.push(snapshot);this.snapshots.set(snapshot.hash,prior);}
   get(hash:string,source_url?:string,retrieved_at?:string):MaterialSnapshot {const matches=(this.snapshots.get(hash)??[]).filter(item=>(source_url===undefined||item.url===source_url||item.requested_url===source_url)&&(retrieved_at===undefined||item.retrieved_at===retrieved_at));if(!matches.length)throw new Error('snapshot_missing');if(matches.length>1)throw new Error('snapshot_identity_ambiguous');return matches[0]!;}
   follow(from_hash:string,url:string):void {if(!(this.snapshots.get(from_hash)??[]).some(snapshot=>snapshot.links.includes(url)))throw new Error('reference_not_in_material');}
   withSnapshot<T>(snapshot:MaterialSnapshot,consume:(material:MaterialSnapshot)=>T|Promise<T>):Promise<T>{return this.bodies.withSnapshot(snapshot,consume);}

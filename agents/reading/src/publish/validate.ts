@@ -40,7 +40,7 @@ export function validateDelivery(
     throw new Error("Invalid delivery identity");
   if (
     !/^[a-f0-9]{40}$/.test(d.base_commit) ||
-    !Number.isFinite(Date.parse(d.sources_verified_at)) ||
+    !isUtcInstant(d.sources_verified_at) ||
     !d.files.length ||
     !d.sources.length
   )
@@ -103,6 +103,7 @@ export function validateDelivery(
   if (notes !== 1)
     throw new Error("Each delivery must contain exactly one note");
   for (const r of d.resources) {
+    parseResourceReceipt(r);
     if (
       r.project_id !== d.project_id ||
       !/^[a-f0-9]{64}$/.test(r.sha256) ||
@@ -121,6 +122,7 @@ export function validatePreparedFiles(
   d: SealedDelivery,
   p: PreparedCommit,
 ): void {
+  assertUtcInstant(p.identity.date, "prepared Git identity date");
   if (
     p.base_commit !== d.base_commit ||
     p.files.length !== d.files.length ||
@@ -142,3 +144,5 @@ export function validatePreparedFiles(
       throw new Error("Prepared commit blob differs from sealed artifact");
   }
 }
+import { assertUtcInstant, isUtcInstant } from "../contracts/utc.js";
+import { parseResourceReceipt } from "./contracts.js";

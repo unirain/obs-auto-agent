@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {canonicalJson,type InvocationRecord,type InvocationMessage} from '../contracts/index.js';
-import {digest,type StageTask} from './contracts.js';
+import {digest,parseStageTask,type StageTask} from './contracts.js';
 import {PolicyGate,type PolicySubject} from '../policy/gate.js';
 import {type ModelAdapter,type ToolDefinition,SDK_VERSION,QueryNotStartedError} from '../runtime/sdk.js';
 import {resolveRuntimeLimits,type ResolvedRuntimeLimits} from '../runtime/limits.js';
@@ -13,6 +13,7 @@ export function stageInputHash(input:Pick<StageExecution,'prompt'|'system_prompt
 export class StageExecutor {
   constructor(private readonly model:ModelAdapter,private readonly gate:PolicyGate,private readonly journal:JournalPort){}
   async execute(input:StageExecution):Promise<{invocation_id:string;result:unknown}> {
+    parseStageTask(input.task);if(input.task.deadline!==input.deadline.generation_deadline)throw new Error('stage_deadline_mismatch');if(input.subject.project_id!==input.task.project_id||input.subject.subject_ref!==`project:${input.task.project_id}`)throw new Error('stage_subject_mismatch');
     if(input.task.execution_scope!==input.subject.execution_scope)throw new Error('stage_scope_mismatch');
     const limits=resolveRuntimeLimits(input.runtime_limits);input.deadline.requireStart();const expected=stageInputHash(input);if(expected!==input.task.input_hash)throw new Error('stage_input_hash_mismatch');
     const check=await this.gate.require(input.subject,input.task.capability,input.task.checkpoint);

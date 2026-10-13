@@ -1,18 +1,19 @@
 {
-  "recorded_at": "2026-10-13T14:26:52.534519+00:00",
-  "implementation_sha256": "97ea7019b991a72f039de2740234b61b5ea4493e5351adfb21d1ac2e127e8e1f",
-  "fingerprint_files": 243,
+  "recorded_at": "2026-10-13T15:23:19.721645+00:00",
+  "implementation_sha256": "9c1c12c140ba2903526cea6dbdfd2159fbfff5ada9c66ee09b52eb122b32a1b6",
+  "fingerprint_files": 280,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
-    "git diff --check": "passed"
+    "git diff --check": "passed",
+    "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 62,
-    "passed": 375,
+    "files": 69,
+    "passed": 394,
     "failed": 0
   },
   "live_tests": {
@@ -27,22 +28,21 @@
   "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "b49ab0a04990aaedaaeda0867cf73f24c3d8feb2",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38413545670",
     "environment": "Linux / Node 24.10.0",
     "scope": "Local contract/replay suite only; no live model/IAM/delivery/human acceptance"
   },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "65cffd96980f593f0276d875ee3953ac0005d0a6",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38412794310",
-    "scope": "Local contract/replay suite only"
+  "schema_documents": {
+    "count": 38,
+    "status": "checked"
   },
-  "followup_checks": [
-    "typecheck",
-    "build",
-    "bootstrap:7",
-    "recovery:8"
-  ]
+  "contract_gate": {
+    "G0": "complete",
+    "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
+  }
 }

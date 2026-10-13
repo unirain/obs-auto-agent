@@ -12,6 +12,7 @@ import {
 } from "../../src/app/watchdog.js";
 import { parseDeployment } from "../../src/config/deployment.js";
 import { sha256 } from "../../src/contracts/index.js";
+import {buildUsageLedger,usageForRun} from '../../src/workspace/usage.js';
 const deployment = () =>
   parseDeployment(
     JSON.parse(
@@ -47,6 +48,9 @@ it("watchdog validates HEAD chain and reads only committed health/reports, never
       records: {
         "sources/health": {
           schema_version: 1,
+          active: {},
+          gaps: {},
+          last_success: {},
           events: [
             {
               event_id: "e1",
@@ -63,10 +67,18 @@ it("watchdog validates HEAD chain and reads only committed health/reports, never
         "runs/42": {
           schema_version: 1,
           run_id: "42",
+          logical_key:'obs-notes-hub:reading:2026-10-13',
+          input_commit:null,
+          versions:{implementation_commit:null,projects:[]},
+          policy_check_refs:[],
           workspace_id: d.workspace_id,
           execution_scope: "production",
           mode: "scheduled",
+          started_at:'2026-10-13T00:00:00Z',
           finished_at: "2026-10-13T01:00:00Z",
+          outcome:'deferred_work',
+          source_results:[],project_ids:[],delivery_results:[],blocked_projects:[],
+          usage:usageForRun(buildUsageLedger([initial]),'production',d.workspace_id,'42'),
           failures: [{ subject: "p1", reason: "capacity_unknown" }],
         },
       },

@@ -1,5 +1,6 @@
 import {parsePublicFeed,directMediaFormat} from '../tools/feed.js';
 import {canonicalJson} from '../contracts/index.js';
+import {parseSourceResult,parseSourceProgress,parseSourceCursor} from './records.js';
 import * as cheerio from 'cheerio';
 import {digest} from '../stages/contracts.js';
 import {discoverCandidate,normalizeUrl,type IdentityState,addCandidate} from './identity.js';
@@ -7,7 +8,7 @@ export type SourceConfig={source_id:'langchain_blog'|'claude_resources';entry_ur
 export type SourceCursor={page_url:string;offset:number;page_hash:string|null;seen_pages:string[];window_start:string;started_at:string};
 export type SourceProgress={schema_version:1;active:SourceCursor|null;last_complete_watermark:string|null;watermark_ids:string[];observed_ids:string[];last_success_at:string|null};
 export const emptySourceProgress=():SourceProgress=>({schema_version:1,active:null,last_complete_watermark:null,watermark_ids:[],observed_ids:[],last_success_at:null});
-export type SourceResult={source_id:string;status:'success'|'failed'|'partial'|'disabled'|'not_attempted';reason_code:string|null;attempted_at:string|null;last_success_at:string|null;
+export type SourceResult={source_id:SourceConfig['source_id'];status:'success'|'failed'|'partial'|'disabled'|'not_attempted';reason_code:string|null;attempted_at:string|null;last_success_at:string|null;
   cursor_before:SourceCursor|null;cursor_after:SourceCursor|null;coverage:{from:string;to:string}|null;coverage_gap:{reason:string;from:string;to:string}|null;unsupported:string[];unsupported_evidence?:{url:string;format:string;reason:string;excerpt:string}[]};
 export type SourcePage={candidates:ReturnType<typeof discoverCandidate>[];observed_candidates?:ReturnType<typeof discoverCandidate>[];observed_ids?:string[];next:SourceCursor|null;result:SourceResult};
 export type HtmlFetch=(url:string)=>Promise<{url:string;body:string}>;
@@ -15,10 +16,10 @@ function parsedDate(raw:string|undefined):string|null {if(!raw)return null;const
 export class WebSourceAdapter {
   constructor(readonly config:SourceConfig,private readonly fetch:HtmlFetch){for(const [key,value] of Object.entries({window_days:config.window_days,batch_size:config.batch_size}))if(!Number.isSafeInteger(value)||value<1)throw new Error(`source_config_invalid:${key}`);if(config.overlap_hours!==undefined&&(!Number.isFinite(config.overlap_hours)||config.overlap_hours<0))throw new Error('source_config_invalid:overlap_hours');if(config.retention_days!==undefined&&(!Number.isFinite(config.retention_days)||config.retention_days<=0))throw new Error('source_config_invalid:retention_days');}
   async collect(progress:SourceProgress,now:Date):Promise<SourcePage&{progress:SourceProgress}>{
-    let cursor=progress.active;
+    parseSourceProgress(progress);let cursor=progress.active;
     if(!cursor){const from=progress.last_complete_watermark?new Date(Date.parse(progress.last_complete_watermark)-(this.config.overlap_hours??24)*3600000).toISOString():new Date(now.getTime()-this.config.window_days*86400000).toISOString();
       cursor={page_url:this.config.entry_url,offset:0,page_hash:null,seen_pages:[],window_start:from,started_at:now.toISOString()};}
-    const page=await this.page(cursor,now);const next=structuredClone(progress);
+    const page=await this.page(cursor,now);parseSourceResult(page.result);const next=structuredClone(progress);
     if(['failed','disabled','not_attempted'].includes(page.result.status))return {...page,next:progress.active,result:{...page.result,cursor_before:progress.active,cursor_after:progress.active},progress:next};
     const previouslySeen=new Set(progress.observed_ids??[]);const firstWindow=new Date(cursor.window_start);firstWindow.setUTCHours(0,0,0,0);
     page.candidates=(page.observed_candidates??page.candidates).filter(candidate=>!previouslySeen.has(candidate.source_item_id)&&(!progress.last_complete_watermark?candidate.published_at===null||candidate.published_at>=firstWindow.toISOString():true));
@@ -30,10 +31,10 @@ export class WebSourceAdapter {
         page.result.status='partial';page.result.reason_code='coverage_gap';page.result.coverage_gap={reason:'source_retention_exceeded',from:progress.last_complete_watermark,to:new Date(now.getTime()-this.config.retention_days*86400000).toISOString()};}
       else if(this.config.source_id==='claude_resources'&&progress.last_complete_watermark){page.result.coverage_gap=null;page.result.reason_code=null;page.result.status='success';}
     }else{page.result.status='partial';page.result.reason_code='pagination_pending';page.result.last_success_at=null;}
-    return {...page,progress:next};
+    parseSourceProgress(next);parseSourceResult(page.result);return {...page,progress:next};
   }
   async page(cursor:SourceCursor|null,now:Date):Promise<SourcePage>{
-    const source_id=this.config.source_id;const started=now.toISOString();
+    if(cursor)parseSourceCursor(cursor);const source_id=this.config.source_id;const started=now.toISOString();
     if(!this.config.enabled)return {candidates:[],next:cursor,result:{source_id,status:'disabled',reason_code:'policy_disabled',attempted_at:null,last_success_at:null,cursor_before:cursor,cursor_after:cursor,coverage:null,coverage_gap:null,unsupported:[]}};
     const current=cursor??{page_url:this.config.entry_url,offset:0,page_hash:null,seen_pages:[],window_start:new Date(now.getTime()-this.config.window_days*86400000).toISOString(),started_at:started};
     try{

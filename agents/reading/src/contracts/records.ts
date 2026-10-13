@@ -8,6 +8,17 @@ import {
 } from "./index.js";
 import { validateSchema, type StorageReservationSchema } from "./schema.js";
 import type { Static } from "@sinclair/typebox";
+import { assertUtcInstant } from "./utc.js";
+function validateInvocationMetadata(key: string, value: unknown): void {
+  if (!key.startsWith("invocation_meta/") || value === null) return;
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new AgentError("corrupt", "Invalid invocation metadata");
+  if (Object.hasOwn(value, "started_at"))
+    assertUtcInstant(
+      (value as Record<string, unknown>).started_at,
+      "Invocation started_at",
+    );
+}
 type Reservation = Static<typeof StorageReservationSchema>;
 function validatedReservation(
   key: string,
@@ -173,6 +184,7 @@ export function validateRecords(
   change: CheckpointChange,
 ): void {
   for (const [key, value] of Object.entries(change.records ?? {})) {
+    validateInvocationMetadata(key, value);
     if (
       (key.startsWith("invocations/") || key.startsWith("receipts/")) &&
       value !== null
@@ -198,6 +210,7 @@ export function validateRestoredRecords(
   scope: WorkspaceHandle["execution_scope"],
 ): void {
   for (const [key, value] of Object.entries(records)) {
+    validateInvocationMetadata(key, value);
     for (const validator of validators)
       if (key.startsWith(validator.prefix))
         validator.restore?.(value, scope, key);

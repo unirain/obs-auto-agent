@@ -28,6 +28,8 @@ import { runWatchdog } from "../monitor/main.js";
 import type { SourceEvent, SourceHealth } from "../collect/incidents.js";
 import { createGitHubAppClient, parseAppCredentials } from "../publish/auth.js";
 import type { RunReport } from "./controller.js";
+import {parseRunReport} from './run-records.js';
+import {parseSourceHealth} from '../monitor/contracts.js';
 export function readonlyObjectStore(store: ObjectStore): ObjectStore {
   return {
     bucket: store.bucket,
@@ -108,7 +110,7 @@ export async function readMonitorProjection(
       throw new AgentError("corrupt", "Monitor projection JSON invalid");
     }
     if (file.path === "state/sources/health.json") {
-      const health = parsed as SourceHealth;
+      const health = parseSourceHealth(parsed);
       if (health.schema_version !== 1 || !Array.isArray(health.events))
         throw new AgentError("corrupt", "Monitor source-health schema invalid");
       let position = -1;
@@ -135,7 +137,7 @@ export async function readMonitorProjection(
       }
       events = health.events;
     } else {
-      const report = parsed as RunReport;
+      const report = parseRunReport(parsed);
       if (
         report.schema_version !== 1 ||
         report.execution_scope !== deployment.execution_scope ||

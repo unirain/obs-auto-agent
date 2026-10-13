@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { sha256, AgentError } from "../contracts/index.js";
+import { isUtcInstant } from "../contracts/utc.js";
 export const G1_REQUIRED_ASSERTIONS = [
   "immutable_race",
   "forbid_overwrite",
@@ -43,7 +44,7 @@ export async function assertG1Evidence(
     value.isolated_resources !== true ||
     value.sdk !== "ali-oss@6.23.0" ||
     !value.observed_at ||
-    !Number.isFinite(Date.parse(value.observed_at)) ||
+    !isUtcInstant(value.observed_at) ||
     G1_REQUIRED_ASSERTIONS.some((name) => value.assertions?.[name] !== "passed")
   )
     throw new AgentError(

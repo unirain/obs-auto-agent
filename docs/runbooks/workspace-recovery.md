@@ -64,3 +64,9 @@ SDK message ID 重放按规范化 JSON 比较；整个 query 的累计 summary �
 容量与 GC 引用使用 `manifestBlobs(file)` 的物理集合；logical SHA 不一定有同名 OSS blob。旧单 blob 格式保持严格可读，超大的旧无 chunks 条目仍拒绝。任一块缺失／损坏时，HEAD 恢复停止；未发布 commit 的块只是孤立占用，不能作为恢复完成事实。历史保护版本的所有块都保留，解除引用后的宽限及 commit 永久保护不变。
 
 注册业务 record validators 时应同时提供 restore hook，且在 Manager.restore 前完成注册。S 的基础校验不代替项目、来源或交付 DTO 的业务解析；未知 schema 不能在恢复时自动升级。
+
+## G0 严格契约后的原型记录兼容性
+
+本次契约收尾拒绝原型中的短哈希、`now`/date-only 等非 UTC 时刻、缺字段运行报告，以及旧非 canonical 内容派生的 PolicyCheck ID。不会自动补齐版本、改日期或重写回执 ID。原 immutable commit/manifest、费用和未知调用事实必须保留；需要使用记录其原版本的只读程序先核验原型数据，再在独立审阅的迁移方案下写新的递增提交。没有运行过此迁移，也不能通过删除 HEAD、回滚序号或关闭 parser 来重新开始付费。
+
+当前宿主默认使用完整 G0 schema。`npx tsx agents/reading/evals/generate-schemas.ts --check` 只核对公开契约文档，不能把历史数据变成已迁移；来源、模型、RAM 和真实交付仍按 G1–G5 门槛验证。

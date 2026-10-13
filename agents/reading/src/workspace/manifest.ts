@@ -9,6 +9,7 @@ import {
 } from "../contracts/index.js";
 import { validateSchema } from "../contracts/schema.js";
 import { validatePath, MAX_FILE_BYTES } from "./paths.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export function encode(value: unknown): Uint8Array {
   return Buffer.from(canonicalJson(value));
 }
@@ -25,8 +26,7 @@ export function decode<T>(bytes: Uint8Array, schema: string): T {
 }
 export function validateManifest(value: WorkspaceManifest): void {
   validateSchema("workspace", value);
-  if (!Number.isFinite(Date.parse(value.created_at)))
-    throw new AgentError("corrupt", "Invalid manifest timestamp");
+  assertUtcInstant(value.created_at, "Manifest created_at");
   const paths = new Set<string>();
   for (const f of value.files) {
     validateManifestFile(f);

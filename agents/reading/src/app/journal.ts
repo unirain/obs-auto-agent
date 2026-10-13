@@ -22,6 +22,7 @@ function json(value: unknown): JsonValue {
 /** A single host writer shares one advancing handle across every business module. */
 export class WorkspaceJournal implements OperationsJournal {
   private tail: Promise<void> = Promise.resolve();
+  private readonly committedKeys=new Set<string>();
   constructor(
     private readonly manager: WorkspaceManager,
     public handle: WorkspaceHandle,
@@ -35,6 +36,7 @@ export class WorkspaceJournal implements OperationsJournal {
   keys(prefix = ""): string[] {
     return Object.keys(this.handle.records).filter((k) => k.startsWith(prefix));
   }
+  committedRecordKeys(prefix=''):string[]{return [...this.committedKeys].filter(key=>key.startsWith(prefix));}
   async commit<T>(key: string, value: T): Promise<void> {
     await this.commitMany({ [key]: value }, `record:${key}`);
   }
@@ -59,6 +61,7 @@ export class WorkspaceJournal implements OperationsJournal {
       if (result.status !== "committed")
         throw new Error(`checkpoint_${result.status}`);
       this.handle = result.handle;
+      for(const key of Object.keys(records))this.committedKeys.add(key);
     });
     // A failed checkpoint poisons this writer; no subsequent queued effect can run on stale state.
     this.tail = task;

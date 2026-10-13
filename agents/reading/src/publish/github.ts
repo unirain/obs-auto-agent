@@ -1,3 +1,5 @@
+import { isUtcInstant } from "../contracts/utc.js";
+import { parsePullRequestFact } from "./contracts.js";
 import { samePrimarySource } from "./primary-source.js";
 import { Octokit } from "@octokit/rest";
 import { createHash } from "node:crypto";
@@ -30,7 +32,7 @@ export function gitCommitContent(
   if (
     /[\n<>]/.test(identity.name) ||
     /[\n<>]/.test(identity.email) ||
-    !Number.isFinite(Date.parse(identity.date))
+    !isUtcInstant(identity.date)
   )
     throw new Error("Unsafe Git identity");
   const seconds = Math.floor(Date.parse(identity.date) / 1000);
@@ -149,7 +151,7 @@ export class OctokitGitHub implements GitHubPort {
     ).data;
     if (!["open", "closed"].includes(p.state))
       throw new Error("Unknown actual PR state");
-    return {
+    return parsePullRequestFact({
       number: p.number,
       url: p.html_url,
       state: p.merged
@@ -163,7 +165,7 @@ export class OctokitGitHub implements GitHubPort {
       created_at: p.created_at,
       closed_at: p.closed_at,
       merged_at: p.merged_at,
-    };
+    });
   }
   async authority(): Promise<import("./regeneration.js").GitHubReadAuthority> {
     const metadata = (await this.client.repos.get(this.args())).data;
@@ -222,21 +224,23 @@ export class OctokitGitHub implements GitHubPort {
       ).data;
       if (!["open", "closed"].includes(full.state))
         throw new Error("Unknown PR state in readonly snapshot");
-      prs.push({
-        number: full.number,
-        url: full.html_url,
-        state: full.merged
-          ? "merged"
-          : full.state === "open"
-            ? "open"
-            : "closed_unmerged",
-        branch: full.head.ref,
-        head_sha: full.head.sha,
-        delivery_id: parseDeliveryMarker(full.body)?.delivery_id ?? null,
-        created_at: full.created_at,
-        closed_at: full.closed_at,
-        merged_at: full.merged_at,
-      });
+      prs.push(
+        parsePullRequestFact({
+          number: full.number,
+          url: full.html_url,
+          state: full.merged
+            ? "merged"
+            : full.state === "open"
+              ? "open"
+              : "closed_unmerged",
+          branch: full.head.ref,
+          head_sha: full.head.sha,
+          delivery_id: parseDeliveryMarker(full.body)?.delivery_id ?? null,
+          created_at: full.created_at,
+          closed_at: full.closed_at,
+          merged_at: full.merged_at,
+        }),
+      );
     }
     const after = await this.authority();
     return {
@@ -298,21 +302,23 @@ export class OctokitGitHub implements GitHubPort {
       const full = (
         await this.client.pulls.get({ ...this.args(), pull_number: p.number })
       ).data;
-      prs.push({
-        number: full.number,
-        url: full.html_url,
-        state: full.merged
-          ? "merged"
-          : full.state === "open"
-            ? "open"
-            : "closed_unmerged",
-        branch: full.head.ref,
-        head_sha: full.head.sha,
-        delivery_id: parseDeliveryMarker(full.body)?.delivery_id ?? null,
-        created_at: full.created_at,
-        closed_at: full.closed_at,
-        merged_at: full.merged_at,
-      });
+      prs.push(
+        parsePullRequestFact({
+          number: full.number,
+          url: full.html_url,
+          state: full.merged
+            ? "merged"
+            : full.state === "open"
+              ? "open"
+              : "closed_unmerged",
+          branch: full.head.ref,
+          head_sha: full.head.sha,
+          delivery_id: parseDeliveryMarker(full.body)?.delivery_id ?? null,
+          created_at: full.created_at,
+          closed_at: full.closed_at,
+          merged_at: full.merged_at,
+        }),
+      );
     }
     let branch_sha: string | null = null;
     try {
@@ -627,7 +633,7 @@ export class OctokitGitHub implements GitHubPort {
         maintainer_can_modify: true,
       })
     ).data;
-    return {
+    return parsePullRequestFact({
       number: p.number,
       url: p.html_url,
       state: "open",
@@ -637,6 +643,6 @@ export class OctokitGitHub implements GitHubPort {
       created_at: p.created_at,
       closed_at: p.closed_at,
       merged_at: p.merged_at,
-    };
+    });
   }
 }

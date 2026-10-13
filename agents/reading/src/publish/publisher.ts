@@ -10,6 +10,8 @@ import { validateDelivery, validatePreparedFiles } from "./validate.js";
 import { reconcileRecord } from "./reconcile.js";
 import { recoveryRoute, assertRefreshAllowed } from "./recovery.js";
 import { runtimeHours } from "../config/runtime-limits.js";
+import { isUtcInstant } from "../contracts/utc.js";
+import { parseDeliveryRecord, parseStoredDelivery } from "./contracts.js";
 export interface PublisherOptions {
   workspace_id: string;
   committedRevision: () => Promise<string>;
@@ -29,7 +31,10 @@ export class Publisher {
     private options: PublisherOptions,
   ) {
     this.now = options.now ?? (() => new Date());
-    runtimeHours(options.sources_freshness_hours ?? 24, "sources_freshness_hours");
+    runtimeHours(
+      options.sources_freshness_hours ?? 24,
+      "sources_freshness_hours",
+    );
   }
   private key(id: string): string {
     return `delivery-${id}`;
@@ -44,6 +49,7 @@ export class Publisher {
       if (!record) throw new Error("Missing persisted historical delivery");
       if (record.schema_version !== 1)
         throw new Error("Unsupported delivery record schema");
+      parseDeliveryRecord(record);
       if (record.project_id !== projectId || record.delivery_id !== id)
         throw new Error("Historical delivery identity mismatch");
       records.push(record);
@@ -51,6 +57,7 @@ export class Publisher {
     return records;
   }
   private async save(r: DeliveryRecord): Promise<void> {
+    parseDeliveryRecord(r);
     await this.journal.commit(this.key(r.delivery_id), r);
   }
   async reconcile(delivery: SealedDelivery): Promise<DeliveryRecord[]> {
@@ -94,7 +101,7 @@ export class Publisher {
     if (
       refresh.delivery_id === previous.delivery_id ||
       !/^[a-zA-Z0-9_-]+$/.test(refresh.delivery_id) ||
-      !Number.isFinite(Date.parse(refresh.sources_verified_at))
+      !isUtcInstant(refresh.sources_verified_at)
     )
       throw new Error("Invalid immutable delivery refresh");
     const records = await this.reconcile(previous);
@@ -199,7 +206,14 @@ export class Publisher {
     );
     if (confirmedPR) return confirmedPR;
     const current = await this.options.classificationCurrent(d);
-    const route = recoveryRoute(d, records, current, this.now(), mode, this.options.sources_freshness_hours ?? 24);
+    const route = recoveryRoute(
+      d,
+      records,
+      current,
+      this.now(),
+      mode,
+      this.options.sources_freshness_hours ?? 24,
+    );
     if (route.route !== "publish") {
       if (
         ["resume_source_verification", "resume_classification"].includes(
@@ -326,15 +340,18 @@ type StoredDelivery = Omit<SealedDelivery, "files"> & {
   })[];
 };
 function encodeDelivery(d: SealedDelivery): StoredDelivery {
-  return {
+  const encoded = {
     ...d,
     files: d.files.map(({ content, ...f }) => ({
       ...f,
       content_base64: Buffer.from(content).toString("base64"),
     })),
   };
+  parseStoredDelivery(encoded);
+  return encoded;
 }
 function decodeDelivery(d: StoredDelivery): SealedDelivery {
+  parseStoredDelivery(d);
   return {
     ...d,
     files: d.files.map(({ content_base64, ...f }) => ({

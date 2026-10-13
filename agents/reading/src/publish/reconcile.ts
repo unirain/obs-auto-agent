@@ -1,4 +1,6 @@
 import type { DeliveryRecord, GitHubFact } from "./types.js";
+import { assertUtcInstant } from "../contracts/utc.js";
+import { assertGitHubFactTimes, parseDeliveryRecord } from "./contracts.js";
 export function reconcileRecord(
   record: DeliveryRecord,
   fact: GitHubFact,
@@ -6,6 +8,9 @@ export function reconcileRecord(
 ): DeliveryRecord {
   if (record.schema_version !== 1)
     throw new Error("Unsupported delivery record schema");
+  parseDeliveryRecord(record);
+  assertGitHubFactTimes(fact);
+  assertUtcInstant(now, "delivery updated_at");
   const own = fact.prs.filter(
     (p) =>
       p.delivery_id === record.delivery_id ||

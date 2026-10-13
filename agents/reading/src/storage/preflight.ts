@@ -1,4 +1,5 @@
 import { AgentError, type ObjectStore } from "../contracts/index.js";
+import { isUtcInstant } from "../contracts/utc.js";
 export async function preflight(store: ObjectStore): Promise<void> {
   const config = await store.configuration();
   if (config.versioning !== "never")
@@ -44,8 +45,7 @@ export async function listAll(store: ObjectStore, prefix: string) {
         !object.key.startsWith(prefix) ||
         !Number.isSafeInteger(object.size) ||
         object.size < 0 ||
-        typeof object.created_at !== "string" ||
-        !Number.isFinite(Date.parse(object.created_at))
+        !isUtcInstant(object.created_at)
       )
         throw new AgentError("corrupt", "Invalid object listing metadata");
     result.push(...page.objects);

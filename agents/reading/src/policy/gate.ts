@@ -1,3 +1,6 @@
+import {canonicalJson} from '../contracts/index.js';
+import {parsePolicyCheck} from './records.js';
+export {PolicyCheckSchema,parsePolicyCheck} from './records.js';
 import { digest, type Capability, type Scope } from '../stages/contracts.js';
 
 export type TrustedPolicy = {
@@ -27,7 +30,7 @@ export class PolicyGate {
       policy_commit:null,policy_hash:null,semantic_policy_hash:null,checked_at:this.now().toISOString(),execution_permission:'allowed',content_eligibility:'unresolved',reason_codes:[]};
     try {
       const policy=await this.load();result.policy_commit=policy.commit;result.policy_hash=policy.hash;result.semantic_policy_hash=policy.semantic_policy_hash;
-      if(!policy.commit||!policy.hash||!policy.semantic_policy_hash) throw new Error('invalid_trusted_policy');
+      if(!/^[a-f0-9]{40}$/.test(policy.commit)||![policy.hash,policy.semantic_policy_hash].every(value=>/^[a-f0-9]{64}$/.test(value))) throw new Error('invalid_trusted_policy');
       // Reconciliation is read-only and records facts even after permissions are revoked.
       if(capability!=='reconcile') {
         if(policy.paused) result.reason_codes.push('global_paused');
@@ -51,12 +54,12 @@ export class PolicyGate {
         if(!['discover','main_read','classify_only','cleanup'].includes(capability) && result.content_eligibility!=='allowed')result.reason_codes.push(result.content_eligibility==='excluded'?'semantic_excluded':'classification_required');
         if(result.reason_codes.length)result.execution_permission='denied';
       }
-    } catch {result.execution_permission='unavailable';result.reason_codes=['policy_unavailable'];}
-    const check={...result,check_id:digest(JSON.stringify(result))};
+    } catch {result.execution_permission='unavailable';result.reason_codes=['policy_unavailable'];result.policy_commit=null;result.policy_hash=null;result.semantic_policy_hash=null;}
+    const check=parsePolicyCheck({...result,check_id:digest(canonicalJson(result))});
     await this.persist(check); // A permission that did not commit cannot authorize an effect.
     return check;
   }
   async require(subject:PolicySubject,capability:Capability,checkpoint:string):Promise<PolicyCheck>{
-    const check=await this.check(subject,capability,checkpoint);if(check.execution_permission!=='allowed')throw new Error(check.reason_codes.join(','));return check;
+    const check=parsePolicyCheck(await this.check(subject,capability,checkpoint));if(check.subject_ref!==subject.subject_ref||check.execution_scope!==subject.execution_scope||check.requested_capability!==capability||check.checkpoint!==checkpoint)throw new Error('policy_check_subject_binding_mismatch');if(check.execution_permission!=='allowed')throw new Error(check.reason_codes.join(','));return check;
   }
 }

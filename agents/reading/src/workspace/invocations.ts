@@ -11,6 +11,7 @@ import {
 } from "../contracts/index.js";
 import { validateSchema } from "../contracts/schema.js";
 import { aggregateUsage } from "./usage.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 const key = (id: string) => {
   if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id))
     throw new AgentError("corrupt", "Invalid invocation identity");
@@ -59,8 +60,7 @@ export class PersistentInvocationJournal implements InvocationJournal {
     if (handle.records[key(record.invocation_id)])
       throw new AgentError("conflict", "Invocation identity already used");
     const started = metadata?.started_at ?? new Date().toISOString();
-    if (!Number.isFinite(Date.parse(started)))
-      throw new AgentError("corrupt", "Invocation start timestamp invalid");
+    assertUtcInstant(started, "Invocation started_at");
     const attribution = {
       run_id: runId,
       started_at: started,

@@ -1,3 +1,4 @@
+import {assertUtcInstant} from '../contracts/utc.js';
 import { parse as parseYaml } from 'yaml';
 import {canonicalJson} from '../contracts/index.js';
 import type {RuntimeVersions} from '../runtime/versions.js';
@@ -43,4 +44,5 @@ export function verifyContext(bundle:ContextBundle,expectedProvider?:{model_prov
   if(bundle.model_base_url){const url=new URL(bundle.model_base_url);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)throw new Error('model_base_url_unsafe');}
   if(bundle.runtime_limits)resolveRuntimeLimits(bundle.runtime_limits);if(bundle.runtime_versions){const versions=bundle.runtime_versions;if(!/^\d+\.\d+\.\d+$/.test(versions.sdk_version)||!/^v\d+\.\d+\.\d+$/.test(versions.node_version)||!/^sha256:[a-f0-9]{64}$/.test(versions.tools_image_id)||![versions.sdk_hash,versions.tools_manifest_hash].every(hash=>/^[a-f0-9]{64}$/.test(hash))||!['requested_alias','provider_reported_unpinned'].includes(versions.model_version_status))throw new Error('fixed_runtime_versions_invalid');}
   if(bundle.prompt_templates){const stages=bundle.prompt_templates.agent?['agent','selection','research','writing','review']:['selection','research','writing','review'];const bytes=stages.map(stage=>{const text=bundle.prompt_templates![stage];if(!text)throw new Error('fixed_prompt_template_unavailable');return Buffer.from(text);});if(digest(Buffer.concat(bytes))!==bundle.prompt_hash)throw new Error('fixed_prompt_hash_mismatch');}
+  for(const note of [...bundle.examples,...bundle.related_notes])assertUtcInstant(note.organized_at,'note organized_at');
   for(const note of bundle.examples)if(digest(bundle.example_texts[note.path]??'')!==note.hash)throw new Error('example_hash_mismatch');}

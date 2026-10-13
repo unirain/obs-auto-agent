@@ -8,7 +8,7 @@ const check = (name: string, value: unknown) => {
   const schema = JSON.parse(
     readFileSync(`agents/reading/schemas/${name}.schema.json`, "utf8"),
   );
-  return (ajv.getSchema(schema.$id) ?? ajv.compile(schema))(value);
+  return ((schema.$id?ajv.getSchema(schema.$id):undefined) ?? ajv.compile(schema))(value);
 };
 it("public schemas agree with deployment, encoded delivery, resource and projection DTOs", () => {
   for (const profile of ["production", "preview", "integration"])

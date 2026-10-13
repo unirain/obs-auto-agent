@@ -1,4 +1,5 @@
 import type { Octokit } from "@octokit/rest";
+import { assertUtcInstant } from "../contracts/utc.js";
 export interface ActionsMetrics {
   schema_version: 1;
   repository: string;
@@ -80,6 +81,10 @@ export async function collectActionsMetrics(
       unique.set(job.id, job);
     }
     view.jobs = [...unique.values()].map((job) => {
+      if (job.started_at != null)
+        assertUtcInstant(job.started_at, "Actions job started_at");
+      if (job.completed_at != null)
+        assertUtcInstant(job.completed_at, "Actions job completed_at");
       const start = job.started_at ? Date.parse(job.started_at) : NaN,
         end = job.completed_at ? Date.parse(job.completed_at) : NaN;
       const elapsed =

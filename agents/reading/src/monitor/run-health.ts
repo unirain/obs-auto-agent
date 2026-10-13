@@ -1,6 +1,7 @@
 export type RunRecord = RunReport;
 import type { RunReport } from "../app/controller.js";
 import { runtimeHours } from "../config/runtime-limits.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export interface ActionsRun {
   id: string;
   mode: string;
@@ -27,7 +28,19 @@ export function runHealth(
   },
   now: Date,
 ): { faults: HealthFault[]; suppressed: boolean } {
-  const gapHours = runtimeHours(policy.watchdog_gap_hours ?? 36, "watchdog_gap_hours");
+  const gapHours = runtimeHours(
+    policy.watchdog_gap_hours ?? 36,
+    "watchdog_gap_hours",
+  );
+  if (policy.enabled_at !== null)
+    assertUtcInstant(policy.enabled_at, "monitor enabled_at");
+  if (policy.resumed_at != null)
+    assertUtcInstant(policy.resumed_at, "monitor resumed_at");
+  for (const run of runs) {
+    assertUtcInstant(run.started_at, "Actions started_at");
+    if (run.finished_at !== undefined)
+      assertUtcInstant(run.finished_at, "Actions finished_at");
+  }
   if (policy.globally_paused) return { faults: [], suppressed: true };
   if (!policy.enabled_at) return { faults: [], suppressed: false };
   const anchor = Math.max(

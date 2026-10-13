@@ -1,0 +1,173 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "schema_version",
+    "subject_ref",
+    "execution_scope",
+    "checkpoint",
+    "requested_capability",
+    "policy_commit",
+    "policy_hash",
+    "semantic_policy_hash",
+    "checked_at",
+    "execution_permission",
+    "content_eligibility",
+    "reason_codes",
+    "check_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "type": "number"
+    },
+    "subject_ref": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "execution_scope": {
+      "anyOf": [
+        {
+          "const": "production",
+          "type": "string"
+        },
+        {
+          "const": "preview",
+          "type": "string"
+        }
+      ]
+    },
+    "checkpoint": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requested_capability": {
+      "anyOf": [
+        {
+          "const": "discover",
+          "type": "string"
+        },
+        {
+          "const": "main_read",
+          "type": "string"
+        },
+        {
+          "const": "classify_only",
+          "type": "string"
+        },
+        {
+          "const": "select",
+          "type": "string"
+        },
+        {
+          "const": "research",
+          "type": "string"
+        },
+        {
+          "const": "write",
+          "type": "string"
+        },
+        {
+          "const": "review",
+          "type": "string"
+        },
+        {
+          "const": "upload",
+          "type": "string"
+        },
+        {
+          "const": "publish",
+          "type": "string"
+        },
+        {
+          "const": "reconcile",
+          "type": "string"
+        },
+        {
+          "const": "cleanup",
+          "type": "string"
+        }
+      ]
+    },
+    "policy_commit": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "policy_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "semantic_policy_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "checked_at": {
+      "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+      "type": "string"
+    },
+    "execution_permission": {
+      "anyOf": [
+        {
+          "const": "allowed",
+          "type": "string"
+        },
+        {
+          "const": "denied",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "type": "string"
+        }
+      ]
+    },
+    "content_eligibility": {
+      "anyOf": [
+        {
+          "const": "allowed",
+          "type": "string"
+        },
+        {
+          "const": "excluded",
+          "type": "string"
+        },
+        {
+          "const": "unresolved",
+          "type": "string"
+        }
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "check_id": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    }
+  }
+}

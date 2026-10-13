@@ -45,10 +45,10 @@ async function fixture(scope: 'preview'|'production' = 'preview') {
     index: [],
     query: "test",
     heldout: { urls: new Set(), note_paths: new Set() },
-    preferences_hash: "p",
+    preferences_hash: "148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940",
     skill_commit: "a".repeat(40),
-    skill_hash: "s",
-    prompt_hash: "p",
+    skill_hash: "043a718774c572bd8a25adbeb1bfcd5c0256ae11cecf9f9c3f925d0e52beaf89",
+    prompt_hash: "148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940",
     model: "replay",
     evidence_versions: [],
   });
@@ -104,13 +104,13 @@ async function fixture(scope: 'preview'|'production' = 'preview') {
       origin_source_ids: ["manual_url"],
       urls: [candidate.url],
       main_url: candidate.url,
-      source_snapshot_hash: "body",
+      source_snapshot_hash: "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
       classification: {
         candidate_id: candidate.candidate_id,
-        source_snapshot_hash: "body",
+        source_snapshot_hash: "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
         semantic_policy_hash: policyFixture().semantic_policy_hash,
         content_eligibility: "allowed",
-        evidence_hash: "e",
+        evidence_hash: "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
       },
     },
     prompt: "fixed",
@@ -121,6 +121,7 @@ async function fixture(scope: 'preview'|'production' = 'preview') {
     tools: [],
     deadline: new RunDeadline(),
   };
+  input.task.deadline=input.deadline.generation_deadline;
   input.task.input_hash = stageInputHash(input);
   project.pending_query = {
     stage: "research",
@@ -398,7 +399,7 @@ it('explicit changed input creates one new generation, preserving prior fees and
  const f=await fixture();try{
   await expect(applyRecovery(f.journal,f.request('new_generation','unsafe',{guidance:'Explain the failure mechanism more deeply'}),'operator')).rejects.toThrow('generation_invocation_unresolved');
   await applyRecovery(f.journal,f.request('record_result','received',{invocation_id:'old',input_hash:f.input.task.input_hash,status:'succeeded',usage:{input_tokens:7,output_tokens:4,cost_status:'unknown',cost_usd:null},structured_response:{answer:'actual receipt'}}),'operator');
-  const old=(await f.journal.load<HostProject>('projects/p1'))!;old.classification={candidate_id:old.candidate.candidate_id,source_snapshot_hash:'body',semantic_policy_hash:'s1',attempts:2,format_repairs:1,pending:false,credential:null};await f.journal.commit('projects/p1',old);
+  const old=(await f.journal.load<HostProject>('projects/p1'))!;old.classification={candidate_id:old.candidate.candidate_id,source_snapshot_hash:'230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5',semantic_policy_hash:'e8bc163c82eee18733288c7d4ac636db3a6deb013ef2d37b68322be20edc45cc',attempts:2,format_repairs:1,pending:false,credential:null};await f.journal.commit('projects/p1',old);
   const request=f.request('new_generation','new-input',{guidance:'Explain the failure mechanism more deeply'});expect(await applyRecovery(f.journal,request,'operator')).toMatchObject({generation_version:2});
   const restored=new WorkspaceJournal(f.manager,await f.manager.restore(f.project.workspace_id),'run2');const next=(await restored.load<HostProject>('projects/p1'))!;
   expect(next.generation_version).toBe(2);expect(next.counters.revisions).toBe(0);expect(next.counters.stalled_batches).toBe(0);expect(next.classification?.attempts).toBe(2);expect(next.context.example_texts).toEqual(old.context.example_texts);expect(next.context.context_id).not.toBe(old.context.context_id);
@@ -439,10 +440,12 @@ it('production regeneration requires complete remote readiness and persists its 
 it('SIGTERM interrupts an active paid query and a cold restart preserves unknown fees without repeating it',async()=>{
  const f=await fixture(),signals=new EventEmitter(),cancel=processCancellation(signals);try{
   await applyRecovery(f.journal,f.request('record_result','before-cancel',{invocation_id:'old',input_hash:f.input.task.input_hash,status:'succeeded',usage:{input_tokens:7,output_tokens:4,cost_status:'unknown',cost_usd:null},structured_response:{answer:'previous receipt'}}),'operator');
-  const input={...f.input,prompt:'new fixed query',deadline:new RunDeadline(Date.now(),60000,5000,cancel.signal)};input.task={...input.task,input_hash:''};input.task.input_hash=stageInputHash(input);let calls=0;
+  const input={...f.input,prompt:'new fixed query',deadline:new RunDeadline(Date.now(),60000,5000,cancel.signal)};input.task={...input.task,input_hash:'',deadline:input.deadline.generation_deadline};input.task.input_hash=stageInputHash(input);let calls=0;
   const adapter={async *stream(request:import('../../src/runtime/sdk.js').QueryRequest){calls++;expect(request.vault_root).toBe(join(f.root,'projects','p1','draft'));yield {message_id:'partial-before-cancel',type:'assistant' as const,summary:false,usage:{input_tokens:11,output_tokens:3,cost_status:'unknown' as const,cost_usd:null},observable:{}};signals.emit('SIGTERM');expect(request.signal.aborted).toBe(true);throw new Error('sdk_cancelled');}};
   await expect(new StageExecutor(adapter,f.gate,f.calls).execute(input)).rejects.toThrow('request_unknown:run_cancelled');expect(input.deadline.mayStart()).toBe(false);
   const restored=new WorkspaceJournal(f.manager,await f.manager.restore(f.project.workspace_id),'run2');const record=await new ApplicationInvocationJournal(restored).find('project:p1',input.task.input_hash,'research');expect(record).toMatchObject({status:'unknown',usage:{input_tokens:11,cost_status:'unknown',cost_usd:null}});
-  await expect(new StageExecutor(adapter,f.gate,new ApplicationInvocationJournal(restored)).execute({...input,deadline:new RunDeadline()})).rejects.toThrow('request_unknown');expect(calls).toBe(1);
+  await expect(new StageExecutor(adapter,f.gate,new ApplicationInvocationJournal(restored)).execute(inputForFreshDeadline(input))).rejects.toThrow('request_unknown');expect(calls).toBe(1);
  }finally{cancel.close();expect(signals.listenerCount('SIGTERM')).toBe(0);expect(signals.listenerCount('SIGINT')).toBe(0);await f.cleanup();}
 });
+
+function inputForFreshDeadline(input:StageExecution):StageExecution{const deadline=new RunDeadline();return {...input,deadline,task:{...input.task,deadline:deadline.generation_deadline}};}

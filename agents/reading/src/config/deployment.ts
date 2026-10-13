@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isUtcInstant } from "../contracts/utc.js";
 import type { Dispatch } from "./dispatch.js";
 export interface OSSBinding {
   bucket: string;
@@ -230,8 +231,7 @@ export function parseDeployment(value: unknown): Deployment {
   if (
     typeof d.cron_enabled !== "boolean" ||
     (d.enabled_at !== null &&
-      (typeof d.enabled_at !== "string" ||
-        !Number.isFinite(Date.parse(d.enabled_at)))) ||
+      (typeof d.enabled_at !== "string" || !isUtcInstant(d.enabled_at))) ||
     (d.g5_evidence !== null && !/^[a-f0-9]{64}$/.test(d.g5_evidence))
   )
     throw new Error("Invalid activation state");

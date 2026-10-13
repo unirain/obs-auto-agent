@@ -1,4 +1,6 @@
 import { AgentError, canonicalJson, sha256 } from "../contracts/index.js";
+import { isUtcInstant, assertUtcInstant } from "../contracts/utc.js";
+import { parseResourceReceipt } from "./contracts.js";
 import type { OperationsJournal, ResourceReceipt } from "./types.js";
 import type { ImageObject } from "./resources.js";
 export interface ImageVersion {
@@ -44,9 +46,7 @@ const object = (v: unknown): Record<string, unknown> | null =>
     ? (v as Record<string, unknown>)
     : null;
 const time = (v: unknown): number | null =>
-  typeof v === "string" && Number.isFinite(Date.parse(v))
-    ? Date.parse(v)
-    : null;
+  isUtcInstant(v) ? Date.parse(v) : null;
 const terminal = new Set(["merged", "closed_unmerged", "skipped"]);
 const projectStates = new Set([
   "discovered",
@@ -101,6 +101,15 @@ function knownRecord(
       "corrupt",
       `Unsupported ${key.split("/")[0]} record schema/state during image GC`,
     );
+  if (key.startsWith("image-gc-")) {
+    assertUtcInstant(r.planned_at, "image GC planned_at");
+    if (r.confirmed_at !== null)
+      assertUtcInstant(r.confirmed_at, "image GC confirmed_at");
+  }
+  if (key.startsWith("delivery-") && !key.startsWith("delivery-project-"))
+    assertUtcInstant(r.updated_at, "delivery updated_at");
+  if (key.startsWith("projects/") && r.retention_pruned_at != null)
+    assertUtcInstant(r.retention_pruned_at, "project retention_pruned_at");
   return r;
 }
 
@@ -140,6 +149,7 @@ export function imageProtection(
           "Invalid resource receipt during image GC",
         );
       if (!r.object_key.startsWith(prefix)) continue;
+      parseResourceReceipt(r);
       if (
         typeof r.project_id !== "string" ||
         typeof r.sha256 !== "string" ||

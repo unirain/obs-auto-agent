@@ -7,6 +7,7 @@ import {
   sha256,
 } from "../contracts/index.js";
 import { listAll } from "../storage/preflight.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 import {
   decode,
   validateManifest,
@@ -35,8 +36,8 @@ export async function collectGarbage(
 ): Promise<GcResult> {
   if (!protection.reference_knowledge_complete)
     throw new AgentError("unknown", "GC reference knowledge incomplete");
+  assertUtcInstant(protection.now, "GC observed_at");
   const now = Date.parse(protection.now);
-  if (!Number.isFinite(now)) throw new AgentError("corrupt", "Invalid GC time");
   const objects = await listAll(store, prefix);
   const commits = objects
     .filter((o) => o.key.startsWith(prefix + "commits/"))

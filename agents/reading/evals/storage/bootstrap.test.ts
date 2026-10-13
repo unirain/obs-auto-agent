@@ -225,8 +225,8 @@ it("wired local preview uses real durable manager, controlled source/classifier 
   const host = (await first.journal.load<HostProject>(projects[0]!))!;
   const scopedPolicy: TrustedPolicy = {
     commit: "a".repeat(40),
-    hash: "scope",
-    semantic_policy_hash: "semantic",
+    hash: "5f161c9149882e0e10124bc5dd5c11f0fbe8ec452edd52bcec76b01e9252cb33",
+    semantic_policy_hash: "3784070fe3e7e3de5f0ec08eadfa10acbaa0f543916b1ab2c68f371924ff7db3",
     paused: false,
     paused_projects: [],
     sources: {},

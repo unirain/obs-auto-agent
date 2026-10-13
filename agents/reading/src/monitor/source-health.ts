@@ -1,4 +1,5 @@
-import type { SourceEvent } from "../collect/incidents.js";
+import type { SourceEvent } from "./contracts.js";
+import { parseSourceEvent, parseMonitorMetadata } from "./contracts.js";
 export type MonitorEvent = SourceEvent;
 export interface MonitorMetadata {
   schema_version: 1;
@@ -25,6 +26,8 @@ export function projectEvents(
   previous: MonitorMetadata | undefined,
   suppressed: boolean,
 ): { metadata: MonitorMetadata; notify: boolean } | null {
+  events.forEach(parseSourceEvent);
+  if (previous) parseMonitorMetadata(previous);
   const relevant = events
     .filter(
       (e) =>
@@ -113,5 +116,6 @@ export function projectEvents(
     metadata.last_position = event.position;
   }
   metadata.suppressed = suppressed;
+  parseMonitorMetadata(metadata);
   return { metadata, notify: notify && !suppressed };
 }

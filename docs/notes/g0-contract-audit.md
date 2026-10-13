@@ -31,20 +31,18 @@ README 将 G0 定义为“工程骨架可构建，schema 与状态转换有样�
 | 全仓库 writer mutex、preview capacity 边界、model 不持秘密 | `WRITER_CONCURRENCY_GROUP='reading-workspace-writer'`；agent/recovery/maintenance workflows 共用；watchdog 为独立只读投影；shared 50 GB broker+reservation | `npm test -- agents/reading/evals/operations/workflows.test.ts agents/reading/evals/storage/broker.test.ts agents/reading/evals/runtime/executor.test.ts`：同组不 cancel writer、秘密前先验证、preview/恢复/维护不持额外权力、SDK env 不继承 OSS/GitHub、独立 readonly broker 无账号文件 fallback | mutex 与能力配置的**定义和静态接线**已证明；云端实际互斥/不同 RAM 身份拒绝属于 G1/O1 live |
 | UTC 写入 / 北京时间展示与归集 | Date.toISOString writers；`beijingDay`、`shanghaiDate`、dailyLogicalKey；nullable 来源发布时间 | `npm test -- agents/reading/evals/storage/usage-ledger.test.ts agents/reading/evals/operations/modes.test.ts agents/reading/evals/collect/intake.test.ts`：北京时间跨天、不以展示日期改变 submission 身份、published_at 可空、恢复 run attribution | 正常 producer 口径已证明；所有叶 DTO 的 UTC 严格解析仍未逐字段冻结 |
 
-## 尚未逐项证明的契约尾项
+## 本轮已关闭的五项契约尾项
 
-这些是明确可定位的 S1/A1/O1 收尾，不应改写为“因为没有 live 凭据所以 G0 不可能通过”。也不能将其中尚未验证部分写成已经自动由 Manager 覆盖。
+1. **同源状态集合**：RuntimeProject schema 与 TypeScript state 都复用 READING_PROJECT_STATES；独立 parser 与实际 host 恢复都拒绝未知状态。
+2. **完整 DTO**：StageTask、PolicyCheck、SourceHealth/SourceEvent、SourceCursor/Progress/Result、RunReport 有 exact schema 和实际生产／使用／恢复入口。阶段 scope、project、capability、state、deadline 在 policy/preflight/paid intent 之前验证；运行报告保留 input_commit、实际或 unknown 的版本、持久策略回执及完整 11 字段 UsageTotals。实际运行时 schema 不能被 TypeScript 声明替代。
+3. **UTC**：共享 UtcInstantSchema/assertUtcInstant/isUtcInstant 拒绝 date-only、offset、无时区、非法 Gregorian 日期和尾部换行，接受合法秒及 1–3 位小数的 Z 时刻，不转换旧记录。A/S/O/Root 持久时间入口已消费，note_date 等日期字段保留其单独含义。正反例包含价格／状态冷恢复前拒绝与无新增外部写入。
+4. **注册与防漂移**：38 份公开 JSON schema 来自共享导出表；TypeCompiler/Ajv 都能编译，统一测试核对文件集合、唯一名字和逐字节定义。重复 schema/transition 注册及 UTC 拒绝有独立负例。显式 `npx tsx agents/reading/evals/generate-schemas.ts --check` 检查，不在运行时重写文档。
+5. **统一完整 fixture**：`evals/integration/shared-domain-flow.test.ts` 使用完整领域 DTO 与真实 FileObjectStore/scoped Manager/Journal，显式 ModelAdapter 回放五种调用、真实内容校验及封存核验、内存 GitHub/Image/Issue adapters。同一流水线经历研究回执冷恢复和 PR 响应丢失；下一轮复用既有请求及 PR，不增加模型、图片、PR 或 Issue 写入。只读监控不读取原文对象，仍通知持续来源故障。它证明本地模块契约互通，不证明真实服务或内容质量。
 
-1. **A RuntimeProject schema 的 state 同源性**：目前实际 HostRecord validator 已消费 READING_PROJECT_STATES 并拒绝未知 state，真实转换也统一检查。`RuntimeProjectSchema.state` 自身仍为 nonempty string；独立调用 parseRuntimeProject 尚未自动获得相同 enum。Root/A 可进一步复用共享 state 字段消除这个差异。当前 host 恢复保护已生效。
-2. **StageTask、PolicyCheck、RunReport、SourceHealth 的完整运行时 schema**：StageTask 等仍有 TypeScript 定义和实际构造／消费校验，尚无一组独立 exact schema 正/反例覆盖其全部字段。Host scoped validator 覆盖 contexts/projects，S 覆盖 invocation/reservation；不是任意 namespace 都已经完整业务解析。RunReport 的版本/input_commit/policy refs 与规范完整数据契约还需逐字段对照。
-3. **UTC 的非法输入样例**：写入函数产生 UTC，归集拒绝缺时区时刻；部分 A parsers 仅检查时间为非空 string，当前 fixture 包含 `retrieved_at:'now'` 等。缺少“每个持久时间字段都拒绝无时区/非法时刻”的共享负例。UTC producer 正常路径与 UTC parser 完整性是不同证据。
-4. **注册扩展与所有 public schema 的自动防漂移覆盖**：S 的 unknown-schema、注册恢复和 canonical JSON 已测试；O public JSON schema 有正/反例。没有同一自动比较套件覆盖每个手写 type、export schema 与所有并行模块 fixture，也没有专门测试 duplicate transition/schema 注册保护的全部情况。Typecheck 与当前共享消费可证明现用组合，但不能声称普遍同源代码生成。
-5. **四模块统一 fixture 的含义**：现有证据是实际 A→S 项目/调用、S→O 发布回执、A/S→O watchdog 投影的配对组合与统一编译。`storage/recovery-scenarios/flow.test.ts` 是通用协议合成流程，其中简化 candidates/projects/PR 值不是完整真实领域 DTO。不能把它说成一次 fixture 已覆盖每个 Agent→Manager→Publisher→watchdog 字段。若冻结标准要求同一个完整共享 fixture，应补这种组合 fixture；它仍不需要 live 服务。
+本轮最终验证：69 files / 394 tests、typecheck/build、38 schema 防漂移、87 场景映射与 diff 检查通过；3 live tests skipped。README 定义的 G0 契约门槛已具备完整本地证据；G1–G5 及工作包中各自的 live/human 条件不因此通过。
 
 ## 本次证据边界与状态交接
 
-共享转换修复后的本地检查：`npm run typecheck`、storage 14 files/75 tests、`npm test` 62 files/374 tests、`npm run build` 通过（22:08–22:10 Asia/Shanghai 检查点）。后续并行变化以 Root 的最终全量检查和 implementation fingerprint 为准。
+最终检查：69 files / 394 tests、typecheck/build、38 schema documents 检查、87-case mapping 和 diff 检查通过。前三轨各自的 freeze 输出是较早的局部证据；最终实现指纹与命令结果以 `evals/results/local-verification.json` 为准。
 
-原 `evals/results/local-verification.json` 还记录 60 files/360 tests、Linux Node 24 CI 通过；它是那个实现指纹的证据，不应直接称为本轮新增代码的最新 CI。审计只引用既有／本地结果，没有运行 paid model、创建云资源或新增 live pass。
-
-结论建议：README 定义的 G0 基础能力可记录为已有本地验证；若 canonical “G0 complete” 的口径要求本节全部 S1/A1/O1 冻结尾项也关闭，则应保留这些明确待办。不要以 87 端到端场景 pending、RAM 未准备或五篇真实 preview 未完成来否定已经获得的 G0 契约证据。
+本轮没有运行 paid model、创建云资源或新增 live pass。G0 complete 仅指 README 的共享契约与本地组合门槛。G1–G5、真实 SDK/OSS/RAM/GitHub/图床、文章与人类质量要求仍未达到，完整目标没有完成。

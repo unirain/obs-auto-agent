@@ -168,6 +168,7 @@ it.each([
         schema_version: 1,
         delivery_id: "d1",
         status: "awaiting_review",
+        updated_at: "2026-10-13T00:00:00Z",
       });
       journal.data.set("sealed-d1", {
         schema_version: 1,

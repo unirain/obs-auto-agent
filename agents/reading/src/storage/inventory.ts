@@ -4,6 +4,7 @@ import {
   type ObjectMetadata,
 } from "../contracts/index.js";
 import { listAll } from "./preflight.js";
+import { isUtcInstant } from "../contracts/utc.js";
 export interface InventoryObject extends ObjectMetadata {
   bucket: string;
 }
@@ -24,8 +25,7 @@ export function normalizeInventory(
       !o.key ||
       !Number.isSafeInteger(o.size) ||
       o.size < 0 ||
-      typeof o.created_at !== "string" ||
-      !Number.isFinite(Date.parse(o.created_at)) ||
+      !isUtcInstant(o.created_at) ||
       (o.version !== undefined &&
         o.version !== null &&
         (typeof o.version !== "string" || !o.version))

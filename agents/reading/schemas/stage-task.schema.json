@@ -1,0 +1,187 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "project_id",
+    "stage",
+    "execution_scope",
+    "context_id",
+    "input_hash",
+    "checkpoint",
+    "capability",
+    "deadline",
+    "workspace_id",
+    "state"
+  ],
+  "properties": {
+    "project_id": {
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "stage": {
+      "anyOf": [
+        {
+          "const": "selection",
+          "type": "string"
+        },
+        {
+          "const": "research",
+          "type": "string"
+        },
+        {
+          "const": "writing",
+          "type": "string"
+        },
+        {
+          "const": "review",
+          "type": "string"
+        }
+      ]
+    },
+    "execution_scope": {
+      "anyOf": [
+        {
+          "const": "production",
+          "type": "string"
+        },
+        {
+          "const": "preview",
+          "type": "string"
+        }
+      ]
+    },
+    "context_id": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "input_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "checkpoint": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "capability": {
+      "anyOf": [
+        {
+          "const": "discover",
+          "type": "string"
+        },
+        {
+          "const": "main_read",
+          "type": "string"
+        },
+        {
+          "const": "classify_only",
+          "type": "string"
+        },
+        {
+          "const": "select",
+          "type": "string"
+        },
+        {
+          "const": "research",
+          "type": "string"
+        },
+        {
+          "const": "write",
+          "type": "string"
+        },
+        {
+          "const": "review",
+          "type": "string"
+        },
+        {
+          "const": "upload",
+          "type": "string"
+        },
+        {
+          "const": "publish",
+          "type": "string"
+        },
+        {
+          "const": "reconcile",
+          "type": "string"
+        },
+        {
+          "const": "cleanup",
+          "type": "string"
+        }
+      ]
+    },
+    "deadline": {
+      "minimum": 1,
+      "maximum": 9007199254740991,
+      "type": "integer"
+    },
+    "workspace_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "const": "discovered",
+          "type": "string"
+        },
+        {
+          "const": "selected",
+          "type": "string"
+        },
+        {
+          "const": "researching",
+          "type": "string"
+        },
+        {
+          "const": "researched",
+          "type": "string"
+        },
+        {
+          "const": "drafted",
+          "type": "string"
+        },
+        {
+          "const": "reviewing",
+          "type": "string"
+        },
+        {
+          "const": "validated",
+          "type": "string"
+        },
+        {
+          "const": "preview_ready",
+          "type": "string"
+        },
+        {
+          "const": "ready_for_delivery",
+          "type": "string"
+        },
+        {
+          "const": "publishing",
+          "type": "string"
+        },
+        {
+          "const": "pr_open",
+          "type": "string"
+        },
+        {
+          "const": "merged",
+          "type": "string"
+        },
+        {
+          "const": "closed_unmerged",
+          "type": "string"
+        },
+        {
+          "const": "skipped",
+          "type": "string"
+        },
+        {
+          "const": "deferred",
+          "type": "string"
+        }
+      ]
+    }
+  }
+}

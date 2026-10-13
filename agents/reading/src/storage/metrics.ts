@@ -9,13 +9,9 @@ import {
   type ExecutionScope,
 } from "../contracts/index.js";
 import type { InventoryObject } from "./inventory.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export type StoreOperation =
-  | "create"
-  | "read"
-  | "stat"
-  | "list"
-  | "delete"
-  | "configuration";
+  "create" | "read" | "stat" | "list" | "delete" | "configuration";
 export interface TransportObservation {
   service_requests: number | null;
   wire_bytes_sent: number | null;
@@ -31,7 +27,7 @@ export interface StorageOperationEvent {
   bucket: string;
   operation: StoreOperation;
   started_at: string;
-  finished_at: string;
+  finished_at: string | null;
   outcome: "confirmed" | "failed_known" | "unknown";
   error_category: string | null;
   supplied_payload_bytes: number;
@@ -111,7 +107,7 @@ export class MeteredObjectStore implements ObjectStore {
       bucket: this.bucket,
       operation,
       started_at: this.now().toISOString(),
-      finished_at: "",
+      finished_at: null,
       outcome: "unknown",
       error_category: null,
       supplied_payload_bytes: supplied,
@@ -197,6 +193,9 @@ export function summarizeStorageOperations(
 ): StorageMetricsView {
   const events = new Map<string, StorageOperationEvent>();
   for (const event of input) {
+    assertUtcInstant(event.started_at, "Storage operation started_at");
+    if (event.finished_at !== null)
+      assertUtcInstant(event.finished_at, "Storage operation finished_at");
     if (
       event.run_id !== attribution.run_id ||
       event.execution_scope !== attribution.execution_scope ||
@@ -336,6 +335,10 @@ export function inventoryMetrics(input: {
   historical_versions_known?: boolean;
   observed_at?: string;
 }): CapacityBreakdown {
+  assertUtcInstant(
+    input.observed_at ?? new Date().toISOString(),
+    "Capacity breakdown observed_at",
+  );
   if (!input.complete)
     throw new AgentError(
       "unknown",
@@ -343,6 +346,7 @@ export function inventoryMetrics(input: {
     );
   const unique = new Map<string, InventoryObject & { is_latest?: boolean }>();
   for (const object of input.objects) {
+    assertUtcInstant(object.created_at, "Storage object created_at");
     nonnegative(object.size);
     const id = storageObjectIdentity(object);
     const old = unique.get(id);

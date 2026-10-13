@@ -1,3 +1,4 @@
+import {assertUtcInstant} from '../contracts/utc.js';
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import { request as httpsRequest } from 'node:https';
@@ -51,7 +52,7 @@ export class UrlGateway {
 export type WebSnapshot={url:string;hash:string;text:string;links:string[];canonical_url:string|null;title:string;retrieved_at:string;figures:{url:string;caption:string}[]};
 export function observedHttpLinks(text:string):string[]{const links=new Set<string>();for(const match of text.matchAll(/https?:\/\/[^\s<>"')\]]+/g)){try{const url=new URL(match[0].replace(/[.,;]+$/,''));if(!url.username&&!url.password)links.add(url.href);}catch{}if(links.size>5000)throw new Error('source_link_count_limit');}return [...links];}
 export function extractWebSnapshot(url:string,html:string,retrieved_at:string):WebSnapshot {
-  const $=cheerio.load(html);$('script,style,nav,header,footer,noscript,form').remove();const article=$('article,main,[role="main"],.blog-rich-text').first();const root=article.length?article:$('body');
+  assertUtcInstant(retrieved_at,'web snapshot retrieval time');const $=cheerio.load(html);$('script,style,nav,header,footer,noscript,form').remove();const article=$('article,main,[role="main"],.blog-rich-text').first();const root=article.length?article:$('body');
   root.find('p,h1,h2,h3,h4,li,pre,blockquote,tr').each((_,element)=>{$(element).append('\n');});
   const text=root.text().split('\n').map(line=>line.replace(/\s+/g,' ').trim()).filter(Boolean).join('\n');if(!text)throw new Error('source_empty_body');
   const links=[...new Set([...root.find('a[href]').toArray().map(element=>$(element).attr('href')!).map(href=>{try{return new URL(href,url).href;}catch{return '';}}).filter(href=>/^https?:/.test(href)),...observedHttpLinks(text)])];if(links.length>5000)throw new Error('source_link_count_limit');

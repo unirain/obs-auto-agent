@@ -1,3 +1,4 @@
+import {parseRunReport,parseRunUsage,parseRunProjectState,type RunReport} from './run-records.js';
 import { canonicalJson } from "../contracts/index.js";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -47,6 +48,7 @@ import {
   buildUsageLedger,
   usageForRun,
   usageForProject,
+  type UsageTotals,
 } from "../workspace/usage.js";
 import { retryAuthorized } from "./recovery.js";
 import {storeProjectBodies} from './project-storage.js';
@@ -67,6 +69,7 @@ export type HostProject = RuntimeProject & {
 };
 export interface ControllerPorts {
   journal: WorkspaceJournal;
+  report_provenance?:{input_commit:string|null;implementation_commit:string|null};
   gate: PolicyGate;
   readArtifact?(path: string): Promise<Uint8Array>;
   metrics?(): Promise<Record<string, unknown>>;
@@ -96,34 +99,7 @@ export interface ControllerPorts {
   now?: () => Date;
   execute?: typeof executeProjectStage;
 }
-export type RunReport = {
-  schema_version: 1;
-  run_id: string;
-  logical_key:string;
-  workspace_id: string;
-  execution_scope: "preview" | "production";
-  mode: Dispatch["mode"];
-  started_at: string;
-  finished_at: string;
-  outcome:
-    | "success_preview"
-    | "success"
-    | "success_no_selection"
-    | "partial"
-    | "failed_collection"
-    | "deferred_work";
-  source_results: SourceResult[];
-  project_ids: string[];
-  usage: Usage;
-  failures: { subject: string; reason: string }[];
-  delivery_results: { project_id: string; state: string }[];
-  blocked_projects: {
-    project_id: string;
-    reason: string;
-    required_action: string;
-  }[];
-  metrics?: Record<string, unknown>;
-};
+export type {RunReport} from './run-records.js';
 export class SourceRevisionChanged extends Error {
   constructor(
     readonly source_url: string,
@@ -293,7 +269,7 @@ export class ReadingController {
           : await readFile(join(this.ports.journal.handle.root_dir, file.path));
     return result;
   }
-  private usage(): Usage {
+  private usage(): UsageTotals {
     const journal = this.ports.journal;
     return usageForRun(
       buildUsageLedger([journal.handle]),
@@ -312,6 +288,9 @@ export class ReadingController {
       schema_version: 1,
       run_id: this.ports.journal.run_id,
       logical_key:logicalKey,
+      input_commit:this.ports.report_provenance?.input_commit??null,
+      versions:{implementation_commit:this.ports.report_provenance?.implementation_commit??null,projects:[]},
+      policy_check_refs:[],
       workspace_id: this.ports.journal.handle.workspace_id,
       execution_scope: scope,
       mode: dispatch.mode,
@@ -320,7 +299,7 @@ export class ReadingController {
       outcome: "deferred_work",
       source_results: [],
       project_ids: [],
-      usage: this.usage(),
+      usage: parseRunUsage(this.usage()),
       failures: [],
       delivery_results: [],
       blocked_projects: [],
@@ -695,7 +674,7 @@ export class ReadingController {
                 ? "preview_ready"
                 : "validated"
               : "drafted",
-          } as Record<StageTask["stage"], string>
+          } as Record<StageTask["stage"], HostProject['state']>
         )[stage];
         await this.save(project, step.files, "stage_completed");
         if (stage === "review") break;
@@ -759,7 +738,7 @@ export class ReadingController {
           report.failures.push({ subject: id, reason: reasonOf(error) });
         }
       }
-      report.delivery_results.push({ project_id: id, state: project.state });
+      report.delivery_results.push({ project_id: id, state: parseRunProjectState(project.state) });
       if (project.state === "deferred")
         report.failures.push({
           subject: id,
@@ -817,8 +796,11 @@ export class ReadingController {
               ? "deferred_work"
               : "success_no_selection";
     report.finished_at = this.now().toISOString();
-    report.usage = this.usage();
-    if (this.ports.metrics) report.metrics = await this.ports.metrics();
+    report.usage = parseRunUsage(this.usage());
+    for(const id of report.project_ids){const p=await this.ports.journal.load<HostProject>('projects/'+id);if(!p?.context)throw new Error('run_project_context_unavailable');report.versions.projects.push({project_id:p.project_id,generation_version:p.generation_version,context_id:p.context.context_id,skill_commit:p.context.skill_commit,skill_hash:p.context.skill_hash,prompt_hash:p.context.prompt_hash,model:p.context.model,runtime_versions:p.context.runtime_versions??null});}
+    report.policy_check_refs=this.ports.journal.committedRecordKeys('policy-checks/').map(key=>key.slice('policy-checks/'.length)).sort();
+    if (this.ports.metrics) report.metrics = JSON.parse(canonicalJson(await this.ports.metrics())) as RunReport['metrics'];
+    parseRunReport(report);
     await this.ports.journal.commitMany(
       {
         [`runs/${report.run_id}`]: report,

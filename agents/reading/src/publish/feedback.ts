@@ -1,4 +1,10 @@
 import { canonicalJson, sha256 } from "../contracts/index.js";
+import { isUtcInstant } from "../contracts/utc.js";
+import {
+  parseHumanReviewFeedback,
+  parseDeliveryRecord,
+  parsePullRequestFact,
+} from "./contracts.js";
 import { FEEDBACK_REASONS, type HumanReviewFeedback } from "./metrics.js";
 import type {
   DeliveryRecord,
@@ -46,6 +52,7 @@ export function validateFeedback(
   feedback: HumanReviewFeedback,
   trustedActor: string,
 ): void {
+  parseHumanReviewFeedback(feedback);
   const login = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/;
   if (
     !login.test(trustedActor) ||
@@ -54,7 +61,7 @@ export function validateFeedback(
     feedback.schema_version !== 1 ||
     feedback.origin !== "trusted_management" ||
     !/^[A-Za-z0-9_-]+$/.test(feedback.delivery_id) ||
-    !Number.isFinite(Date.parse(feedback.recorded_at)) ||
+    !isUtcInstant(feedback.recorded_at) ||
     (feedback.reason !== null && !FEEDBACK_REASONS.includes(feedback.reason)) ||
     (feedback.review_minutes !== null &&
       (!Number.isFinite(feedback.review_minutes) ||
@@ -69,6 +76,7 @@ export async function prepareHumanReviewFeedback(
   validateFeedback(input.feedback, input.trusted_actor);
   const d = input.seal,
     r = input.record;
+  parseDeliveryRecord(r);
   if (
     d.schema_version !== 1 ||
     d.execution_scope !== "production" ||
@@ -88,6 +96,7 @@ export async function prepareHumanReviewFeedback(
   try {
     authority = await input.github.authority();
     pr = await input.github.inspectPullRequest(r.pr.number);
+    parsePullRequestFact(pr);
   } catch {
     throw new Error("Feedback remote PR verification unavailable");
   }
@@ -97,7 +106,7 @@ export async function prepareHumanReviewFeedback(
     authority.repository.toLowerCase() !== input.repository.toLowerCase() ||
     !authority.default_branch ||
     !/^[a-f0-9]{40}$/.test(authority.default_commit_sha) ||
-    !Number.isFinite(Date.parse(authority.checked_at)) ||
+    !isUtcInstant(authority.checked_at) ||
     pr.number !== r.pr.number ||
     pr.url !== r.pr.url ||
     !["open", "merged", "closed_unmerged"].includes(pr.state) ||
@@ -149,7 +158,12 @@ export async function prepareHumanReviewFeedback(
   const delivery: DeliveryRecord = {
     ...r,
     pr,
-    status: r.status === 'delivery_conflict' ? 'delivery_conflict' : pr.state === "open" ? "awaiting_review" : pr.state,
+    status:
+      r.status === "delivery_conflict"
+        ? "delivery_conflict"
+        : pr.state === "open"
+          ? "awaiting_review"
+          : pr.state,
     updated_at: checked_at,
   };
   if (r.pr.head_sha !== pr.head_sha) delete delivery.review_outcome;

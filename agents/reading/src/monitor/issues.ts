@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { Octokit } from "@octokit/rest";
 import type { MonitorMetadata } from "./source-health.js";
+import { parseMonitorMetadata } from "./contracts.js";
 export interface IssueFact {
   number: number;
   body: string;
@@ -27,20 +28,12 @@ export function decodeMetadata(body: string): MonitorMetadata | undefined {
   } catch {
     throw new Error("Invalid Issue monitoring metadata");
   }
-  if (
-    m.schema_version !== 1 ||
-    typeof m.key !== "string" ||
-    !Number.isSafeInteger(m.last_position) ||
-    !["active", "recovered", "accepted_gap"].includes(m.status) ||
-    typeof m.suppressed !== "boolean" ||
-    !Array.isArray(m.events) ||
-    !Array.isArray(m.unresolved_gaps)
-  )
-    throw new Error("Invalid Issue monitoring metadata");
+  parseMonitorMetadata(m);
   if (!body.includes(marker(m.key))) throw new Error("Issue marker mismatch");
   return m;
 }
 function machineBody(metadata: MonitorMetadata): string {
+  parseMonitorMetadata(metadata);
   return `${marker(metadata.key)}\n<!-- reading-monitor-metadata:${Buffer.from(JSON.stringify(metadata)).toString("base64")} -->\n\n来源：${metadata.source_id}\n原因：${metadata.reason_code}\n状态：${metadata.status}${metadata.suppressed ? "（策略抑制）" : ""}\n未解决覆盖缺口：${metadata.unresolved_gaps.join(", ") || "无"}\n事件范围：${metadata.event_summary ? `${metadata.event_summary.first_at} — ${metadata.event_summary.last_at} (${metadata.event_summary.total})` : "无"}\n\n<!-- reading-monitor-end -->`;
 }
 export function issueBody(

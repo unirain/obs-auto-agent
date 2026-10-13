@@ -15,3 +15,4 @@ export * from "./metrics.js";
 export * from './primary-source.js';
 export * from './regeneration.js';
 export * from './feedback.js';
+export * from './contracts.js';

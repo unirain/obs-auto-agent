@@ -1,3 +1,4 @@
+import { isUtcInstant } from "../contracts/utc.js";
 import { canonicalJson, sha256 } from "../contracts/index.js";
 import {
   branchFor,
@@ -8,6 +9,11 @@ import {
   type PullRequestFact,
 } from "./types.js";
 import { validatePreparedFiles, validateDelivery } from "./validate.js";
+import {
+  assertGitHubFactTimes,
+  parseDeliveryRecord,
+  parsePullRequestFact,
+} from "./contracts.js";
 export interface GitHubReadAuthority {
   schema_version: 1;
   complete: boolean;
@@ -77,7 +83,7 @@ function validateAuthority(a: GitHubReadAuthority, repository: string): void {
     a.repository.toLowerCase() !== repository.toLowerCase() ||
     !a.default_branch ||
     !sha(a.default_commit_sha) ||
-    !Number.isFinite(Date.parse(a.checked_at))
+    !isUtcInstant(a.checked_at)
   )
     throw new Error("unverified_remote_authority");
 }
@@ -144,6 +150,14 @@ export async function checkGenerationReadiness(
   for (const h of input.history) {
     const d = h.seal,
       r = h.record;
+    if (r) {
+      try {
+        parseDeliveryRecord(r);
+      } catch {
+        deny("historical_record_identity_or_schema_invalid");
+        return finish();
+      }
+    }
     try {
       validateDelivery(d, {
         id: input.workspace_id,
@@ -202,10 +216,13 @@ export async function checkGenerationReadiness(
     }
   }
   try {
-    audit.authority = await input.github.authority();
-    validateAuthority(audit.authority, input.repository);
-    audit.before = await input.github.projectSnapshot(input.project_id);
-    validateAuthority(audit.before, input.repository);
+    const authority = await input.github.authority();
+    validateAuthority(authority, input.repository);
+    audit.authority = authority;
+    const before = await input.github.projectSnapshot(input.project_id);
+    validateAuthority(before, input.repository);
+    before.prs.forEach(parsePullRequestFact);
+    audit.before = before;
     if (audit.before.project_id !== input.project_id)
       throw new Error("project_scope_mismatch");
     if (audit.before.prs.length) deny("historical_pr_exists");
@@ -214,6 +231,7 @@ export async function checkGenerationReadiness(
         h.seal,
         h.record?.prepared ?? undefined,
       );
+      assertGitHubFactTimes(facts);
       if (
         typeof facts.expected_commit_exists !== "boolean" ||
         typeof facts.complete_diff_matches !== "boolean" ||
@@ -283,8 +301,10 @@ export async function checkGenerationReadiness(
       if (facts.expected_commit_exists && !facts.complete_diff_matches)
         deny("historical_commit_diff_unverified");
     }
-    audit.after = await input.github.projectSnapshot(input.project_id);
-    validateAuthority(audit.after, input.repository);
+    const after = await input.github.projectSnapshot(input.project_id);
+    after.prs.forEach(parsePullRequestFact);
+    validateAuthority(after, input.repository);
+    audit.after = after;
     if (audit.after.project_id !== input.project_id)
       throw new Error("project_scope_mismatch");
     if (audit.before.prs.length || audit.after.prs.length)

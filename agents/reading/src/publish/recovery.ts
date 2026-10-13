@@ -1,5 +1,6 @@
 import type { DeliveryRecord, SealedDelivery } from "./types.js";
 import { runtimeHours } from "../config/runtime-limits.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export type RecoveryRoute =
   | "read_only"
   | "publish"
@@ -14,7 +15,8 @@ export function recoveryRoute(
   mode: "scheduled" | "resume" | "publish-only",
   sourcesFreshnessHours = 24,
 ): { route: RecoveryRoute; reason: string | null; model_allowed: boolean } {
-  const freshnessMs = runtimeHours(sourcesFreshnessHours, "sources_freshness_hours") * 3_600_000;
+  const freshnessMs =
+    runtimeHours(sourcesFreshnessHours, "sources_freshness_hours") * 3_600_000;
   if (records.some((r) => r.uncertain_action))
     return {
       route: "read_only",
@@ -40,6 +42,7 @@ export function recoveryRoute(
       model_allowed: mode !== "publish-only",
     };
   const verifiedAt = Date.parse(d.sources_verified_at);
+  assertUtcInstant(d.sources_verified_at, "sources_verified_at");
   if (!Number.isFinite(verifiedAt) || !Number.isFinite(now.getTime()))
     throw new Error("Invalid source verification time");
   if (now.getTime() - verifiedAt > freshnessMs)

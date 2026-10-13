@@ -21,8 +21,8 @@ import { parseDispatch } from "../../src/config/dispatch.js";
 
 const policy: TrustedPolicy = {
   commit: "a".repeat(40),
-  hash: "p",
-  semantic_policy_hash: "s",
+  hash: "148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940",
+  semantic_policy_hash: "043a718774c572bd8a25adbeb1bfcd5c0256ae11cecf9f9c3f925d0e52beaf89",
   paused: false,
   paused_projects: [],
   sources: {},
@@ -74,10 +74,10 @@ async function fixture(scope: Scope) {
         index: [],
         query: "test",
         heldout: { urls: new Set(), note_paths: new Set() },
-        preferences_hash: "p",
+        preferences_hash: "148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940",
         skill_commit: "a".repeat(40),
-        skill_hash: "s",
-        prompt_hash: "h",
+        skill_hash: "043a718774c572bd8a25adbeb1bfcd5c0256ae11cecf9f9c3f925d0e52beaf89",
+        prompt_hash: "aaa9402664f1a41f40ebbc52c9993eb66aeb366602958fdfaa283b71e64db123",
         model: "fixture",
         evidence_versions: [],
       }),
@@ -149,17 +149,17 @@ describe("host lifecycle and durable mode boundaries", () => {
           refreshed = true;
           const binding = {
             candidate_id: project.candidate.candidate_id,
-            source_snapshot_hash: "body",
+            source_snapshot_hash: "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
             semantic_policy_hash: policy.semantic_policy_hash,
             attempts: 1,
             format_repairs: 0,
             pending: false,
             credential: {
               candidate_id: project.candidate.candidate_id,
-              source_snapshot_hash: "body",
+              source_snapshot_hash: "230d8358dc8e8890b4c58deeb62912ee2f20357ae92a5cc861b98e68fe31acb5",
               semantic_policy_hash: policy.semantic_policy_hash,
               content_eligibility: "allowed" as const,
-              evidence_hash: "e",
+              evidence_hash: "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea",
             },
           };
           return {

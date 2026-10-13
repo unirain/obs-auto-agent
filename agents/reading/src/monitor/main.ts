@@ -1,5 +1,6 @@
 import type { MonitorEvent } from "./source-health.js";
 import { incidentKey, projectEvents } from "./source-health.js";
+import { parseSourceEvent } from "./contracts.js";
 import type { IssueProjector } from "./issues.js";
 /** Pure control plane: no model, workspace write or image/target-repository write capability. */
 export class Watchdog {
@@ -14,9 +15,9 @@ export class Watchdog {
   async run(): Promise<{ processed: number; projected: number }> {
     // A policy read error throws; it is never interpreted as a healthy paused system.
     const policy = await this.readSuppression();
-    const events = (await this.readEvents()).filter(
-      (e) => e.execution_scope === "production",
-    );
+    const events = (await this.readEvents())
+      .map(parseSourceEvent)
+      .filter((e) => e.execution_scope === "production");
     const groups = new Map<string, MonitorEvent[]>();
     for (const e of events)
       groups.set(incidentKey(e), [...(groups.get(incidentKey(e)) ?? []), e]);
@@ -100,7 +101,7 @@ export async function runWatchdog(options: WatchdogRunnerOptions): Promise<{
     policy = await options.readPolicy();
     runtimeHours(policy.watchdog_gap_hours ?? 36, "watchdog_gap_hours");
     reportIds = await options.readReportRunIds();
-    events = await options.readEvents();
+    events = (await options.readEvents()).map(parseSourceEvent);
     const remote = await options.actions.paginate(
       options.actions.actions.listWorkflowRuns,
       {

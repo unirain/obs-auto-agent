@@ -1,0 +1,338 @@
+{
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "context_id",
+    "preferences_hash",
+    "skill_commit",
+    "skill_hash",
+    "prompt_hash",
+    "model",
+    "evidence_versions",
+    "examples",
+    "related_notes",
+    "example_texts"
+  ],
+  "properties": {
+    "context_id": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "preferences_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "skill_commit": {
+      "pattern": "^[a-f0-9]{40}$",
+      "type": "string"
+    },
+    "skill_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "prompt_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "prompt_templates": {
+      "type": "object",
+      "patternProperties": {
+        "^(.*)$": {
+          "type": "string"
+        }
+      }
+    },
+    "runtime_limits": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "max_output_tokens": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_download_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_resources": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_tools_per_batch": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_references_per_batch": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_revision_rounds": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_no_progress_batches": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "classification_queries": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "format_repairs": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "policy_refresh_seconds": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      }
+    },
+    "runtime_versions": {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "sdk_version",
+        "sdk_hash",
+        "tools_image_id",
+        "tools_manifest_hash",
+        "node_version",
+        "model_version_status"
+      ],
+      "properties": {
+        "sdk_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "sdk_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "tools_image_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tools_manifest_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "node_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "model_version_status": {
+          "anyOf": [
+            {
+              "const": "requested_alias",
+              "type": "string"
+            },
+            {
+              "const": "provider_reported_unpinned",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "tool_domains": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "model": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "model_provider": {
+      "anyOf": [
+        {
+          "const": "claude",
+          "type": "string"
+        },
+        {
+          "const": "deepseek",
+          "type": "string"
+        }
+      ]
+    },
+    "model_base_url": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "evidence_versions": {
+      "type": "array",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "examples": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "path",
+          "commit",
+          "title",
+          "tags",
+          "sources",
+          "summary",
+          "organized_at",
+          "date_basis",
+          "hash",
+          "pending"
+        ],
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "commit": {
+            "pattern": "^[a-f0-9]{40}$",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": {
+            "type": "string"
+          },
+          "organized_at": {
+            "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+            "type": "string"
+          },
+          "date_basis": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "pending": {
+            "type": "boolean"
+          },
+          "retrieval_relevance": {
+            "anyOf": [
+              {
+                "const": "matched",
+                "type": "string"
+              },
+              {
+                "const": "unknown",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "related_notes": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "path",
+          "commit",
+          "title",
+          "tags",
+          "sources",
+          "summary",
+          "organized_at",
+          "date_basis",
+          "hash",
+          "pending"
+        ],
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "commit": {
+            "pattern": "^[a-f0-9]{40}$",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": {
+            "type": "string"
+          },
+          "organized_at": {
+            "pattern": "^(?:[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29)T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,3})?Z(?![\\s\\S])",
+            "type": "string"
+          },
+          "date_basis": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "pending": {
+            "type": "boolean"
+          },
+          "retrieval_relevance": {
+            "anyOf": [
+              {
+                "const": "matched",
+                "type": "string"
+              },
+              {
+                "const": "unknown",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "example_texts": {
+      "type": "object",
+      "patternProperties": {
+        "^(.*)$": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

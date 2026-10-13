@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-13 Continuation: G0 contract closure
+
+- The prior turn changed authoritative state through commits 65cffd9/b49ab0a/af9f374 and their passing Linux CI. This continuation closed the five specific G0 audit follow-ups without reducing G1–G5 or the 87 layered acceptance cases.
+- StageTask parsing now precedes policy/preflight/intent, with project, scope, phase/capability, state and current deadline bindings. PolicyCheck verifies UTC, canonical content identity and consumer bindings. RuntimeProject state/schema/type share one enum. Source and monitor DTOs have exact parsers at their actual boundaries.
+- A portable shared Gregorian UTC schema and guard reject invalid calendars, offset/no-zone/date-only and trailing newline; no silent legacy rewrite. Persistent A/S/O/Root time fields consume it. Public schemas are generated from one set of exported definitions: 38 files compile under TypeCompiler and Ajv, remain byte-matched, and duplicate schema/transition registrations fail.
+- RunReport now records input_commit, true or unavailable implementation/project versions, this writer's persisted policy references and the complete 11-field UsageTotals. Metadata absence is not converted into known token usage or zero cost. Scoped current/historical restore and readonly monitor reject incomplete reports, malformed source facts or dangling policy references.
+- One complete domain fixture crosses A/S/O/monitor with real FileObjectStore/scoped Manager and explicit local adapters. It proves cold reuse of a paid response before stage consumption, immutable sealing, recovery from lost PR response and persistent source alerting; the next round does not add query/image/PR/Issue effects. Fake remotes/model outputs are not live or quality evidence.
+- Final local check at 23:16 Asia/Shanghai: 69 files / 394 tests, typecheck/build, 38 schema checks, mapping and diff checks passed; three live tests skipped. G0 is complete as the contract gate only; the full goal is still unproven. Readonly GitHub metadata found zero configured environments. Restricted RAM, test App/repository/image resources, target skill publication, live model/recovery and human quality remain required.
+
 ## 2026-10-13 Continuation: contract audit, cancellation and cloud skill proposal
 
 - The previous turn changed authoritative state: implementation 95be532 and evidence bae2cbb were pushed; both Linux CI runs passed. This turn found concrete G0/O5/A7 gaps and retained all external gates.

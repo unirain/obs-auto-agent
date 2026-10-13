@@ -19,7 +19,7 @@ it('a body above the physical blob limit survives cold restart while its project
   const options={store,scope:'preview' as const,local_root:join(root,'local'),verify_preflight:false,record_validator:validateHostRecords};
   const manager=new ImmutableWorkspaceManager(options),workspace='obs-notes-hub/reading-preview/body';
   const journal=new WorkspaceJournal(manager,await manager.restore(workspace,{allow_initialize:true}),'run1');
-  const context=buildContext({index:[],query:'test',heldout:{urls:new Set(),note_paths:new Set()},preferences_hash:'p',skill_commit:'a'.repeat(40),skill_hash:'s',prompt_hash:'p',model:'replay',evidence_versions:[]});
+  const context=buildContext({index:[],query:'test',heldout:{urls:new Set(),note_paths:new Set()},preferences_hash:'148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940',skill_commit:'a'.repeat(40),skill_hash:'043a718774c572bd8a25adbeb1bfcd5c0256ae11cecf9f9c3f925d0e52beaf89',prompt_hash:'148de9c5a7a44d19e56cd9ae1a554bf67847afb0c58f6e12fa29ac7ddfca9940',model:'replay',evidence_versions:[]});
   const candidate=discoverCandidate('manual_url','https://example.org/article','Article',null,new Date().toISOString());
   const text='x'.repeat(33*1024*1024)+'\nlast line';
   const project:HostProject={...newRuntimeProject(candidate,{project_id:'p1',execution_scope:'preview',workspace_id:workspace,context,now:new Date()}),generation_version:1,resume_stage:null,resume_policy:'automatic',reason:null,last_run_id:null,batch_id:'b1',delivery_id:null,sources_verified_at:null};

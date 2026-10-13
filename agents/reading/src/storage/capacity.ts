@@ -5,6 +5,7 @@ import {
 } from "../contracts/index.js";
 import { normalizeInventory, type InventoryObject } from "./inventory.js";
 import { validateSchema } from "../contracts/schema.js";
+import { assertUtcInstant } from "../contracts/utc.js";
 export const STORAGE_LIMIT = 50_000_000_000;
 export const STORAGE_WARNING = 45_000_000_000;
 export const STORAGE_GENERATION_STOP = 49_000_000_000;
@@ -27,8 +28,7 @@ export function capacityView(
   reservations: StorageReservation[],
   observedAt = new Date().toISOString(),
 ): StorageCapacityView {
-  if (!Number.isFinite(Date.parse(observedAt)))
-    throw new AgentError("corrupt", "Capacity observation timestamp invalid");
+  assertUtcInstant(observedAt, "Capacity observed_at");
   objects = normalizeInventory(objects);
   const occupied = objects.reduce((n, o) => n + o.size, 0);
   const normalizeVersion = (v: string | null | undefined) =>
@@ -99,7 +99,6 @@ export function assertCapacity(
     view.limit_bytes !== STORAGE_LIMIT ||
     !Number.isSafeInteger(view.occupied_bytes) ||
     !Number.isSafeInteger(view.reserved_bytes) ||
-    !Number.isFinite(Date.parse(view.observed_at)) ||
     !Number.isSafeInteger(additionalBytes) ||
     additionalBytes < 0
   )

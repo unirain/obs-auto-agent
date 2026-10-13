@@ -1,4 +1,6 @@
 import type { DeliveryRecord, OperationsJournal } from "./types.js";
+import { parseDeliveryRecord, parseHumanReviewFeedback } from "./contracts.js";
+import { isUtcInstant } from "../contracts/utc.js";
 export type ReviewOutcome =
   | "accepted_without_changes"
   | "accepted_with_changes"
@@ -68,12 +70,14 @@ export function deliveryMetrics(
   now: Date,
   longPendingDays: number,
 ): DeliveryMetrics {
+  feedback.forEach(parseHumanReviewFeedback);
   if (!Number.isFinite(longPendingDays) || longPendingDays < 0)
     throw new Error("Invalid reporting pending-age threshold");
   const unique = new Map<string, DeliveryRecord>();
   for (const r of records) {
     if (r.schema_version !== 1)
       throw new Error("Unsupported delivery record schema");
+    parseDeliveryRecord(r);
     if (r.pr) {
       const old = unique.get(r.pr.url);
       if (!old || Date.parse(r.updated_at) > Date.parse(old.updated_at))
@@ -173,11 +177,12 @@ export async function recordHumanReviewFeedback(
   journal: OperationsJournal,
   feedback: HumanReviewFeedback,
 ): Promise<void> {
+  parseHumanReviewFeedback(feedback);
   if (
     feedback.schema_version !== 1 ||
     feedback.origin !== "trusted_management" ||
     !/^[A-Za-z0-9-]+$/.test(feedback.actor) ||
-    !Number.isFinite(Date.parse(feedback.recorded_at)) ||
+    !isUtcInstant(feedback.recorded_at) ||
     (feedback.reason !== null && !FEEDBACK_REASONS.includes(feedback.reason)) ||
     (feedback.review_minutes !== null &&
       (!Number.isFinite(feedback.review_minutes) ||
