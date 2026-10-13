@@ -13,6 +13,8 @@
 
 这不是 G2 完成证据。真实 SDK skill 激活、文章写作与模型审校、Obsidian 质量及用户验收仍未执行。GIF 等可选能力没有被静态 PNG 测试证明。提案尚需进入目标库受审阅的固定版本；部署仍消费目标库的已发布 Git commit，不能将本机提案 SHA 冒充可由远端 checkout 取得的版本。
 
+2026-10-13 只读核对[DeepSeek 官方图像文档](https://api-docs.deepseek.com/zh-cn/guides/vision/)：所选 deepseek-flash 声明支持图片及 Anthropic 兼容入口。该文档支持保留当前模型选择，不替代真实 SDK 工具图片传输和质量验收。
+
 本机可核对差异：
 
 ```sh

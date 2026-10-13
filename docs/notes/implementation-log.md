@@ -62,4 +62,4 @@
 
 - Continuation checkpoint: 288 local tests passed; typecheck/build/mapping passed. Three live tests skipped. The sanitized evidence fingerprint was refreshed; this does not mark any of the 87 full acceptance cases complete.
 
-- Final follow-up at 22:24: 375 tests passed; SDK VAULT_ROOT explicitly points to projects/<id>/draft and rejects escaping the trusted model view, whose draft directory is created by the host. After that directory follow-up, affected bootstrap 7/recovery 8 tests and typecheck/build passed. Implementation 65cffd9 passed Linux CI run 38412794310; the follow-up awaits its own CI.
+- Final follow-up at 22:24: 375 tests passed; SDK VAULT_ROOT explicitly points to projects/<id>/draft and rejects escaping the trusted model view, whose draft directory is created by the host. After that directory follow-up, affected bootstrap 7/recovery 8 tests and typecheck/build passed. Implementation 65cffd9 passed Linux CI run 38412794310; follow-up b49ab0a passed Linux Node 24 CI run 38413545670.
