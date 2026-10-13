@@ -45,7 +45,9 @@ import { mkdtemp, mkdir, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { it, expect, vi } from "vitest";
-import { buildApplication } from "../../src/app/bootstrap.js";
+import { buildApplication, projectSubject } from "../../src/app/bootstrap.js";
+import type { HostProject } from "../../src/app/controller.js";
+import { PolicyGate, type TrustedPolicy } from "../../src/policy/gate.js";
 import type { ModelAdapter } from "../../src/runtime/sdk.js";
 import type { PolicySource } from "../../src/config/trusted-policy.js";
 import { parseDeployment } from "../../src/config/deployment.js";
@@ -209,6 +211,49 @@ it("wired local preview uses real durable manager, controlled source/classifier 
   const { context_id: oldContextId, ...rest } = altered;
   altered.context_id = sha256(canonicalJson(rest));
   expect(() => verifyContext(altered)).toThrow("fixed_prompt_hash_mismatch");
+  const host = (await first.journal.load<HostProject>(projects[0]!))!;
+  const scopedPolicy: TrustedPolicy = {
+    commit: "a".repeat(40),
+    hash: "scope",
+    semantic_policy_hash: "semantic",
+    paused: false,
+    paused_projects: [],
+    sources: {},
+    manual_url: { enabled: true },
+    allowed_domains: [
+      ...context.tool_domains!,
+      "scope-expansion.example",
+      "revoked.example",
+    ],
+    denied_domains: ["revoked.example"],
+    excluded_topics: [],
+  };
+  const hostGate = new PolicyGate(
+    async () => scopedPolicy,
+    async () => {},
+  );
+  await expect(
+    hostGate.require(
+      projectSubject(host, ["https://scope-expansion.example/reference"]),
+      "main_read",
+      "host_gateway",
+    ),
+  ).rejects.toThrow("domain_outside_original_scope");
+  host.candidate.aliases.push("https://revoked.example/alias");
+  await expect(
+    hostGate.require(projectSubject(host), "main_read", "host_permission"),
+  ).rejects.toThrow("domain_denied:revoked.example");
+  host.candidate.aliases = host.candidate.aliases.filter(
+    (url) => !url.includes("revoked.example"),
+  );
+  host.snapshots[0]!.url = "https://revoked.example/core";
+  await expect(
+    hostGate.require(
+      projectSubject(host),
+      "main_read",
+      "host_source_verification",
+    ),
+  ).rejects.toThrow("domain_denied:revoked.example");
   const next = await buildApplication({ ...options, run_id: "next-run" });
   await next.controller.run({ ...dispatch, input_urls: [] }, "fixture");
   expect(calls).toBe(1);

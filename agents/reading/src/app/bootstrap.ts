@@ -164,9 +164,15 @@ function decodeDelivery(d: StoredDelivery): SealedDelivery {
     })),
   };
 }
-function projectSubject(
+export function projectSubject(
   p: HostProject,
-  urls = [p.candidate.url],
+  urls = [
+    ...new Set([
+      p.candidate.url,
+      ...p.candidate.aliases,
+      ...p.snapshots.map((snapshot) => snapshot.url),
+    ]),
+  ],
 ): PolicySubject {
   return {
     subject_ref: `project:${p.project_id}`,
@@ -175,6 +181,9 @@ function projectSubject(
     execution_scope: p.execution_scope,
     origin_source_ids: p.candidate.origin_source_ids,
     urls,
+    ...(p.context.tool_domains
+      ? { original_domains: [...p.context.tool_domains] }
+      : {}),
     main_url: p.candidate.url,
     ...(p.classification
       ? { source_snapshot_hash: p.classification.source_snapshot_hash }

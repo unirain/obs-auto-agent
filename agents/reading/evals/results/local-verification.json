@@ -1,6 +1,6 @@
 {
-  "recorded_at": "2026-10-13T10:52:15.078025+00:00",
-  "implementation_sha256": "f952428a4b6778f507b1cca9d9ee7c96867bb9ed278ca7214f7382f363fedaea",
+  "recorded_at": "2026-10-13T10:57:50.366065+00:00",
+  "implementation_sha256": "ff684f2de152aa28149d43b7c0eb51c51f98da66403ceb86a05ba5f6d9d3b4be",
   "fingerprint_files": 156,
   "commands": {
     "npm run typecheck": "passed",

@@ -25,3 +25,5 @@
 - Setup instructions and generated RAM policies are available in `docs/runbooks/test-environment-setup.md`. Restricted identities, test App/repository, image prefix, transport-loss verification and human labels remain outstanding. No production generation schedule was enabled.
 
 - Final local checkpoint at 18:50: 187 tests passed, typecheck/build and mapping passed; three live tests skipped. Sanitized command results and implementation fingerprint are saved in `agents/reading/evals/results/local-verification.json`. Production-scope publish-only composition proves no model/image credential reads and no SDK construction.
+
+- Initial implementation commit `667fa1a` was pushed to master; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38386402472). Cross-review then found and fixed host policy-subject propagation: gateway, source verification and Publisher now retain original tool domains; default subjects include actual aliases and snapshot URLs. Regression checks reject later scope expansion and revoked alias/core domains; the full 187-test suite, typecheck/build and mapping pass after the fix.
