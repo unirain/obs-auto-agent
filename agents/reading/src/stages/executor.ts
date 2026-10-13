@@ -1,4 +1,5 @@
 import {randomUUID} from 'node:crypto';
+import path from 'node:path';
 import {canonicalJson,type InvocationRecord,type InvocationMessage} from '../contracts/index.js';
 import {digest,type StageTask} from './contracts.js';
 import {PolicyGate,type PolicySubject} from '../policy/gate.js';
@@ -31,7 +32,7 @@ export class StageExecutor {
     const refresh=setInterval(()=>{if(stopped)return;void this.gate.check(input.subject,input.task.capability,'active_query_refresh').then(current=>{if(current.execution_permission!=='allowed'){policyFailed=true;controller.abort('policy_revoked');}}).catch(()=>{policyFailed=true;controller.abort('policy_unavailable');});},limits.policy_refresh_seconds*1000);refresh.unref();
     const controller=new AbortController();cancellation.signal.addEventListener('abort',()=>controller.abort(cancellation.signal.reason),{once:true});if(cancellation.signal.aborted)controller.abort();
     try {
-      for await(const message of this.model.stream({prompt:input.prompt,system_prompt:input.system_prompt,schema:input.schema,cwd:input.cwd,model:input.model,signal:controller.signal,tools:input.tools,max_turns:limits.max_tools_per_batch,max_output_tokens:input.max_output_tokens??8192,...(input.skills?{skills:input.skills}:{})})){
+      for await(const message of this.model.stream({prompt:input.prompt,system_prompt:input.system_prompt,schema:input.schema,cwd:input.cwd,vault_root:path.join(input.cwd,'projects',input.task.project_id,'draft'),model:input.model,signal:controller.signal,tools:input.tools,max_turns:limits.max_tools_per_batch,max_output_tokens:input.max_output_tokens??8192,...(input.skills?{skills:input.skills}:{})})){
         observedSdkMessage=true;
         await this.journal.observe(invocation_id,{message_id:message.message_id,summary:message.summary,usage:message.usage},{...message.observable,...(message.type==='result'&&message.result!==undefined?{structured_response:message.result}:{})});
         if(message.type==='result'){terminal=true;success=message.success===true;final=message.result;}

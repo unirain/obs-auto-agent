@@ -1,4 +1,5 @@
 import {readInstalledSdkVersion} from './versions.js';
+import path from 'node:path';
 import {query,createSdkMcpServer,tool,type Options,type SDKMessage,type ModelUsage} from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
@@ -6,7 +7,7 @@ import type {Usage} from '../contracts/index.js';
 export const SDK_VERSION='0.3.296';
 export type RuntimeMessage={message_id:string;type:string;summary:boolean;usage:Usage;result?:unknown;success?:boolean;observable:Record<string,unknown>};
 export type ToolDefinition={name:string;description:string;run:(args:Record<string,unknown>)=>Promise<unknown>};
-export type QueryRequest={prompt:string;system_prompt:string;schema:object;cwd:string;model:string;signal:AbortSignal;tools:ToolDefinition[];skills?:string[];max_output_tokens?:number;max_turns?:number};
+export type QueryRequest={prompt:string;system_prompt:string;schema:object;cwd:string;vault_root?:string;model:string;signal:AbortSignal;tools:ToolDefinition[];skills?:string[];max_output_tokens?:number;max_turns?:number};
 export interface ModelAdapter {preflight?:()=>Promise<void>;stream(request:QueryRequest):AsyncIterable<RuntimeMessage> }
 /** Only a trusted host adapter may raise this before calling SDK query(); it is never inferred from an SDK/network error. */
 export class QueryNotStartedError extends Error {readonly request_started=false;constructor(readonly reason:string){super(reason);this.name='QueryNotStartedError';}}
@@ -53,7 +54,8 @@ export function sdkOptions(request:QueryRequest,secrets:SdkSecrets,home:string):
     {input:z.record(z.string(),z.unknown())},async({input})=>mcpToolContent(await definition.run(input))))});
   const allowed=request.tools.map(definition=>`mcp__reading__${definition.name}`);
   const skillActivation=request.tools.find(definition=>definition.name==='activate_skill');
-  return {cwd:request.cwd,model:request.model,env:{...sdkEnvironment(secrets,home),VAULT_ROOT:request.cwd,CLAUDE_CODE_MAX_OUTPUT_TOKENS:String(maxOutput)},abortController:controller,
+  const vaultRoot=request.vault_root??request.cwd;const relativeVault=path.relative(path.resolve(request.cwd),path.resolve(vaultRoot));if(relativeVault==='..'||relativeVault.startsWith('..'+path.sep)||path.isAbsolute(relativeVault))throw new Error('sdk_vault_root_outside_project_view');
+  return {cwd:request.cwd,model:request.model,env:{...sdkEnvironment(secrets,home),VAULT_ROOT:vaultRoot,CLAUDE_CODE_MAX_OUTPUT_TOKENS:String(maxOutput)},abortController:controller,
     tools:request.skills?.length?['Skill']:[],allowedTools:request.skills?.length?[...allowed,'Skill']:allowed,disallowedTools:['Bash','Read','Write','Edit','Glob','Grep','WebFetch','WebSearch','Agent','Task','NotebookEdit'],
     mcpServers:{reading:mcp},settingSources:request.skills?.length?['project']:[],skills:request.skills??[],persistSession:false,permissionMode:'default',
     ...(request.skills?.length?{hooks:{PreToolUse:[{matcher:'Skill',hooks:[async hook=>{

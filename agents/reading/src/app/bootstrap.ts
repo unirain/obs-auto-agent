@@ -1432,6 +1432,7 @@ export async function buildApplication(
         project.project_id,
         project.context.skill_hash,
       );
+      await mkdir(join(skills.root,safeRelative(`projects/${project.project_id}/draft`)),{recursive:true});
       for (const file of records.handle.snapshot.manifest.files.filter((f) =>
         f.path.startsWith(`projects/${project.project_id}/`)&&!f.path.startsWith(`projects/${project.project_id}/snapshots/`)&&!f.path.startsWith(`projects/${project.project_id}/sources/`),
       )) {

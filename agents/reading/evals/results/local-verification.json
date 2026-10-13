@@ -1,6 +1,6 @@
 {
-  "recorded_at": "2026-10-13T14:21:38.743492+00:00",
-  "implementation_sha256": "45b4369eb9a5de73eb600365ce0f4bae9a5a8abc36d3d2ab40ea2fc013e68d5f",
+  "recorded_at": "2026-10-13T14:26:52.534519+00:00",
+  "implementation_sha256": "97ea7019b991a72f039de2740234b61b5ea4493e5351adfb21d1ac2e127e8e1f",
   "fingerprint_files": 243,
   "commands": {
     "npm run typecheck": "passed",
@@ -12,7 +12,7 @@
   },
   "local_tests": {
     "files": 62,
-    "passed": 374,
+    "passed": 375,
     "failed": 0
   },
   "live_tests": {
@@ -31,9 +31,14 @@
   },
   "previous_ci": {
     "status": "passed",
-    "implementation_commit": "95be532cc4aa6f1d6c437f8d8fa5fb6ea38999a8",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38407803369",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local contract/replay suite; no live model or cloud permissions acceptance"
-  }
+    "implementation_commit": "65cffd96980f593f0276d875ee3953ac0005d0a6",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38412794310",
+    "scope": "Local contract/replay suite only"
+  },
+  "followup_checks": [
+    "typecheck",
+    "build",
+    "bootstrap:7",
+    "recovery:8"
+  ]
 }
