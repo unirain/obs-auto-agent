@@ -887,12 +887,32 @@
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "recovering read never removes historical gap; transient incident survives monitor interval",
           "proves": "实际good结果仍保留gaps；validated_fill=false拒处置，true产生gap_resolved。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "trusted gap acceptance commits health, event and human audit together; cold recovery and later reading keep accepted and other unresolved intervals",
+          "proves": "真实FileObjectStore、scoped Manager和host validator保存来源读取恢复与coverage gap。可信管理请求将health/event/audit原子写入；毁掉本地状态后恢复，accepted保持、其他open区间仍在，游标不动。真实monitor投影保留未接受区间。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "lost management reply reconciles the committed audit after cold restart without another acceptance event",
+          "proves": "人为丢失管理成功回复后新manager恢复原提交，重放相同请求already_applied且revision/event次数不变。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "acceptance revision compare runs inside the shared writer queue and refuses intervening state without losing source facts",
+          "proves": "入口revision检查后注入另一条真实host提交；排队内expected_revision校验拒绝旧接受，冷恢复保留新事实且audit/accepted事件均无写入。"
+        },
+        {
+          "file": "agents/reading/evals/contracts/source-gap-cli.test.ts",
+          "test_name": "source gap management only targets an existing workspace and requires an explicit private request file",
+          "proves": "CLI拒新URL/project/submission与无请求文件；写入仅可信管理入口，不接受Issue评论/validated_fill命令。"
         }
       ],
       "remaining": [
         {
           "layer": "local",
-          "requirement": "resolveGap目前为未接入CLI/controller的纯函数；需受信用户接受/真实补采核验入口与原子持久事件、下一次watchdog的组合。测试手工注入accepted_gap不证明用户入口。"
+          "requirement": "人工接受路径已接线并有原子/冷恢复/漂移断言；真实补采仍缺读取已提交覆盖证据、验证实际区间并调用filled的可信入口，不能用validated_fill boolean当证明。"
         },
         {
           "layer": "source_live",

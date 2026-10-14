@@ -10,6 +10,8 @@ export async function loadCaseAudits(paths:string[],ids:string[]):Promise<CaseAu
    if(item.local_status==='covered'&&item.evidence.length===0)throw new Error('local_coverage_without_evidence');
    for(const evidence of item.evidence){if(!evidence.file.startsWith('agents/reading/evals/')||evidence.file.split('/').includes('..')||!evidence.test_name.trim()||!evidence.proves.trim())throw new Error('case_evidence_pointer_invalid');const source=await readFile(resolve(evidence.file),'utf8');if(!source.includes(evidence.test_name))throw new Error('case_evidence_test_missing:'+item.id+':'+evidence.test_name);}
    for(const need of item.remaining)if(!layers.has(need.layer)||!need.requirement.trim())throw new Error('case_audit_remaining_invalid');
+   const localRemaining=item.remaining.some(need=>need.layer==='local');
+   if((item.local_status==='covered')===localRemaining||(item.local_status==='missing'&&item.evidence.length>0))throw new Error('case_audit_status_conflicts_with_evidence');
    rows.set(item.id,item);
   }
  }

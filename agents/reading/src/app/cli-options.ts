@@ -10,6 +10,8 @@ export type CliOptions = {
     | "verify-storage"
     | "maintenance"
     | "recover"
+    | "manage-source-gap"
+    | "inspect-source-gaps"
     | "inspect";
   deployment: string;
   dispatch: Dispatch | null;
@@ -54,6 +56,8 @@ export function parseCli(
       "verify-storage",
       "maintenance",
       "recover",
+      "manage-source-gap",
+      "inspect-source-gaps",
       "inspect",
     ].includes(command)
   )
@@ -84,6 +88,8 @@ export function parseCli(
     "validate-dispatch",
     "maintenance",
     "recover",
+    "manage-source-gap",
+    "inspect-source-gaps",
     "inspect",
   ].includes(command)
     ? parseDispatch(
@@ -92,7 +98,13 @@ export function parseCli(
       )
     : null;
   if (
-    ["maintenance", "recover", "inspect"].includes(command) &&
+    [
+      "maintenance",
+      "recover",
+      "inspect",
+      "manage-source-gap",
+      "inspect-source-gaps",
+    ].includes(command) &&
     (dispatch?.input_urls.length ||
       dispatch?.project_id ||
       dispatch?.submission_id ||
@@ -101,7 +113,12 @@ export function parseCli(
     throw new Error("maintenance_existing_workspace_only");
   if (command === "recover" && !values["request-file"])
     throw new Error("recovery_request_file_required");
-  if (command !== "recover" && values["request-file"])
+  if (command === "manage-source-gap" && !values["request-file"])
+    throw new Error("source_gap_request_file_required");
+  if (
+    !["recover", "manage-source-gap"].includes(command) &&
+    values["request-file"]
+  )
     throw new Error("recovery_request_wrong_command");
   if (values.local && dispatch?.mode !== "preview")
     throw new Error("local_adapter_is_preview_only");

@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: trusted gap acceptance and render process recovery
+
+- Previous continuation made concrete progress: evaluation/case audits were committed as 6e00cfe and Linux Node 24 CI passed (Actions run 38428107840). The full goal remains active; G1–G5 and all 87 layered cases remain unpassed.
+- C029 now has an explicit trusted management CLI. Scope/source/gap identity, interval fingerprint, actor, reason and human evidence are required. Health/event/audit commit together; journal compares expected revision inside the queue. Cold replay of a lost management response adds no event, failed commits add neither fact, and intervening writes reject the stale request. Restore validates audit hash, scope and event closure. Current read recovery preserves accepted/other unresolved gaps. Actual backfill verification is still missing.
+- C050 has seven explicit initialization tests: NoSuchBucket at three boundaries, public-read/public-read-write and private-but-anonymous-readable configurations all refuse before writes and again after cold restart; the valid empty-private control creates exactly one zero commit. These are filesystem/service fault fixtures, not RAM or real OSS permission evidence.
+- C053 exposed an actual persistence bug: SVG/check output was saved only after successful PNG export. Renderer and driver now commit checked JSON/SVG/receipt before export, bind input/skill/tool/source versions and restore only validated manifest bytes. Partial/drifted receipts fail; same-name changed input requires an explicit different artifact name or generation.
+- A real local isolated Linux Docker process exited 42 during export; prior evidence and source hashes survived a destroyed local workspace, and the cold host ran only export-png. No model intent/query was created; visual status stays pending. Fixed fault script scope is explicit in evals/runtime/evidence/render-exit-20261014.json. It does not prove real Fireworks/SDK/article quality.
+- At 10:34 Asia/Shanghai, 75 files / 413 local tests passed; typecheck/build, 38 schema checks, mapping and diff checks passed. Default live command skipped four gated tests; the Docker fault test passed under its explicit flag. Local case audit is 32 covered / 54 partial / 1 missing with 55 local follow-ups; complete layered cases remain zero. Restricted RAM, delivery/image resources and human labels remain required.
+
 ## 2026-10-13 Continuation: case-by-case scope audit and evaluation binding
 
 - Previous turn changed authoritative state: G0 contract closure and commits ec366b7/91edd85 passed Linux CI. This turn inspected every one of the 87 expected scenarios against actual test bodies, rather than treating the green suite or file existence as broad proof.

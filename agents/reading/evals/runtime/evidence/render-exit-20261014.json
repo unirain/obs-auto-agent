@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-14T02:32:47.044Z",
+  "runtime": {
+    "image_id": "sha256:66bc2e4d14f732be1da3e685e0337844c8c1dce01cbf3014094489e6561d1a7a",
+    "manifest_hash": "92d57bffdd511c2d44e20380d25ab1c285b96a9781b2a8a1fbe1dc51ecabefeb"
+  },
+  "scope": "Actual local isolated Docker fault with fixed fixture script; not real drawing skill/model/quality acceptance.",
+  "fixture_skill_hash": "a385a80087aa258732d7792b5dc79d4e5b43a739359a8800269e8f2f086de40d",
+  "exit_code": 42,
+  "first_commands": [
+    "validate",
+    "render",
+    "check",
+    "export-png"
+  ],
+  "cold_commands": [
+    "export-png"
+  ],
+  "source_hash": "3a444526ae39603865c10d612532ca39a8fb164106261d518d00f9100a278d26",
+  "png_hash": "2cec9ad8480fa53fe91e8c36aaf00aa447d9838da523a01c8097bdd164843b17",
+  "model_queries": 0,
+  "visual_check": "pending"
+}

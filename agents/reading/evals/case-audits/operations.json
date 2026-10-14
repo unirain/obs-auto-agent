@@ -551,13 +551,30 @@
     },
     {
       "id": "C050",
-      "local_status": "missing",
-      "evidence": [],
-      "remaining": [
+      "local_status": "covered",
+      "evidence": [
         {
-          "layer": "local",
-          "requirement": "当前source存在NoSuchBucket→configuration分类及private/anonymous preflight守卫，但未找到NoSuchBucket、public ACL或anonymous_readable=true驱动manager启动并断言零初始化写的测试。补这三个反例，不能把unknown错误分类或unverified配置声明当场景证据。"
+          "file": "agents/reading/evals/storage/initialization-safety.test.ts",
+          "test_name": "missing bucket at %s refuses explicit initialization before writes and still refuses after cold restart",
+          "proves": "真实ImmutableWorkspaceManager默认preflight及显式allow_initialize调用；configuration/list/zero_probe三个边界的NoSuchBucket(status404)经过实际classifyOssError归configuration而不是not_found。各风险以新FileStore和新manager再次启动，create/delete均0，后端目录为空；zero_probe确实读固定zero commit key。"
         },
+        {
+          "file": "agents/reading/evals/storage/initialization-safety.test.ts",
+          "test_name": "%s ACL refuses explicit initialization before writes and still refuses after cold restart",
+          "proves": "public-read/public-read-write两种ACL在实际初始化入口仅读取configuration即拒绝；初次与冷重启均未列举、未创建manifest/commit/blob、未删除对象，配置未被修改为private。"
+        },
+        {
+          "file": "agents/reading/evals/storage/initialization-safety.test.ts",
+          "test_name": "private ACL with anonymous access refuses initialization before writes and still refuses after cold restart",
+          "proves": "ACL仍private但anonymous_readable=true也在任何对象读写前拒绝；两次独立客户端均零写，匿名可读配置保持原值，未自动修复bucket。"
+        },
+        {
+          "file": "agents/reading/evals/storage/initialization-safety.test.ts",
+          "test_name": "a healthy private empty bucket explicitly missing only the zero object can initialize exactly once",
+          "proves": "正向对照区分同为404的NoSuchKey/not_found与NoSuchBucket/configuration；正常私有空库显式初始化只有一个zero commit，新客户端allow_initialize恢复同revision且不新增任何写。"
+        }
+      ],
+      "remaining": [
         {
           "layer": "oss_live",
           "requirement": "用户预先准备的不存在测试bucket访问以及实际匿名可读隔离bucket应拒绝运行/初始化；不更改private obs-agent为public。"
@@ -631,16 +648,28 @@
     },
     {
       "id": "C053",
-      "local_status": "missing",
-      "evidence": [],
-      "remaining": [
+      "local_status": "covered",
+      "evidence": [
         {
-          "layer": "local",
-          "requirement": "未找到绘图容器运行途中exit/kill的故障注入。missing sandbox测试只证明不退回宿主；lost draft checkpoint测试只模拟阶段提交丢失。需证明已提交证据/已检查图源保留、半成品图不被认可，冷恢复继续未完成操作。"
+          "file": "agents/reading/evals/runtime/render-recovery.test.ts",
+          "test_name": "renderer process exit preserves checked sources and prior evidence; a fresh host resumes only export from the immutable checkpoint",
+          "proves": "实际renderer、driver共用persistence端口、WorkspaceJournal和FileStore在export前原子保存JSON/SVG/check receipt；真实Python子进程exit42后无PNG产物，毁掉临时root与恢复目录，新manager恢复保留既有证据、仅export、visual_check仍pending且无model intent。"
         },
         {
+          "file": "agents/reading/evals/runtime/render-recovery.test.ts",
+          "test_name": "renderer refuses incomplete, changed source, input and runtime checkpoints without executing a process or claiming visual completion",
+          "proves": "同名不同diagram、固定skill/runtime变化、SVG篡改、缺输入文件都在进程前拒绝，不能复用旧图源或虚构完成。"
+        },
+        {
+          "file": "agents/reading/evals/runtime/render-exit.live.test.ts",
+          "test_name": "actual isolated Docker process exit retains checked sources and a cold host exports them without a model query",
+          "proves": "已显式实际执行，本机固定image/manifest的隔离Linux容器运行固定故障script，export退出42；冷宿主只export，图源hash保持、无SDK intent。证据runtime/evidence/render-exit-20261014.json；是容器故障，不证明真实绘图skill或文章质量。"
+        }
+      ],
+      "remaining": [
+        {
           "layer": "image_live",
-          "requirement": "在实际Linux固定工具容器绘图中退出，核对保留的图源hash及恢复渲染结果，而非只执行正常绘图或Python回放。"
+          "requirement": "实际隔离Docker进程退出与恢复已证明；仍需固定正式Fireworks skill处理真实文章图源时的故障/恢复及视觉检查，固定故障脚本不能替代绘图skill质量。"
         },
         {
           "layer": "sdk_live",

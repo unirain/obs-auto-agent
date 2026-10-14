@@ -21,6 +21,6 @@ export function applySourceResult(previous:SourceHealth,result:SourceResult,work
   return parseSourceHealth(next);
 }
 export function resolveGap(previous:SourceHealth,gap_id:string,resolution:{kind:'accepted'|'filled';reason:string;validated_fill:boolean},workspace_id:string,scope:Scope,now:string):SourceHealth {
-  parseSourceHealth(previous);assertUtcInstant(now,'gap resolution time');if(!resolution.reason||(resolution.kind==='filled'&&!resolution.validated_fill))throw new Error('gap_resolution_evidence_required');const next=structuredClone(previous);const gap=next.gaps[gap_id];if(!gap)throw new Error('gap_not_found');gap.status=resolution.kind;
+  parseSourceHealth(previous);assertUtcInstant(now,'gap resolution time');if(!resolution.reason.trim()||(resolution.kind==='filled'&&!resolution.validated_fill))throw new Error('gap_resolution_evidence_required');if(previous.events.some(event=>event.workspace_id!==workspace_id||event.execution_scope!==scope))throw new Error('gap_resolution_scope_mismatch');const next=structuredClone(previous);const gap=next.gaps[gap_id];if(!gap)throw new Error('gap_not_found');if(gap.status!=='open')throw new Error('gap_already_disposed');gap.status=resolution.kind;
   const position=(next.events.at(-1)?.position??0)+1;next.events.push({event_id:`source_event_${position}`,position,workspace_id,execution_scope:scope,source_id:gap_id.split(':')[0]!,reason_code:'coverage_gap',kind:resolution.kind==='filled'?'gap_resolved':'accepted_gap',occurred_at:now,gap_id});return parseSourceHealth(next);
 }

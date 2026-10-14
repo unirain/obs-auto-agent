@@ -4,6 +4,7 @@ import {READING_PROJECT_STATES,validateReadingProjectTransition} from '../contra
 import {parseRunReport} from './run-records.js';
 import {parsePolicyCheck} from '../policy/gate.js';
 import {parseSourceHealth} from '../monitor/contracts.js';
+import {parseSourceGapAudit} from './source-gap-management.js';
 import {parseSourceResult,parseSourceProgress} from '../collect/records.js';
 import {UtcInstantSchema} from '../contracts/utc.js';
 import {parseContextBundle,parseRuntimeProject,RuntimeProjectSchema} from '../stages/records.js';
@@ -21,6 +22,7 @@ export function validateHostRecords(records:Record<string,JsonValue|null>,execut
   if(key.startsWith('runs/')){const report=parseRunReport(raw);if(key!==`runs/${report.run_id}`||report.execution_scope!==execution_scope||report.workspace_id!==workspace_id)throw new Error('run_record_scope_identity_mismatch');for(const reference of report.policy_check_refs){const check=records['policy-checks/'+reference];if(!check||parsePolicyCheck(check).execution_scope!==execution_scope)throw new Error('run_policy_reference_missing');}}
   if(key.startsWith('policy-checks/')){const check=parsePolicyCheck(raw);if(key!==`policy-checks/${check.check_id}`||check.execution_scope!==execution_scope)throw new Error('policy_record_scope_identity_mismatch');}
   if(key==='sources/health'){const health=parseSourceHealth(raw);if(health.events.some(event=>event.workspace_id!==workspace_id||event.execution_scope!==execution_scope))throw new Error('source_health_scope_identity_mismatch');}
+  if(key.startsWith('source-gap-management/')){const audit=parseSourceGapAudit(raw);if(key!=='source-gap-management/'+audit.request.management_id||audit.request.workspace_id!==workspace_id||audit.request.execution_scope!==execution_scope)throw new Error('source_gap_audit_scope_identity_mismatch');const health=parseSourceHealth(records['sources/health']);if(health.gaps[audit.request.gap_id]?.status!=='accepted'||!health.events.some(event=>event.event_id===audit.event_id&&event.position===audit.event_position&&event.gap_id===audit.request.gap_id&&event.source_id===audit.request.source_id&&event.kind==='accepted_gap'&&event.workspace_id===workspace_id&&event.execution_scope===execution_scope))throw new Error('source_gap_audit_event_missing');}
   if(/^sources\/[^/]+\/progress$/.test(key))parseSourceProgress(raw);
   if(/^sources\/[^/]+\/result$/.test(key)){const result=parseSourceResult(raw);if(result.source_id!==key.split('/')[1])throw new Error('source_result_identity_mismatch');}
   if(key.startsWith('contexts/')){const context=parseContextBundle(raw);if(key!==`contexts/${context.context_id}`)throw new Error('context_record_identity_mismatch');}

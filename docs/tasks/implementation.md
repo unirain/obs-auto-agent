@@ -1,6 +1,6 @@
 # Reading Agent implementation tasks
 
-Updated: 2026-10-13. Objective: implement and verify all five plans without narrowing live validation requirements.
+Updated: 2026-10-14. Objective: implement and verify all five plans without narrowing live validation requirements.
 
 Statuses: pending, in_progress, implemented, local_verified, live_unverified, blocked_external, complete. A work package is complete only when its required evidence exists. Gate evidence is tracked separately.
 
@@ -43,7 +43,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 External configuration: implementation repository unirain/obs-auto-agent is connected on default branch master, preserving the initial Apache License. obs-agent in Beijing supplied and native OSS core probe passed. DEEPSEEK_API_KEY is visible to host; read-only model catalog confirms deepseek-flash. Distinct restricted RAM identities, separate GitHub test repository/App and public image test prefix remain unprepared. Human dataset labels and quality confirmation remain required. No secret values belong in this document.
 
-Evidence checkpoint: 398 local tests in 71 files passed at 2026-10-13 23:55 Asia/Shanghai; typecheck/build, mapping and diff checks passed. Sanitized command results and implementation fingerprint: agents/reading/evals/results/local-verification.json. Three opt-in live tests remain skipped. SDK child isolation and Docker JS/render probes are actual local evidence only. Core OSS evidence is partial; RAM/transport evidence and full service/human gates are still missing. All 87 spec cases remain pending complete layered proof.
+Evidence checkpoint: 413 local tests in 75 files passed at 2026-10-14 10:34 Asia/Shanghai; typecheck/build, mapping and diff checks passed. Sanitized command results and implementation fingerprint: agents/reading/evals/results/local-verification.json. Four opt-in live tests were skipped by the default live command; the new isolated local Docker fault test was explicitly executed and passed separately. SDK child isolation and Docker JS/render probes are actual local evidence only. Core OSS evidence is partial; RAM/transport evidence and full service/human gates are still missing. All 87 spec cases remain pending complete layered proof.
 
 Implementation commit `95be532` is pushed to `origin/master`; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38407803369). The implementation repository is still separate from the missing delivery test repository/App.
 
@@ -51,7 +51,7 @@ Implemented in this continuation: audited fixed-input manual invocation recovery
 
 Implemented in the latest continuation: logical file chunking above the physical blob limit; project-body references and bounded lazy loading; authenticated history GC; scoped control DTO validation; explicit changed-input generation and atomic feedback; actual installed SDK/native binary and tool-image binding; trusted runtime limits, freshness/watchdog durations and storage declarations; RSS/Atom and unsupported media receipts. Final local command evidence is recorded above; these changes do not prove live gates.
 
-Implementation follow-ups before full acceptance: deliver and consume a fixed cloud-adapted skill commit; close the 57 explicitly identified local scenario gaps in docs/notes/spec-case-audit.md, then re-audit their assertions; run the frozen evaluation through real model execution and human calibration. Per-case evidence now records actual test names/proved scope and missing layers. External service/human gates above remain unchanged. Completion is still unproven.
+Implementation follow-ups before full acceptance: deliver and consume a fixed cloud-adapted skill commit; close the 55 explicitly identified local scenario gaps in docs/notes/spec-case-audit.md, then re-audit their assertions; run the frozen evaluation through real model execution and human calibration. Per-case evidence now records actual test names/proved scope and missing layers. External service/human gates above remain unchanged. Completion is still unproven.
 
 Latest continuation: actual project transitions and fee/archive preservation are enforced before checkpoint; daily logical keys group physical runs without skipping new URLs; cancellation persists unknown outcomes; workflow G1 evidence is pinned to tracked default-branch bytes, and publish-only excludes model/image credentials. Cloud skill proposal and evidence: docs/notes/cloud-skill-proposal.md. The five G0 contract follow-ups are now closed; fuller plan-level host fault evidence and case-by-case layered acceptance mapping remain; external gates remain unchanged.
 
@@ -62,3 +62,5 @@ Continuation implementation 65cffd9 passed Linux CI (https://github.com/unirain/
 Implementation ec366b7 pushed to master and passed Linux Node 24 CI: https://github.com/unirain/obs-auto-agent/actions/runs/38421910653.
 
 87-case audit: local covered 30, partial 54, missing 3; 57 cases have explicit local remaining requirements. These are scope assessments of actual assertions, not executed live passes. All full-layer statuses remain pending. Evaluation readiness inspected the actual candidate document: 30 samples, 10 holdout, 30 unlabeled, 30 lacking frozen source body versions.
+
+Latest continuation: trusted inspect-source-gaps/manage-source-gap accept commands commit exact-revision health/event/human audit atomically; restoration verifies audit bindings and committed event closure. C029 backfill remains missing. C050 proves unsafe bucket configurations cause zero writes across cold restart. C053 commits checked JSON/SVG/receipt before PNG export, binds restored input/skill/tool hashes and has an actual isolated Docker exit42/recovery fixture. Audit now 32 covered / 54 partial / 1 missing locally, 55 with local requirements, and 87 pending full-layer proof. Fixed fault scripts are not native drawing/model/article quality acceptance.

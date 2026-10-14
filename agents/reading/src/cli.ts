@@ -7,7 +7,7 @@ import { parseCli, safeError } from "./app/cli-options.js";
 import { loadOssCredentials } from "./config/credentials.js";
 import { createObjectStore } from "./storage/oss.js";
 import { preflight } from "./storage/preflight.js";
-import {processCancellation} from './app/signals.js';
+import { processCancellation } from "./app/signals.js";
 
 async function main(): Promise<void> {
   const started_at = Date.now();
@@ -67,13 +67,54 @@ async function main(): Promise<void> {
     console.log(JSON.stringify(await app.maintenance(), null, 2));
     return;
   }
+  if (
+    options.command === "manage-source-gap" ||
+    options.command === "inspect-source-gaps"
+  ) {
+    if (
+      options.command === "manage-source-gap" &&
+      !options.local &&
+      process.env.READING_SHARED_MUTEX_HELD !== "true"
+    )
+      throw new Error("storage_writer_mutex_unverified");
+    const { buildMaintenanceApplication } = await import("./app/bootstrap.js");
+    const { acceptSourceGap, inspectSourceGaps } =
+      await import("./app/source-gap-management.js");
+    const app = await buildMaintenanceApplication({
+      deployment,
+      dispatch: options.dispatch!,
+      local: options.local,
+      local_root: resolve(options.local_root),
+      run_id: "source-gap-" + randomUUID(),
+    });
+    if (options.command === "inspect-source-gaps")
+      console.log(
+        JSON.stringify(await inspectSourceGaps(app.journal), null, 2),
+      );
+    else {
+      const text = await readFile(resolve(options.request_file!), "utf8");
+      if (Buffer.byteLength(text) > 16000)
+        throw new Error("source_gap_request_too_large");
+      console.log(
+        JSON.stringify(
+          await acceptSourceGap(
+            app.journal,
+            JSON.parse(text),
+            process.env.GITHUB_ACTOR ?? userInfo().username,
+          ),
+        ),
+      );
+    }
+    return;
+  }
   if (options.command === "recover") {
     if (!options.local && process.env.READING_SHARED_MUTEX_HELD !== "true")
       throw new Error("storage_writer_mutex_unverified");
     const text = await readFile(resolve(options.request_file!), "utf8");
     if (Buffer.byteLength(text) > 4_000_000)
       throw new Error("recovery_request_too_large");
-    const { buildRecoveryApplication } = await import("./app/recovery-bootstrap.js");
+    const { buildRecoveryApplication } =
+      await import("./app/recovery-bootstrap.js");
     const { applyRecovery } = await import("./app/recovery.js");
     const app = await buildRecoveryApplication({
       deployment,
@@ -81,7 +122,9 @@ async function main(): Promise<void> {
       local: options.local,
       local_root: resolve(options.local_root),
       run_id: "recovery-" + randomUUID(),
-      ...(options.notes_repository?{notes_repository:resolve(options.notes_repository)}:{}),
+      ...(options.notes_repository
+        ? { notes_repository: resolve(options.notes_repository) }
+        : {}),
     });
     console.log(
       JSON.stringify(
@@ -172,31 +215,33 @@ async function main(): Promise<void> {
     dispatch = { ...dispatch, preview_id: randomUUID() };
   await mkdir(resolve(options.local_root), { recursive: true });
   const { buildApplication } = await import("./app/bootstrap.js");
-  const cancellation=processCancellation();
+  const cancellation = processCancellation();
   try {
-  const application = await buildApplication({
-    deployment,
-    dispatch,
-    started_at,
-    abort_signal:cancellation.signal,
-    local: options.local,
-    local_root: resolve(options.local_root),
-    notes_repository: resolve(options.notes_repository),
-    run_id: process.env.GITHUB_RUN_ID
-      ? `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}`
-      : `local-${randomUUID()}`,
-  });
-  const report = await application.controller.run(
-    dispatch,
-    process.env.GITHUB_ACTOR ?? "local-user",
-  );
-  console.log(JSON.stringify(report, null, 2));
-  if (
-    ["failed_collection", "partial", "deferred_work"].includes(report.outcome)
-  )
-    process.exitCode = 2;
-  if(cancellation.signal.aborted)process.exitCode=130;
-  }finally{cancellation.close();}
+    const application = await buildApplication({
+      deployment,
+      dispatch,
+      started_at,
+      abort_signal: cancellation.signal,
+      local: options.local,
+      local_root: resolve(options.local_root),
+      notes_repository: resolve(options.notes_repository),
+      run_id: process.env.GITHUB_RUN_ID
+        ? `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}`
+        : `local-${randomUUID()}`,
+    });
+    const report = await application.controller.run(
+      dispatch,
+      process.env.GITHUB_ACTOR ?? "local-user",
+    );
+    console.log(JSON.stringify(report, null, 2));
+    if (
+      ["failed_collection", "partial", "deferred_work"].includes(report.outcome)
+    )
+      process.exitCode = 2;
+    if (cancellation.signal.aborted) process.exitCode = 130;
+  } finally {
+    cancellation.close();
+  }
 }
 await main().catch((error) => {
   console.error(safeError(error));

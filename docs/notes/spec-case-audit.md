@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-13。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 30、partial 54、missing 3，57 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件和真实测试标题，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 32、partial 54、missing 1，55 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@
 | C026 一个来源连续失败，另一个持续创建 PR，Actions 成功退出 | partial | 补A多轮fail+B真实host回放产PR+success Actions状态的组合，断言source_id+reason告警不被总成功抹除。 | github_live, oss_live, source_live |
 | C027 同一来源同一原因多轮失败，之后实际读取恢复 | partial | 补good页的checkpoint失败时watchdog不得closed，下一次持久化good成功才closed；当前monitor测试直接给recovered事件，未验证此关键提交屏障。 | github_live, oss_live, source_live |
 | C028 故障在两次监控之间发生并恢复 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
-| C029 当前来源读取恢复但历史 coverage_gap 未补齐 | partial | resolveGap目前为未接入CLI/controller的纯函数；需受信用户接受/真实补采核验入口与原子持久事件、下一次watchdog的组合。测试手工注入accepted_gap不证明用户入口。 | github_live, oss_live, source_live |
+| C029 当前来源读取恢复但历史 coverage_gap 未补齐 | partial | 人工接受路径已接线并有原子/冷恢复/漂移断言；真实补采仍缺读取已提交覆盖证据、验证实际区间并调用filled的可信入口，不能用validated_fill boolean当证明。 | github_live, oss_live, source_live |
 | C030 停用来源、全局暂停、publish-only 或其他来源成功 | partial | 补已有来源故障之后disabled/not_attempted/publish-only与另一来源success的完整矩阵，核对SourceHealth事件不减少且停用来源Issue明确suppressed；当前disabled测试从空health起步，监控helper disabled_sources总是空数组。 | github_live, source_live |
 | C031 发现候选后进程崩溃 | partial | 注入成功采集页候选+实际非空cursor_after提交后进程退出，用新manager读取并比较候选集合及下一页游标；不能把提交失败空候选测试当作这个场景。 | oss_live, source_live |
 | C032 SDK query 内包含多步模型请求 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
@@ -53,10 +53,10 @@
 | C047 两个客户端争写同一提交序号 | partial | 补两个客户端同序号且完全相同prepared commit bytes/意图的对账回执；并核对败方不同意图停止后不能再以旧handle跳号。当前只有不同意图竞争与单caller丢回执。 | oss_live |
 | C048 workspace bucket 版本控制已开启或已暂停 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C049 提交前缀列举中断、提交链有缺口或哈希不符 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
-| C050 workspace bucket 不存在或匿名可读 | missing | 当前source存在NoSuchBucket→configuration分类及private/anonymous preflight守卫，但未找到NoSuchBucket、public ACL或anonymous_readable=true驱动manager启动并断言零初始化写的测试。补这三个反例，不能把unknown错误分类或unverified配置声明当场景证据。 | oss_live, ram_live |
+| C050 workspace bucket 不存在或匿名可读 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |
 | C051 GC 清理超过保留期的历史数据 | partial | 补GC前后完整commit key/hash集合不变、GC之后protected历史revision新manager读取完整bytes以及逻辑HEAD重建的组合断言；当前覆盖保护集合与HEAD，不完整证明所有承诺。 | oss_live, ram_live |
 | C052 Actions 超时或被取消 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, sdk_live |
-| C053 工具容器在绘图中退出 | missing | 未找到绘图容器运行途中exit/kill的故障注入。missing sandbox测试只证明不退回宿主；lost draft checkpoint测试只模拟阶段提交丢失。需证明已提交证据/已检查图源保留、半成品图不被认可，冷恢复继续未完成操作。 | image_live, sdk_live |
+| C053 工具容器在绘图中退出 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | image_live, sdk_live |
 | C054 同时触发两个 Actions | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, production_smoke |
 | C055 PR 已创建但回执失败 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, sdk_live |
 | C056 回执丢失超过二十四小时且 PR 已存在 | partial | 组合PR已创建/未确认回执+推进25小时以上+publisher冷恢复，明确记录先找到PR再判来源过期，assert不新增seal/generation/model/PR。当前两个分开的测试不证明整个组合。 | github_live, oss_live |
@@ -94,4 +94,4 @@
 
 本轮另发现 A9 的冻结输入/评估结果未强绑定，已补校验与 inspect/freeze/report 工具。当前 30 个候选仍有 30 个缺人工标签、30 个缺固定正文版本；不能冻结或宣称质量门槛通过。
 
-优先补实际入口缺口 C029：resolveGap 已有纯函数，但缺可信人工接受/真实补采调用入口。其余优先项是 C050/C053 缺少具体局部故障断言，以及候选/游标提交、跨天计数、active query 收尾、PR 超期对账和双scope恢复组合。修补后应重新审计对应行的实际断言与残余层，不批量将covered改complete。
+C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待补。C050 已补零写入与冷启动拒绝，C053 已补检查点及实际本地隔离 Docker 退出恢复（固定故障脚本）。其余优先项是候选/游标提交、跨天计数、active query 收尾、PR 超期对账和双scope恢复组合。修补后应重新审计对应行的实际断言与残余层，不批量将covered改complete。

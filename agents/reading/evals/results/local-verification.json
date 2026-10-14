@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-13T16:08:35.262012+00:00",
-  "implementation_sha256": "dbda3e1f4a52f501d140f43d0f5866d8e76de723cdc1be532228017edcf7df94",
-  "fingerprint_files": 287,
+  "recorded_at": "2026-10-14T02:37:29.944387+00:00",
+  "implementation_sha256": "e3ee314459b578b5efd85384223de65df1382cdd72d24facd7f74dd12046a196",
+  "fingerprint_files": 296,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,13 +12,13 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 71,
-    "passed": 398,
+    "files": 75,
+    "passed": 413,
     "failed": 0
   },
   "live_tests": {
     "executed": 0,
-    "skipped": 3
+    "skipped": 4
   },
   "spec_cases": {
     "mapped": 87,
@@ -32,10 +32,10 @@
   },
   "previous_ci": {
     "status": "passed",
-    "implementation_commit": "ec366b7d87e50a4ae9e9db143286188c7d137b4f",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38421910653",
+    "implementation_commit": "6e00cfe4d78cec8bec21cd6ccc693f56aa5e83fd",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38428107840",
     "environment": "Linux / Node 24.10.0",
-    "scope": "G0/local contract replay only; no native model, RAM, GitHub/image or human quality acceptance"
+    "scope": "Local evidence audit and evaluation preparation only; no real model or human quality acceptance"
   },
   "schema_documents": {
     "count": 38,
@@ -46,10 +46,16 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 30,
+    "covered": 32,
     "partial": 54,
-    "missing": 3,
-    "cases_with_local_remaining": 57
+    "missing": 1,
+    "cases_with_local_remaining": 55
   },
-  "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance."
+  "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance.",
+  "actual_local_docker_fault": {
+    "status": "passed",
+    "executed": 1,
+    "evidence": "agents/reading/evals/runtime/evidence/render-exit-20261014.json",
+    "scope": "Fixed local isolated Docker fault script, source persistence and cold export only; not SDK/real drawing/article quality acceptance."
+  }
 }
