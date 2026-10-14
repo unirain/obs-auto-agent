@@ -16,7 +16,7 @@ export class StageExecutor {
     parseStageTask(input.task);if(input.task.deadline!==input.deadline.generation_deadline)throw new Error('stage_deadline_mismatch');if(input.subject.project_id!==input.task.project_id||input.subject.subject_ref!==`project:${input.task.project_id}`)throw new Error('stage_subject_mismatch');
     if(input.task.execution_scope!==input.subject.execution_scope)throw new Error('stage_scope_mismatch');
     const limits=resolveRuntimeLimits(input.runtime_limits);input.deadline.requireStart();const expected=stageInputHash(input);if(expected!==input.task.input_hash)throw new Error('stage_input_hash_mismatch');
-    const check=await this.gate.require(input.subject,input.task.capability,input.task.checkpoint);
+    let check=await this.gate.require(input.subject,input.task.capability,input.task.checkpoint);
     const prior=await this.journal.find(input.subject.subject_ref,expected,input.task.capability);
     if(prior&&['prepared','running','unknown'].includes(prior.status))throw new Error('request_unknown');
     if(prior?.status==='failed')throw new Error('known_failed_requires_manual');
@@ -24,6 +24,10 @@ export class StageExecutor {
     if(prior?.status==='succeeded'){const result=await this.journal.result?.(prior.invocation_id);if(result===undefined)throw new Error('completed_result_missing_requires_reconciliation');return {invocation_id:prior.invocation_id,result};}
     await this.model.preflight?.(); // Capacity/G1 admission rejection proves SDK never started; do not create an ambiguous paid intent.
     input.deadline.requireStart();
+    // Admission may await remote capacity/G1 checks. Its original permission is no
+    // longer current after that wait; persist the latest one before reserving a query.
+    check=await this.gate.require(input.subject,input.task.capability,input.task.checkpoint);
+    if(input.semantic_policy_hash&&check.semantic_policy_hash!==input.semantic_policy_hash)throw new Error('semantic_policy_changed');
     const invocation_id=`inv_${randomUUID()}`;
     await this.journal.prepare({schema_version:1,invocation_id,execution_scope:input.task.execution_scope,subject_id:input.subject.subject_ref,capability:input.task.capability,
       input_hash:expected,context_hash:input.task.context_id,policy_hash:check.policy_hash!,model:input.model,sdk_version:SDK_VERSION,status:'prepared',messages:[],

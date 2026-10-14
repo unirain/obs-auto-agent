@@ -203,6 +203,7 @@ export class ReadingController {
       ];
       candidate.status = project.state;
       candidate.project_id = project.project_id;
+      candidate.pr_number = project.candidate.pr_number ?? candidate.pr_number;
       project.candidate = structuredClone(candidate);
     }
     const records: Record<string, unknown> = {

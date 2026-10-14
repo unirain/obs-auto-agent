@@ -158,7 +158,7 @@
     },
     {
       "id": "C006",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -174,13 +174,19 @@
           "file": "agents/reading/evals/runtime/executor.test.ts",
           "test_name": "cached success still rechecks current revoked permission",
           "proves": "已有缓存结果在全局pause时仍被拦截。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-admission.test.ts",
+          "test_name": "new classify_only %s refuses before admission, paid intent and stream, including a cold restart",
+          "proves": "source_disabled/domain_denied/project_paused分别作用于新classify_only；实际Gate/StageExecutor/ApplicationInvocationJournal/scoped FileStore，初次与毁掉目录后的新manager均拒绝，preflight/stream=0、invocation rows=0，拒绝策略回执真实持久。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-admission.test.ts",
+          "test_name": "policy %s during asynchronous admission is rechecked before committing a paid intent and remains safe after cold restart",
+          "proves": "实际异步preflight中撤权/改语义/策略不可读后重新读取并提交当前政策；零prepare/stream且冷恢复没有不明付费意图。旧代码确实会继续新query，已执行基线回归证实。此为本地模型替身。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补三条件source_disabled/domain_denied/project_paused分别作用于新classify_only请求，断言SDK stream=0且无prepared调用。当前测试未同时覆盖这些分支。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK适配器前的撤权/暂停拦截，不发模型请求。"
@@ -320,7 +326,7 @@
     },
     {
       "id": "C011",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/intake.test.ts",
@@ -331,13 +337,14 @@
           "file": "agents/reading/evals/delivery/publisher.test.ts",
           "test_name": "never rewrites pending, closed or merged PRs and indexes the default branch fact",
           "proves": "已有Fake PR各种终态只补事实，不增加GitHub写调用。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
+          "proves": "原同一fixture已真实本地经历classify/select/research/write/review、封存、Fake PR响应丢失后对账为一个PR。新增人工intake提交成功回执丢失后删本地目录/新manager恢复，再走actualController相同ID及不同ID同URL；一个Project、5原query不增、FakeGithub objects/branch/PR所有写不增，回执返回已确认project/PR1，来源和两个submission refs保留。模型/GitHub为明确本地替身。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补不同submission_id同URL以及提交成功后丢回执的FileStore/controller冷重启，断言研究调用、Project/PR计数不增加。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实提交回执丢响应后查回同候选。"
@@ -389,7 +396,7 @@
     },
     {
       "id": "C013",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -400,13 +407,14 @@
           "file": "agents/reading/evals/policy/gate.test.ts",
           "test_name": "unknown semantics grants only classification, then manual main remains usable for research",
           "proves": "全局pause拒绝能力；该分支使用research而非manual入队。"
+        },
+        {
+          "file": "agents/reading/evals/integration/manual-admission.test.ts",
+          "test_name": "manual intake %s commits a rejected receipt without a candidate and preserves it across a cold restart",
+          "proves": "direct intakeManual+actualPolicyGate+scoped HostManager/FileStore，source_disabled/global_paused两条件回执rejected/明确原因/候选与project/PR refs null；毁掉本地目录后拒绝回执保持、零新candidate/project/invocation，同ID重放不再提交。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "需直接intakeManual(source_disabled/global_paused)断言items.rejected/原因、零新candidate且冷恢复一致；当前源码有拒绝分支但缺精确场景测试。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实入队拒绝回执持久并保持正式队列。"

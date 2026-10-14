@@ -9,6 +9,10 @@ import {
   ApplicationInvocationJournal,
 } from "../../src/app/journal.js";
 import { validateHostRecords } from "../../src/app/records.js";
+import {ReadingController,type ControllerPorts} from '../../src/app/controller.js';
+import {mappedState} from '../../src/app/bootstrap.js';
+import {intakeManual} from '../../src/collect/intake.js';
+import type {IdentityState} from '../../src/collect/identity.js';
 import { parseRunReport, type RunReport } from "../../src/app/run-records.js";
 import { buildUsageLedger } from "../../src/workspace/usage.js";
 import {
@@ -1085,6 +1089,31 @@ it("one complete domain fixture crosses durable source, paid-reply, seal, delive
     ).toBe(context.context_id);
     expect(journal.keys("invocations/")).toHaveLength(5);
     expect(journal.keys("policy-checks/").length).toBeGreaterThan(5);
+    // The first real replayed research and Fake PR already exist. Manual receipt
+    // response loss and a second submission ID must reuse that logical delivery.
+    const manualInput={submission_id:'manual-repeat-1',urls:[url+'?utm_source=manual'],submitted_by:'owner',submitted_at:later,execution_scope:'production' as const};
+    const intakePort=()=>({read:async()=>await journal.load<IdentityState>('identity')??emptyIdentity(),commit:async(value:IdentityState,reason:string)=>{await journal.commitMany({identity:value},reason);throw new Error('manual_receipt_reply_lost');}});
+    await expect(intakeManual(intakePort(),gate(),manualInput)).rejects.toThrow('manual_receipt_reply_lost');
+    await rm(journal.handle.root_dir,{recursive:true,force:true});({manager,journal}=await open('domain-manual-cold'));project=(await journal.load<HostProject>(key))!;
+    const prEffects=[...remote.calls];
+    const ports:ControllerPorts={journal,gate:gate(),deadline:new RunDeadline(),sources:[],now:()=>new Date(),
+      context:async()=>{throw new Error('duplicate_project_context');},environment:async()=>{throw new Error('duplicate_research_environment');},prepareResources:async()=>{throw new Error('duplicate_image_upload');},verifySources:async()=>{throw new Error('duplicate_source_verification');},seal:async()=>{throw new Error('duplicate_seal');},publish:async()=>{throw new Error('duplicate_pr');},
+      reconcile:async current=>{const facts=await publisher().reconcile(delivery);const record=facts.find(fact=>fact.delivery_id===current.delivery_id)!;return mappedState(current,record);},
+    };
+    const controller=new ReadingController(ports);
+    await controller.run(parseDispatch({mode:'scheduled',input_urls:manualInput.urls,submission_id:manualInput.submission_id}),'owner');
+    await controller.run(parseDispatch({mode:'scheduled',input_urls:[url],submission_id:'manual-repeat-2'}),'owner');
+    const currentIdentity=(await journal.load<IdentityState>('identity'))!;
+    expect(Object.values(currentIdentity.candidates)).toHaveLength(1);expect(journal.keys('projects/')).toEqual([key]);
+    expect(currentIdentity.candidates[candidate.candidate_id]).toMatchObject({status:'pr_open',project_id:projectId,pr_number:1});
+    expect(currentIdentity.candidates[candidate.candidate_id]!.submission_refs).toEqual(['manual-repeat-1','manual-repeat-2']);
+    expect(currentIdentity.submissions['manual-repeat-2']!.items[0]).toMatchObject({status:'already_known',project_id:projectId,pr_number:1,candidate_status:'pr_open'});
+    // The first immutable receipt can predate synchronization, but replay returns
+    // the current confirmed PR rather than changing or recreating the receipt.
+    const replayPort={read:async()=>currentIdentity,commit:async()=>{throw new Error('duplicate_intake_commit');}};
+    expect((await intakeManual(replayPort,gate(),manualInput)).items[0]).toMatchObject({project_id:projectId,pr_number:1,candidate_status:'pr_open'});
+    expect(calls).toEqual(['classification','selection','research','writing','review']);expect(journal.keys('invocations/')).toHaveLength(5);expect(remote.calls).toEqual(prEffects);
+    expect(()=>mappedState(project,{...delivered,generation_version:2})).toThrow('delivery_project_binding_mismatch');
     expect(() =>
       executionTarget(deployment, parseDispatch({ input_urls: [url] })),
     ).toThrow("scope mismatch");

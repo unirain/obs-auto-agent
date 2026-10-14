@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: current admission policy and manual identity feedback
+
+- Previous goal turn made progress through 4b6ddd7/9c93492 with verified Linux CI and four cold source/monitor scenarios. This turn keeps the full objective, G1–G5 and 87 layered cases intact.
+- Found a policy race: an asynchronous model admission/capacity preflight could revoke permission after the initial check, yet StageExecutor would prepare/start the replay query. It now persists current policy again after admission, checks fixed semantic binding and stops before a paid intent on revocation/unavailable policy. Executing the new asynchronous admission regression without this fix failed, proving the gap. Initial source/domain/project refusals also have durable cold verification with zero preflight/intent/stream.
+- Found a missing feedback link: known PR facts were not copied into the Candidate. Strict mappedState now parses DeliveryRecord, rejects foreign scope/project/generation/delivery, and copies its known PR; controller saves preserve it in identity. Manual input feedback can report the confirmed PR rather than an unknown reference.
+- Extended the real domain pipeline fixture after its five replay queries, immutable seal and one reconciled Fake PR. Manual receipt success followed by lost reply, destroyed local directory, a new manager, same submission ID and different-ID same URL all reuse the same project/delivery. All Fake GitHub object/branch/PR writes and original query count remain unchanged. Two submission refs survive; replay returns actual known project/PR1. Model/GitHub are explicit substitutes, not service or quality proof.
+- Direct intakeManual tests persist source_disabled/global_paused rejected receipts with reasons and null candidate/project/PR references, zero candidate/project/invocation rows, and identical replay after cold restore.
+- At 11:19 Asia/Shanghai, 79 files / 429 local tests passed, typecheck/build, 38 schemas, mapping and diff check passed. Final strengthened GitHub-writer assertion passed its focused rerun; four gated live tests skipped. C006/C011/C013 local scope is closed; 39 covered / 47 partial / 1 missing and 48 local follow-ups remain. No live SDK/model/OSS/GitHub permission or human quality gate passed.
+
 ## 2026-10-14 Continuation: source pagination and committed recovery
 
 - Implementation 4b6ddd7 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38503701466). Credential scans found no matches in public commit candidates, and the 299-file fingerprint matches current bytes.

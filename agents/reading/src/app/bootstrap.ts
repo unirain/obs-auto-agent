@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import {parseDeliveryRecord} from '../publish/contracts.js';
 import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -335,10 +336,13 @@ function projectUsage(
     estimated_usd: total.invocation_count > 0 ? total.known_cost_usd : null,
   };
 }
-function mappedState(
+export function mappedState(
   project: HostProject,
   record: DeliveryRecord,
 ): HostProject {
+  record=parseDeliveryRecord(record);
+  if(project.execution_scope!=='production'||record.project_id!==project.project_id||record.generation_version!==project.generation_version||record.delivery_id!==project.delivery_id)throw new Error('delivery_project_binding_mismatch');
+  if(record.pr)project={...project,candidate:{...project.candidate,pr_number:record.pr.number}};
   if (record.status === "awaiting_review")
     return { ...project, state: "pr_open", reason: null, resume_stage: null };
   if (record.status === "merged" || record.status === "closed_unmerged")
