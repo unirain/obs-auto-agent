@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: classification routing and denied capabilities
 
+- Evidence commit c372d3e pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38513538301). Public credential scans found no matches; the 303-file fingerprint matches current bytes.
+
 - Previous turn made concrete progress through 81a8992/0ea5c1e/bc8359f; Linux exposed a late-checkpoint race, then the repaired implementation passed CI. This continuation adds missing evidence to already implemented routing rather than inventing semantic results or shrinking G1–G5.
 - Added an actual driver/StageExecutor/Controller/HostManager/journal/FileStore fixture with strict domain records, fixed prompt bytes, policy receipts and immutable lazy body references. Model and source transport are explicit replays. It presents the full registered main slice before anchored classification output; candidates begin with no topic/content label and no manual eligibility barrier.
 - Product-name tutorial and announcement take distinct permitted/excluded routes; pure marketing and LangChain/Claude official-provenance announcements persist specific response reasons, skipped projects and no drafts or delivery. These replay labels test contracts/routing only, not real model semantic judgment.
