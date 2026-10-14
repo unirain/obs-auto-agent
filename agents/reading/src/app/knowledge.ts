@@ -1,5 +1,5 @@
 import {canonicalJson,sha256} from '../contracts/index.js';
-import {indexNote,recallNotes,type NoteIndex} from '../context/index.js';
+import {indexNote,recallNotes,heldoutNote,type NoteIndex} from '../context/index.js';
 import type {HostProject} from './controller.js';
 import type {WorkspaceJournal} from './journal.js';
 /** Default branch and actual pending PR notes are authoritative; merged workspace drafts are historical only. */
@@ -38,7 +38,7 @@ export async function currentKnowledgeView(records:WorkspaceJournal,project:Host
         current.project_id === project.project_id ||
         ["skipped", "closed_unmerged", "merged"].includes(current.state) ||
         (!!current.writing&&currentIndex.some(note=>note.pending&&note.path===current.writing!.note_path)) ||
-        heldout.urls.has(current.candidate.url) ||
+        heldoutNote({path:current.writing?.note_path??'',sources:[current.candidate.url,...current.candidate.aliases]},heldout) ||
         (!!current.writing && heldout.note_paths.has(current.writing.note_path))
       )
         continue;

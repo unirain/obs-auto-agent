@@ -854,6 +854,42 @@
         }
       }
     },
+    "image_degradations": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "project_id",
+          "generation_version",
+          "context_id",
+          "details"
+        ],
+        "properties": {
+          "project_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "generation_version": {
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "type": "integer"
+          },
+          "context_id": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "details": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "metrics": {
       "type": "object",
       "patternProperties": {

@@ -315,7 +315,7 @@
     },
     {
       "id": "C069",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/workspace.test.ts",
@@ -326,13 +326,14 @@
           "file": "agents/reading/evals/collect/intake.test.ts",
           "test_name": "commits receipt and candidate atomically; lost reply replay never resets skipped/pending",
           "proves": "同一scope提交重放保留既有closed/project/PR状态；不证明两个scope对同URL独立判断。"
+        },
+        {
+          "file": "agents/reading/evals/integration/preview-scope-acceptance.test.ts",
+          "test_name": "preview %s survives cold restore but the same URL receives fresh production admission, identity, classification and usage",
+          "proves": "预览/正式namespace同URL的skip与ready分支；正式初始revision、cursor、identity不受preview影响；独立许可/主文/分类/usage，正式冷重试仅一个project。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺同URL preview skip和preview_ready两个分支之后分别正式scheduled入队的双workspace测试，逐项断言正式游标、identity与项目状态没有读到preview结果。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实preview/production前缀的同URL独立状态。"
@@ -402,7 +403,7 @@
     },
     {
       "id": "C072",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/workspace.test.ts",
@@ -413,13 +414,14 @@
           "file": "agents/reading/evals/runtime/driver.test.ts",
           "test_name": "independent review receives native pixels and persistent receipts; lost final checkpoint reuses the same known paid reply without a new query",
           "proves": "使用实际PNG fixture/native image block和模型回放，独立review后preview validated；丢失最终CP复用同query/image receipt。"
+        },
+        {
+          "file": "agents/reading/evals/integration/preview-scope-acceptance.test.ts",
+          "test_name": "controller seals the reviewed relative PNG and preview report with all formal delivery checks not_exercised, preserving exact outputs across cold resume",
+          "proves": "实际controller提交previews报告，三个正式checks为not_exercised；注册来源PNG下载、独立review读像素、Markdown相对引用；cold原note/PNG/report字节与hash不变，无正式effects。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺对controller提交的previews/<id>.checks三个not_exercised字段及PNG相对Markdown引用的同时断言；现seal字段不是整份preview报告的完整证明。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实供应方收到图片像素并完成独立审校。"
@@ -752,7 +754,7 @@
     },
     {
       "id": "C083",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/tools.test.ts",
@@ -763,13 +765,19 @@
           "file": "agents/reading/evals/runtime/driver.test.ts",
           "test_name": "a text-only passing review cannot validate images and restored receipt reuse refuses a changed image hash before another model call",
           "proves": "有core PNG但review不读像素时manual/validated=false；变更bytes后resource hash mismatch且无新review query。"
+        },
+        {
+          "file": "agents/reading/evals/integration/quality-revision-acceptance.test.ts",
+          "test_name": "C083 %s follows actual renderer availability failure, persists disclosed fallback and creates one reviewed Fake PR",
+          "proves": "实际render wrapper沙箱不可用、固定skill允许Mermaid/HTML降级；note/manifest/Fake PR和持久RunReport明示降级；非core skipped完整ResourcePublisher/review/seal/Publisher交付。不是实际Fireworks二进制失败。"
+        },
+        {
+          "file": "agents/reading/evals/integration/quality-revision-acceptance.test.ts",
+          "test_name": "C083 a core skipped visual check preserves the exact manual block across cold days without replacement queries, upload, review, seal or Fake PR",
+          "proves": "核心skipped首次manual且两次cold保持原视觉阻塞、完整writing_activity/context/counters及已付succeeded写作回执；无替代query或交付；首次/cold运行报告及旧报告exact readback。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺renderer实际报错后符合skill的HTML/Mermaid降级并在笔记/PR披露，以及非core skipped可交付、core skipped不可交付的driver/publisher完整分支测试；目前validation.ts有条件检查但这些路径未被断言。"
-        },
         {
           "layer": "image_live",
           "requirement": "固定Linux渲染失败和provider图像输入失败的真实回执。"
@@ -782,7 +790,7 @@
     },
     {
       "id": "C084",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/executor.test.ts",
@@ -793,13 +801,14 @@
           "file": "agents/reading/evals/storage/reading-transitions.test.ts",
           "test_name": "only explicit changed inputs produce g+1; operator preserves source allowance and source changes reset it with registered evidence",
           "proves": "普通stage_completed不能重置耗尽计数，明确输入变更才g+1。"
+        },
+        {
+          "file": "agents/reading/evals/integration/quality-revision-acceptance.test.ts",
+          "test_name": "C084 real driver persists three blocking factual reviews and exactly two revisions; scheduled cold runs never query, upload or publish again",
+          "proves": "实际driver/executor/controller/FileStore三次定位事实错误blocking review、两次修订后quality_blocked/manual；跨两北京日期cold，草稿/context/counters/responses/invocations保留；模型/上传/PR零新增。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺真实driver/model回放连续事实错误blocking review→两轮修订→持久quality_blocked、冷恢复模型/上传/PR零新增的完整链路；当前只证明计数保护和转换。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实模型重复事实错误的可定位审校回执与修订上限。"

@@ -53,6 +53,7 @@ import type { InventoryObject } from "../storage/inventory.js";
 import { ImmutableWorkspaceManager } from "../workspace/manager.js";
 import {
   verifyContext,
+  heldoutNote,
   buildContext,
   indexNote,
   recallNotes,
@@ -162,6 +163,9 @@ export interface BuildApplicationOptions {
   github_port?: GitHubPort;
   image_store?: ImageStore;
   heldout?: { urls: Set<string>; note_paths: Set<string> };
+  /** Trusted quality runner supplies previously verified immutable primary bodies. */
+  fixed_primary_snapshot?: (url:string)=>Promise<import('../tools/evidence.js').MaterialSnapshot>;
+  validate_generation_context?: (context:ContextBundle)=>void;
   generation_gate?: () => Promise<void>;
   notes_index_provider?: () => Promise<NoteIndex[]>;
   maintenance_mutex?: <T>(work: () => Promise<T>) => Promise<T>;
@@ -724,8 +728,7 @@ export async function buildApplication(
     const note = relatedViews.get(id) ?? index.find((note) => note.id === id);
     if (note) {
       if (
-        heldout.note_paths.has(note.path) ||
-        note.sources.some((url) => heldout.urls.has(url))
+        heldoutNote(note,heldout)
       )
         throw new Error("heldout_related_note_denied");
       if (sha256(note.text) !== note.hash)
@@ -1312,6 +1315,7 @@ export async function buildApplication(
           : [],
       });
       verifyContext(bundle);
+      options.validate_generation_context?.(bundle);
       await records.commitMany(
         { [`contexts/${bundle.context_id}`]: bundle },
         "generation_context_fixed",
@@ -1331,6 +1335,7 @@ export async function buildApplication(
         project.context,
         options.dispatch.mode === "publish-only" ? undefined : providerBinding,
       );
+      options.validate_generation_context?.(project.context);
       const fixed = await records.load<ContextBundle>(
         `contexts/${project.context.context_id}`,
       );
@@ -1372,6 +1377,7 @@ export async function buildApplication(
         current_limits:async()=>parseRuntimeLimits(parseYaml((await policySource.readSnapshot()).files['runtime.yaml']) as Record<string,unknown>),
         read_related_note: (id: string) => readRelatedNote(project, id),
         read_snapshot_body:reference=>manager.readFile(records.handle,reference.path),
+        ...(options.fixed_primary_snapshot?{fixed_primary_snapshot:options.fixed_primary_snapshot}:{}),
         settle_semantic_binding: settleSemanticBinding,
       } satisfies RuntimeEnvironment;
     },

@@ -430,7 +430,7 @@
     },
     {
       "id": "C014",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/modes.test.ts",
@@ -441,13 +441,14 @@
           "file": "agents/reading/evals/storage/workspace.test.ts",
           "test_name": "rejects malformed JSON schema and illegal preview state transitions",
           "proves": "Manager拒preview进入正式交付态。"
+        },
+        {
+          "file": "agents/reading/evals/integration/preview-scope-acceptance.test.ts",
+          "test_name": "preview %s survives cold restore but the same URL receives fresh production admission, identity, classification and usage",
+          "proves": "实际双FileStore namespace Controller/driver：preview skip/ready冷恢复零新query；正式同URL重查classify/select，独立context/账本，不复制预览usage；正式游标及重复入队cold状态保持。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补同一URL先preview成功再scheduled提交两个真实FileStore namespace的组合；断言正式许可重新执行、fresh正式候选、未复制预览classification/PR/usage。"
-        },
         {
           "layer": "ram_live",
           "requirement": "preview身份不可读写正式对象。"

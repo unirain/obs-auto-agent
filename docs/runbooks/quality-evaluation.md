@@ -1,6 +1,6 @@
 # 质量评估与冻结输入
 
-本工具只处理显式输入的样本／标签／测量记录，不调用模型、创建 PR 或宣称上线通过。30 个来源候选已在 `agents/reading/evals/quality/candidates.unlabeled.json` 准备，其中 10 个留出；当前全部未标注，也没有固定正文版本。标题或来源不能代替用户的判断。
+`inspect`／`versions`／`freeze`／`report` 只处理显式输入或本地版本；`execute` 在 G1 完整证据与已发布 skill 具备后运行真实模型，只使用 preview。不会创建 PR 或宣称上线通过。30 个来源候选已在 `agents/reading/evals/quality/candidates.unlabeled.json` 准备，其中 10 个留出；当前全部未标注，也没有固定正文版本。标题或来源不能代替用户的判断。
 
 ## 样本准备与用户标注
 
@@ -14,13 +14,39 @@
 npx tsx agents/reading/evals/quality/run.ts inspect --input agents/reading/evals/quality/candidates.unlabeled.json
 ```
 
-在受保护目录准备 `{ "samples": [...] }` 标注文件以及版本文件。版本文件包含 config/prompt 的真实 SHA-256、model 标识和 skill_commit 的完整 Git SHA；这些值不能使用虚构的占位版本。工具保留模型标识仅为 identifier_only_unverified，不把滚动别名当不可变模型版本。
+在受保护目录准备 `{ "samples": [...] }` 标注文件以及版本文件。版本文件包含 config/prompt 的真实 SHA-256、model 标识和 skill_commit 的完整 Git SHA；这些值不能使用虚构的占位版本。`versions` 读取干净 notes checkout 的 HEAD、五份实际 prompt 字节和 canonical deployment + preferences/sources/runtime 三份策略文件 hash，生成版本文件。工具保留模型标识仅为 identifier_only_unverified，不把滚动别名当不可变模型版本。
+
+```sh
+npx tsx agents/reading/evals/quality/run.ts versions --config /protected/preview.json --notes-repository /absolute/notes --output /protected/versions.json
+```
 
 ```sh
 npx tsx agents/reading/evals/quality/run.ts freeze --input /protected/labeled.json --versions /protected/versions.json --output /protected/frozen.json
 ```
 
 输出使用 mode 0600 并拒绝覆盖。冻结 hash 绑定规范化 URL、样本 ID、来源、标题、split、人工标签、对应笔记和正文版本；不把尚未产生的预测／费用／评分混进不可变输入。人工标签、split 或正文版本改变后，旧评估绑定会失败，须明确新建冻结版本。
+
+## 执行冻结评估
+
+保存受控读取后的完整 MaterialSnapshot（含正文、真实检索时间、链接、图形映射、PDF 页或代码 commit/file），将其与标注后的正文 hash 逐样本绑定：
+
+```json
+{"schema_version":1,"snapshots":[{"sample_id":"样本 ID","snapshot":{"url":"https://公开原文","requested_url":"https://冻结的候选URL","text":"真实已读取正文","hash":"正文SHA256","retrieved_at":"实际UTC时间","links":[],"kind":"web"}}]}
+```
+
+JSON 应含全部冻结样本的正文，不能用 URL/title/list hash 代替。PDF 的 text 必须等于 pages 用 `\n\f\n` 拼接；代码绑定完整 commit 和 file。固定主文直接作为已验证证据载入，补充材料仍通过正常受限网关读取。该模式评估冻结材料上的模型表现；不证明在线来源采集仍有效。
+
+宿主注入 `READING_G1_EVIDENCE_PATH`／`READING_G1_EVIDENCE_SHA256`、preview 的受限 OSS 身份、全局只读容量身份与共享 writer mutex、模型和只读 GitHub 身份。CLI 不提供绕过 G1、以本地模型替身冒充真实执行、正式 scope 或发布入口。还会只读核对 notes origin 的默认分支及固定 skill commit 祖先关系，拒绝把本地 proposal 当已发布版本。保持正常工具镜像、SDK、策略和 checkpoint 检查。
+
+```sh
+npx tsx agents/reading/evals/quality/run.ts execute --frozen /protected/frozen.json --snapshots /protected/snapshots.json --config /protected/preview.json --notes-repository /absolute/notes --session calibration-v1 --split holdout --local-root /protected/runner --output /protected/execution.json
+```
+
+开发和留出分开执行，`--sample ID` 可重复指定本次明确选择的样本，不是产品篇数上限。每个样本使用由 session + ID 决定的独立 preview namespace；在模型 query 前提交不含人工标签的冻结绑定与来源 provenance。所有留出 URL（含固定重定向／canonical URL）和对应笔记路径均传入正例、当前知识摘要与正文检索排除集。人工标签及评分不传入模型。
+
+中断后用相同 session／frozen／snapshot／配置继续，输出文件选一个新路径。相同 session 中改标签、split、正文、版本或排除集合会失败；须显式新建评估版本/session。底层调用 uncertain 时保持 manual 与原消耗，不自动重跑。query、正常格式修复、失败与无产出都包含在 invocation 账本中；中断且没有完整 RunReport 的尝试使总耗时保持 null，已观察耗时单列。一次命令中的各样本共享起始截止时间。私有产物和报告留在受保护/ignored 目录。
+
+输出 `samples` 可供后续人工测量和 `report` 使用，另有 `cases` 的实际项目状态、versions、workspace revision、run IDs、实际 input/implementation commit、policy check refs、usage、失败与产物 hashes。`collect` 对应实际 research 选题，`reject` 对应 skip/excluded，`insufficient` 对应明确选题 defer/核心材料不足；不把容量、未知调用或未决分类随意记为材料不足。未完成或未选中的预测仍为 null；`qualified` 一律等待人工判定。模型审校与人工评分分开，上传／正式 URL／PR 均为 not_exercised。部分执行不能作为完整留出报告或 G4/G5 验收。
 
 ## 测量与报告
 
@@ -34,4 +60,4 @@ npx tsx agents/reading/evals/quality/run.ts report --input /protected/measured.j
 
 报告分别保留人工、模型、反馈、错误、样本数和分母。任一样本费用／时长未知时，总值保持 null；已观察的下界单列。未抽查项有单独计数，不把 null 当没有错误。报告仍标记 awaiting_user_confirmation；没有用户对真实样本的质量确认，不能通过 G4/G5 或启用正式 cron。
 
-当前工具完成冻结／导入／统计契约；真实评估模型执行仍依赖 G1、已发布 cloud skill、真实 preview 和用户标注。使用 synthetic fixtures 验证这些函数，不算真实质量校准。
+当前工具已实现真实执行入口，并以实际本地 Controller/driver/不可变文件链和模型回放验证恢复、版本绑定与标签隔离；尚未进行真实模型评估。真实执行仍依赖 G1、已发布 cloud skill 和用户标注。使用 synthetic fixtures 验证执行器，不算真实质量校准。

@@ -1,12 +1,14 @@
 import {assertUtcInstant} from '../contracts/utc.js';
 import { parse as parseYaml } from 'yaml';
 import {canonicalJson} from '../contracts/index.js';
+import {normalizeUrl} from '../collect/identity.js';
 import type {RuntimeVersions} from '../runtime/versions.js';
 import {resolveRuntimeLimits,type RuntimeLimits} from '../runtime/limits.js';
 export type {RuntimeLimits} from '../runtime/limits.js';
 import {digest} from '../stages/contracts.js';
 export type NoteInput={path:string;commit:string;text:string;first_added_at:string;pending?:boolean};
 export type NoteIndex={id:string;path:string;commit:string;title:string;tags:string[];sources:string[];summary:string;organized_at:string;date_basis:string;hash:string;pending:boolean;text:string};
+export function heldoutNote(note:Pick<NoteIndex,'path'|'sources'>,heldout:{urls:Set<string>;note_paths:Set<string>}):boolean{return heldout.note_paths.has(note.path)||note.sources.some(url=>{try{return heldout.urls.has(normalizeUrl(url));}catch{return heldout.urls.has(url);}});}
 function validDate(raw:unknown):string|null {
   if(raw instanceof Date)return raw.toISOString();if(typeof raw!=='string')return null;
   if(!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(raw))return null;const value=Date.parse(raw);if(!Number.isFinite(value))return null;
@@ -27,13 +29,13 @@ export function indexNote(input:NoteInput):NoteIndex {
 }
 function tokens(text:string):Set<string>{return new Set((text.toLowerCase().match(/[a-z0-9_-]{2,}|[\u3400-\u9fff]{2,}/g)??[]));}
 export function recallNotes(index:NoteIndex[],query:string,heldout:{urls:Set<string>;note_paths:Set<string>},limit=12):NoteIndex[]{
-  const terms=tokens(query);const ranked=index.filter(note=>!heldout.note_paths.has(note.path)&&!note.sources.some(url=>heldout.urls.has(url)))
+  const terms=tokens(query);const ranked=index.filter(note=>!heldoutNote(note,heldout))
     .map(note=>({note,score:[...tokens(`${note.title} ${note.tags.join(' ')} ${note.summary}`)].filter(term=>terms.has(term)).length}));
   return ranked.filter(item=>item.score>0).sort((a,b)=>b.score-a.score||b.note.organized_at.localeCompare(a.note.organized_at)||a.note.path.localeCompare(b.note.path)).slice(0,limit).map(item=>item.note);
 }
 export type ContextBundle={context_id:string;preferences_hash:string;skill_commit:string;skill_hash:string;prompt_hash:string;prompt_templates?:Record<string,string>;runtime_limits?:RuntimeLimits;runtime_versions?:RuntimeVersions;tool_domains?:string[];model:string;model_provider?:'claude'|'deepseek';model_base_url?:string;evidence_versions:string[];examples:Omit<NoteIndex,'text'>[];related_notes:(Omit<NoteIndex,'text'>&{retrieval_relevance?:'matched'|'unknown'})[];example_texts:Record<string,string>};
 export function buildContext(input:{index:NoteIndex[];query:string;heldout:{urls:Set<string>;note_paths:Set<string>};preferences_hash:string;skill_commit:string;skill_hash:string;prompt_hash:string;prompt_templates?:Record<string,string>;runtime_limits?:RuntimeLimits;runtime_versions?:RuntimeVersions;tool_domains?:string[];model:string;model_provider?:'claude'|'deepseek';model_base_url?:string;evidence_versions:string[];example_count?:number}):ContextBundle {
-  const related=recallNotes(input.index,input.query,input.heldout);const count=input.example_count??3;if(!Number.isSafeInteger(count)||count<1)throw new Error('example_count_invalid');const relevant=related.filter(note=>!note.pending);const fallback=input.index.filter(note=>!note.pending&&!input.heldout.note_paths.has(note.path)&&!note.sources.some(url=>input.heldout.urls.has(url))).sort((a,b)=>b.organized_at.localeCompare(a.organized_at)||a.path.localeCompare(b.path));const selected=new Map([...relevant,...fallback].map(note=>[note.path,note]));const examples=[...selected.values()].slice(0,count);
+  const related=recallNotes(input.index,input.query,input.heldout);const count=input.example_count??3;if(!Number.isSafeInteger(count)||count<1)throw new Error('example_count_invalid');const relevant=related.filter(note=>!note.pending);const fallback=input.index.filter(note=>!note.pending&&!heldoutNote(note,input.heldout)).sort((a,b)=>b.organized_at.localeCompare(a.organized_at)||a.path.localeCompare(b.path));const selected=new Map([...relevant,...fallback].map(note=>[note.path,note]));const examples=[...selected.values()].slice(0,count);
   const metadata=(note:NoteIndex):Omit<NoteIndex,'text'>=>{const {text:_,...rest}=note;return rest;};
   const content={preferences_hash:input.preferences_hash,skill_commit:input.skill_commit,skill_hash:input.skill_hash,prompt_hash:input.prompt_hash,...(input.prompt_templates?{prompt_templates:input.prompt_templates}:{}),...(input.runtime_limits?{runtime_limits:resolveRuntimeLimits(input.runtime_limits)}:{}),...(input.runtime_versions?{runtime_versions:input.runtime_versions}:{}),...(input.tool_domains?{tool_domains:input.tool_domains}:{}),model:input.model,...(input.model_provider?{model_provider:input.model_provider}:{}),...(input.model_base_url?{model_base_url:input.model_base_url}:{}),
     evidence_versions:input.evidence_versions,examples:examples.map(metadata),related_notes:(related.length?related.map(note=>({...metadata(note),retrieval_relevance:'matched' as const})):examples.map(note=>({...metadata(note),retrieval_relevance:'unknown' as const}))),example_texts:Object.fromEntries(examples.map(note=>[note.path,note.text]))};

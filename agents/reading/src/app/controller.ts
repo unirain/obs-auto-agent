@@ -748,6 +748,7 @@ export class ReadingController {
         });
     }
     const all = await this.projects();
+    report.image_degradations=all.filter(project=>project.writing?.degradations.length).map(project=>({project_id:project.project_id,generation_version:project.generation_version,context_id:project.context.context_id,details:[...project.writing!.degradations]}));
     report.blocked_projects = all
       .filter((p) => p.resume_policy === "manual" && !terminal.has(p.state))
       .map((p) => ({
@@ -937,7 +938,7 @@ export class ReadingController {
   ): HostProject {
     const needsHuman =
       manual ||
-      /request_unknown|known_failed|model_failed|research_stalled|quality_blocked|policy_review_required|login|access_denied|format_repair_exhausted|fixed_stage_contract_changed/.test(
+      /request_unknown|known_failed|model_failed|research_stalled|quality_blocked|visual_check_required_or_disclosed|policy_review_required|login|access_denied|format_repair_exhausted|fixed_stage_contract_changed/.test(
         reason,
       );
     return {
