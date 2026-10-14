@@ -394,7 +394,8 @@ export class ReadingController {
           );
           report.source_results.push(page.result);
           progress = page.progress;
-          continuePages = page.next !== null && page.result.status !== "failed";
+          continuePages = page.next !== null &&
+            ["success", "partial"].includes(page.result.status);
           if (continuePages && !this.ports.deadline.mayStart()) break;
         }
       }

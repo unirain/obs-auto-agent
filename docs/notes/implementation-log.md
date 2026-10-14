@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: source pagination and committed recovery
+
+- The previous goal turn made concrete progress through 193a63a/49fdcd4, passing implementation CI and actual local Docker recovery. This continuation preserves G1–G5, 87 layered cases and the full objective.
+- Actual list/feed completion cannot certify missing historical coverage; C029 backfill remains unproven. Current adapters provide no trustworthy completeness statement for unavailable history. No boolean or arbitrary interval was introduced to close that gap.
+- Found and fixed a host bug: disabled/not_attempted sources returned their active cursor and the page loop kept repeating it. The controller now continues only success/partial pages. Executing the new regression against the prior code failed with repeated_suppressed_cursor, confirming both failure branches; fixed code processes the source once then continues the next source.
+- Added real adapter/controller/scoped manager/journal/filesystem cold tests. Before-commit failure and post-commit reply loss preserve candidates and cursor together; destroying local state and a new manager resumes from offset 50 or from the original empty progress, completes 61 unique candidates, and later rounds do not process them again. Context/records use actual host validators; semantic selection is an explicit skip replay.
+- One source can fail without blocking the other: its active bookmark and incident remain, three candidates from the other source continue, and the partial per-source report survives cold restore. A readonly monitor validates actual immutable HEAD bytes. A good page whose commit fails cannot close the source Issue or advance its position; after a fresh host commits recovery it closes. Issue API is a local substitute, no GitHub/cloud/model effects are claimed.
+- Local verification at 10:53 Asia/Shanghai: 77 files / 419 tests, typecheck/build, 38 schemas, case mapping and diff check passed. Four gated live tests skipped; the existing Docker fault evidence was not rerun because its implementation was unchanged. C017/C025/C027/C031 local requirements are closed; audit is 36 covered / 50 partial / 1 missing and 51 local follow-ups. All 87 full-layer cases and G1–G5 remain pending.
+
 ## 2026-10-14 Continuation: trusted gap acceptance and render process recovery
 
 - Implementation 193a63a was pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38502049810). Public candidates had no locally available credential matches. The 296-file fingerprint was rechecked against committed current bytes.

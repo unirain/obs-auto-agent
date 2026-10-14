@@ -516,19 +516,20 @@
     },
     {
       "id": "C017",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "61 unknown-date unordered items finish across batches; bookmark only advances after full chain",
           "proves": "collect第一批50、第二批11，第一批无complete watermark、第二批完成；没有写入真实Manager或进程重启。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-recovery.test.ts",
+          "test_name": "source page %s keeps candidates and cursor in one version and cold recovery completes more than fifty without duplicates",
+          "proves": "实际两页source adapter+scoped host/controller/journal/FileStore；page commit前写入失败与成功回复丢失分别注入。删除本地目录并用新manager恢复，50候选+offset50要么共同存在要么共同不存在；新轮完成其余11，总61唯一候选/observed IDs，cursor=null，后续轮不重复处理。选题使用skip回放，未证明模型质量或真实信源/OSS。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补页1提交后销毁本地目录/冷restore，再采后11的source adapter+Manager原子候选/cursor组合，断言总61无遗漏/重复。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实入口超过50及页链变动时持续采集。"
@@ -742,7 +743,7 @@
     },
     {
       "id": "C025",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/sources.test.ts",
@@ -753,13 +754,14 @@
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "parser failure cannot announce empty success or move state; candidates+cursor commit failure leaves original",
           "proves": "解析失败非空成功，commit failure的IdentityState未改。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-recovery.test.ts",
+          "test_name": "one failing source retains its active cursor while another source candidates continue, with a partial report and cold durable incident",
+          "proves": "实际双来源scheduled/controller/FileStore，一失败一成功；失败active cursor原样，另一个3候选进入选题回放，RunReport partial/逐来源状态持久化。毁掉本地目录后新manager保持失败事件及两来源各自progress，模型query=0。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "需双来源（一失败、一成功）scheduled+FileStore冷恢复，断言失败cursor原样、成功候选可继续及RunReport partial/逐来源失败。当前controller fixture sources=[]，未覆盖该组合。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实单来源失败期间另一个仍成功采集。"
@@ -783,6 +785,11 @@
           "file": "agents/reading/evals/operations/watchdog-reader.test.ts",
           "test_name": "watchdog validates HEAD chain and reads only committed health/reports, never original evidence or writes",
           "proves": "从真实FileStore提交的health/report读出source事件且不读证据，不写workspace。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-recovery.test.ts",
+          "test_name": "an active cursor whose source becomes %s stops the page loop immediately and lets the next source run",
+          "proves": "实际active cursor在disabled/not_attempted两分支仅collect一次；disabled无fetch，policy域名拒绝一次尝试后停，下一来源成功入队；冷恢复原cursor且无虚假故障/恢复事件。旧controller的重复抑制cursor回归被执行证实。此测试未包含PR/真实Actions。"
         }
       ],
       "remaining": [
@@ -806,7 +813,7 @@
     },
     {
       "id": "C027",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/monitor.test.ts",
@@ -822,13 +829,14 @@
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "recovering read never removes historical gap; transient incident survives monitor interval",
           "proves": "来源fail→good输出occurred/recovered，基于适配器状态而非总体job成功。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-monitor.test.ts",
+          "test_name": "a successful source fetch whose page checkpoint fails cannot close the source Issue; only cold committed recovery closes it",
+          "proves": "真实controller先提交source failure，readonly monitor从实际HEAD chain投影到Issue替身。后续good抓取但checkpoint失败时HEAD没有recovered，Issue位置/开放状态/通知不变且watchdog零workspace写。新manager重新抓取并提交good后才生成recovered/关闭，非直接伪造恢复事件。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补good页的checkpoint失败时watchdog不得closed，下一次持久化good成功才closed；当前monitor测试直接给recovered事件，未验证此关键提交屏障。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实读取恢复。"

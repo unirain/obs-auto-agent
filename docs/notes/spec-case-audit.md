@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 32、partial 54、missing 1，55 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 36、partial 50、missing 1，51 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -20,7 +20,7 @@
 | C014 预览成功后使用 scheduled + input_urls 正式提交 | partial | 补同一URL先preview成功再scheduled提交两个真实FileStore namespace的组合；断言正式许可重新执行、fresh正式候选、未复制预览classification/PR/usage。 | oss_live, ram_live, sdk_live |
 | C015 Claude 目录条目指向允许的外部官方正文域名 | partial | 补外部官方正文经Gate实际读取以及全部候选均来自card而非nav的断言。 | source_live |
 | C016 列表只有活动或无文字视频，或正文日期未知 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live, source_live |
-| C017 首次窗口内超过五十个条目 | partial | 补页1提交后销毁本地目录/冷restore，再采后11的source adapter+Manager原子候选/cursor组合，断言总61无遗漏/重复。 | oss_live, source_live |
+| C017 首次窗口内超过五十个条目 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, source_live |
 | C018 同轮已有三篇产出或已有十个待审 PR | partial | 需明确种入3本轮产物和10待审PR后仍执行新合格候选，分别证明time/capacity不足才让出；纯scheduler无数量参数不能代替该组合。 | github_live, sdk_live |
 | C019 加载质量正例 | partial | 补多个相关笔记不同整理日期的明确排序、样例版本/date_basis持久化冷恢复及固定Git目录加载的组合断言；当前单笔记fallback不能证明近期优先。 | human_quality |
 | C020 历史正例来自本轮排除的内容或来源类型 | partial | 补含被排除内容/停用来源的历史质量正例，同时新候选为公告/禁用来源，断言只作写作参照且不改变分类或发现URL。 | human_quality, sdk_live |
@@ -28,13 +28,13 @@
 | C022 多站转载同一文章 | partial | 补两个站已各建项目再读出相同body的controller组合，断言一个active owner/一次研究和Fake PR，loser保留解释并冷恢复。 | github_live, source_live |
 | C023 同主题文章有不同实验或相反结论 | partial | 尚缺不同实验/相反结论进入selection与research的成对fixture，验证后续知识增量不被主题相似过滤；身份不合并只是前置条件。 | human_quality, sdk_live |
 | C024 核心论文读取失败 | partial | 补核心论文HTTP/提取失败→持久gap+deferred→冷恢复的driver/Manager路径，断言无writing/PR及理由披露。 | sdk_live, source_live |
-| C025 单个信源失败 | partial | 需双来源（一失败、一成功）scheduled+FileStore冷恢复，断言失败cursor原样、成功候选可继续及RunReport partial/逐来源失败。当前controller fixture sources=[]，未覆盖该组合。 | oss_live, source_live |
+| C025 单个信源失败 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, source_live |
 | C026 一个来源连续失败，另一个持续创建 PR，Actions 成功退出 | partial | 补A多轮fail+B真实host回放产PR+success Actions状态的组合，断言source_id+reason告警不被总成功抹除。 | github_live, oss_live, source_live |
-| C027 同一来源同一原因多轮失败，之后实际读取恢复 | partial | 补good页的checkpoint失败时watchdog不得closed，下一次持久化good成功才closed；当前monitor测试直接给recovered事件，未验证此关键提交屏障。 | github_live, oss_live, source_live |
+| C027 同一来源同一原因多轮失败，之后实际读取恢复 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, source_live |
 | C028 故障在两次监控之间发生并恢复 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C029 当前来源读取恢复但历史 coverage_gap 未补齐 | partial | 人工接受路径已接线并有原子/冷恢复/漂移断言；真实补采仍缺读取已提交覆盖证据、验证实际区间并调用filled的可信入口，不能用validated_fill boolean当证明。 | github_live, oss_live, source_live |
 | C030 停用来源、全局暂停、publish-only 或其他来源成功 | partial | 补已有来源故障之后disabled/not_attempted/publish-only与另一来源success的完整矩阵，核对SourceHealth事件不减少且停用来源Issue明确suppressed；当前disabled测试从空health起步，监控helper disabled_sources总是空数组。 | github_live, source_live |
-| C031 发现候选后进程崩溃 | partial | 注入成功采集页候选+实际非空cursor_after提交后进程退出，用新manager读取并比较候选集合及下一页游标；不能把提交失败空候选测试当作这个场景。 | oss_live, source_live |
+| C031 发现候选后进程崩溃 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, source_live |
 | C032 SDK query 内包含多步模型请求 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C033 SDK query 结果不明或仅存启动意图 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, sdk_live |
 | C034 未配置模型金额上限或价格未知 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
@@ -95,3 +95,5 @@
 本轮另发现 A9 的冻结输入/评估结果未强绑定，已补校验与 inspect/freeze/report 工具。当前 30 个候选仍有 30 个缺人工标签、30 个缺固定正文版本；不能冻结或宣称质量门槛通过。
 
 C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待补。C050 已补零写入与冷启动拒绝，C053 已补检查点及实际本地隔离 Docker 退出恢复（固定故障脚本）。其余优先项是候选/游标提交、跨天计数、active query 收尾、PR 超期对账和双scope恢复组合。修补后应重新审计对应行的实际断言与残余层，不批量将covered改complete。
+
+2026-10-14 续验：C017/C025/C027/C031 已补 controller、scoped FileStore 冷恢复及只读监控组合断言。C026 另补停用/未尝试来源的循环退出，发现并修复重复同一游标问题；其 PR/Actions 组合仍未完成。历史完整性没有可靠依据的列表成功仍不能关闭 coverage_gap。

@@ -42,7 +42,7 @@
     },
     {
       "id": "C031",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/sources.test.ts",
@@ -53,13 +53,14 @@
           "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
           "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts",
           "proves": "真实FileStore同checkpoint写candidate、SourceProgress、SourceResult、SourceHealth，冷恢复保留项目；该源结果是failed，未测试成功分页推进游标。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-recovery.test.ts",
+          "test_name": "source page %s keeps candidates and cursor in one version and cold recovery completes more than fifty without duplicates",
+          "proves": "实际两页source adapter+scoped host/controller/journal/FileStore；page commit前写入失败与成功回复丢失分别注入。删除本地目录并用新manager恢复，50候选+offset50要么共同存在要么共同不存在；新轮完成其余11，总61唯一候选/observed IDs，cursor=null，后续轮不重复处理。选题使用skip回放，未证明模型质量或真实信源/OSS。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "注入成功采集页候选+实际非空cursor_after提交后进程退出，用新manager读取并比较候选集合及下一页游标；不能把提交失败空候选测试当作这个场景。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实OSS在该原子页提交边界中断/读回，候选与订阅游标来自同一有效commit。"
