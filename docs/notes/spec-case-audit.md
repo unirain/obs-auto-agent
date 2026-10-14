@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 56、partial 31、missing 0，31 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 59、partial 28、missing 0，28 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -33,7 +33,7 @@
 | C027 同一来源同一原因多轮失败，之后实际读取恢复 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, source_live |
 | C028 故障在两次监控之间发生并恢复 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C029 当前来源读取恢复但历史 coverage_gap 未补齐 | partial | 人工接受路径已接线并有原子/冷恢复/漂移断言；真实补采仍缺读取已提交覆盖证据、验证实际区间并调用filled的可信入口，不能用validated_fill boolean当证明。 | github_live, oss_live, source_live |
-| C030 停用来源、全局暂停、publish-only 或其他来源成功 | partial | 补已有来源故障之后disabled/not_attempted/publish-only与另一来源success的完整矩阵，核对SourceHealth事件不减少且停用来源Issue明确suppressed；当前disabled测试从空health起步，监控helper disabled_sources总是空数组。 | github_live, source_live |
+| C030 停用来源、全局暂停、publish-only 或其他来源成功 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, source_live |
 | C031 发现候选后进程崩溃 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, source_live |
 | C032 SDK query 内包含多步模型请求 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C033 SDK query 结果不明或仅存启动意图 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, sdk_live |
@@ -47,7 +47,7 @@
 | C041 用户手工修改 PR 分支 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C042 用户合并 PR | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C043 首次运行且提交链为空、零号对象不存在 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
-| C044 读取 OSS 超时、403 或 manifest 损坏 | partial | 补writer restore的commit/manifest read超时、403和manifest字节损坏；allow_initialize=true时检查零新create/不丢旧快照，不能用list错误或blob损坏代替每种边界。 | oss_live, ram_live |
+| C044 读取 OSS 超时、403 或 manifest 损坏 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |
 | C045 产物已上传但提交记录尚未发布时退出 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C046 提交记录创建成功但响应丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C047 两个客户端争写同一提交序号 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
@@ -90,7 +90,7 @@
 | C084 模型连续修订仍有事实错误 | partial | 缺真实driver/model回放连续事实错误blocking review→两轮修订→持久quality_blocked、冷恢复模型/上传/PR零新增的完整链路；当前只证明计数保护和转换。 | human_quality, sdk_live |
 | C085 当天没有合格文章 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, source_live |
 | C086 阅读调度未触发而监控工作流正常 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, production_smoke |
-| C087 故障恢复或 GitHub 平台整体不可用 | partial | 代码和reading-operations runbook明确同平台限制，但缺GitHub Actions/API/Issue全部不可用时无法保证通知的专门故障回放；不能拿可用Issue服务的read_failed测试替代。 | github_live, production_smoke |
+| C087 故障恢复或 GitHub 平台整体不可用 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, production_smoke |
 
 本轮另发现 A9 的冻结输入/评估结果未强绑定，已补校验与 inspect/freeze/report 工具。当前 30 个候选仍有 30 个缺人工标签、30 个缺固定正文版本；不能冻结或宣称质量门槛通过。
 
@@ -109,3 +109,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C047/C051 使用独立FileObjectStore客户端、实际Manager准备的同字节提交和完整GC/冷恢复。C057 在同一过期unknown delivery下走actual Controller/maintenance/image GC，不以独立保护集合代替组合；GitHub/图床引用不可读，objects/reservation/sealed/generation均保留，零delete/释放/新PR/模型。RAM/OSS/真实GitHub/图床仍待证明。
 
 2026-10-14 续验：C073 两scope真实FileStore/Manager在同一全局容量view和互斥下竞争；图床大对象/版本为readonly库存fixture，不实际申请49GB。C077 actual driver保留容量暂停后的候选/body/次数，真实GC保护后new physical run恢复，不把一次run反复领取当合法重试。C085 两SourceAdapter scheduled有效空/全skip数据回放持久success_no_selection，无空PR。真实库存/RAM/来源/质量仍待证明。
+
+2026-10-14 续验：C030/C044/C087 补六种read边界故障、已有故障之后五模式/策略抑制，以及Actions+Issue同时不可用。新host/readonly HEAD组合不误初始化、不把suppression当recovery；全部同平台API不可用时函数失败且没有通知，不宣称平台外可用。故障为服务替身，真实timeout/403及同平台整体停调度边界仍待验证。

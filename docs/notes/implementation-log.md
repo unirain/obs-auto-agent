@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: failed restore, policy suppression and platform outage
+
+- Previous turn progressed through 310dba1/c03976f and passed Linux CI. This turn keeps all plan gates and remote/human evidence intact while closing three more actual local combinations.
+- Actual writer Manager.restore with explicit allow_initialize receives commit/manifest transient read, permission denial and byte corruption. Each stops with zero creates/deletes; a new client still reads original HEAD/source bytes and identical full commit key/hash sets. These service faults are local FileStore fixtures, not real OSS transport or RAM denials.
+- Existing source failure is followed by disabled/not_attempted/publish-only/another-source success/global pause. Actual controller/source adapter/FileStore/cold restore keeps prior events and active failure without a false recovered event. Readonly HEAD Watchdog leaves the Issue open and records policy suppression where appropriate; repeat polls do not spam. Shared collection policy now clones per fixture, avoiding unrelated test contamination.
+- Actual runWatchdog consumes persistent failure while both Actions and Issue APIs are unavailable: returns failure, emits no notification or Issue write, and leaves workspace revision untouched. When API fixtures recover, the original source alert is projected without repeats. Same-platform no-scheduling is still an explicit limitation, not a successful notification guarantee.
+- Full local runs exposed test-resource contention: the 61-candidate I/O case exceeded 30s, then the multi-subprocess quality CLI exceeded its 15s bound. The former now has 60s with unchanged state assertions; Vitest workers are bounded at four, preserving the CLI bound. No model/tool/product limits changed. The four-worker full rerun passed at 14:43: 85 files / 459 tests, typecheck/build, 38 schemas, mapping and diff check passed; four live tests skipped.
+- C030/C044/C087 local gaps closed; audit 59 covered / 28 partial / 0 missing, 28 local requirements remain. Full-layer cases remain zero complete and G1–G5 unpassed. Execution fingerprints now include vitest.config.ts so worker/timing configuration is reviewable evidence.
+
 ## 2026-10-14 Continuation: shared capacity and zero-selection reporting
 
 - Evidence commit 310dba1 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38522415087). Public credential scans found no matches; the 307-file fingerprint matches current bytes.

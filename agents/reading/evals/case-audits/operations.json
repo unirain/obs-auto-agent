@@ -7,7 +7,7 @@
   "cases": [
     {
       "id": "C030",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/monitor.test.ts",
@@ -23,13 +23,14 @@
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "normal pagination yields never create false source incidents, while mid-run policy revocation suppresses read",
           "proves": "disabled结果attempted_at=null，空SourceHealth不会新增故障；不是已有active故障的停用恢复测试。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-monitor.test.ts",
+          "test_name": "existing source failure survives %s and another source success; policy suppression never becomes recovery",
+          "proves": "actual scheduled Controller/SourceAdapters/scoped FileStore已有A失败后分别disabled/not_attempted/publish-only/仅B成功/global_pause。new manager原事件前缀/active故障保持，无A recovered；readonly HEAD Watchdog消费真实持久事件，Issue替身open，disabled/globalPause suppressed策略抑制，重复poll不刷通知。各fixture策略现在独立克隆，避免污染其他测试。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补已有来源故障之后disabled/not_attempted/publish-only与另一来源success的完整矩阵，核对SourceHealth事件不减少且停用来源Issue明确suppressed；当前disabled测试从空health起步，监控helper disabled_sources总是空数组。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实隔离采集运行中暂停/停用/另一路恢复，核对提交的来源事件与游标，不能仅从静态HTML或回放证明。"
@@ -406,7 +407,7 @@
     },
     {
       "id": "C044",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/workspace.test.ts",
@@ -422,13 +423,14 @@
           "file": "agents/reading/evals/operations/watchdog-reader.test.ts",
           "test_name": "watchdog validates HEAD chain and reads only committed health/reports, never original evidence or writes",
           "proves": "只读monitor的manifest读取损坏拒绝；不是writer恢复初始化分支的测试。"
+        },
+        {
+          "file": "agents/reading/evals/storage/restore-read-failures.test.ts",
+          "test_name": "%s read timeout, permission denial or corruption cannot initialize and leave the prior chain intact for the next client",
+          "proves": "实际writer Manager.restore allow_initialize=true在commit/manifest read两边分别注入transient/permission/corrupt六条件，所有新create/delete=0。新的FileStore/manager还可读取原HEAD/records/完整source bytes，全commit key/hash集合保持，失败不是空库。服务故障是本地原型，非原生OSS/真实403。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补writer restore的commit/manifest read超时、403和manifest字节损坏；allow_initialize=true时检查零新create/不丢旧快照，不能用list错误或blob损坏代替每种边界。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实传输timeout与损坏/缺失manifest读回，不能把服务异常当NoSuchKey空库。"

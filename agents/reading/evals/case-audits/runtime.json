@@ -863,7 +863,7 @@
     },
     {
       "id": "C087",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/monitor.test.ts",
@@ -874,13 +874,14 @@
           "file": "agents/reading/evals/operations/run-events.test.ts",
           "test_name": "watchdog API/read failure is visible as a deduplicated monitoring incident and never healthy",
           "proves": "policy read故障连续两poll仅一个open incident；恢复后closed、notice1。这是API仍可用的假Issue服务，不是GitHub整体不可用。"
+        },
+        {
+          "file": "agents/reading/evals/integration/collection-monitor.test.ts",
+          "test_name": "Actions and Issue API outage cannot report healthy or deliver a notification; recovery resumes persistent alerts without repeated notices",
+          "proves": "实际runWatchdog在真实持久故障/HEAD readonly投影上同时收到Actions API和Issue API不可用。函数失败不能报健康，通知/Issue写入0、workspace revision不变；恢复API后持久来源故障可投影open，重复poll不重发。模拟API故障不证明平台实际整体停调度，仍保留production_smoke边界。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "代码和reading-operations runbook明确同平台限制，但缺GitHub Actions/API/Issue全部不可用时无法保证通知的专门故障回放；不能拿可用Issue服务的read_failed测试替代。"
-        },
         {
           "layer": "github_live",
           "requirement": "真实来源/运行故障恢复关闭对应Issue且不重发通知。"

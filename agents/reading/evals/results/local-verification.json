@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T06:28:25.409432Z",
-  "implementation_sha256": "1e254214b4ef867b422720f696a0fb1742c6eb644fc821b265c5edf3188fcad5",
-  "fingerprint_files": 307,
+  "recorded_at": "2026-10-14T06:44:29.404700Z",
+  "implementation_sha256": "06b4c7bbe406ddbc101160a1bfb2c0739cc87eeed5b8576406105a6830d6fc73",
+  "fingerprint_files": 309,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 84,
-    "passed": 451,
+    "files": 85,
+    "passed": 459,
     "failed": 0
   },
   "live_tests": {
@@ -26,20 +26,16 @@
     "pending": 87
   },
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
-  "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
+  "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "310dba1e97e87ebd2b87f898fcb53f89cfe975f3",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38522415087",
     "environment": "Linux / Node 24.10.0",
     "scope": "Local capacity/queue/no-selection replay only; native inventory/RAM/service/model/human gates unpassed."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "99f801263bdf75828a5bcdde9af0ab951354d67c",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38520789931",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local identical intent/filesystem GC/unknown-delivery maintenance only; native OSS/IAM and GitHub/image service gates unpassed."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 56,
-    "partial": 31,
+    "covered": 59,
+    "partial": 28,
     "missing": 0,
-    "cases_with_local_remaining": 31
+    "cases_with_local_remaining": 28
   },
   "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance.",
   "actual_local_docker_fault": {
@@ -74,5 +70,6 @@
   "classification_scope": "Actual local driver/controller/gate/journal/FileStore and SDK permission hook; semantic labels and source transport are explicit replays, not native SDK or human quality acceptance.",
   "knowledge_and_delivery_scope": "Actual local host/publisher/journal/index/cold restore; GitHub/default note/model/image facts are explicit substitutes. No real merge, PR recovery or human quality acceptance.",
   "concurrency_gc_scope": "Actual local independent filesystem clients/manager/checkpoint/GC/cold restore and same-delivery maintenance; GitHub/image/reference/model adapters are substitutes, not real service/IAM acceptance.",
-  "capacity_scope": "Actual local Managers/reservations/inventory/driver/controller/cold restore and GC; mutex/large-image inventory/source transport/value model are explicit local substitutes, not real Actions/RAM/service/quality proof."
+  "capacity_scope": "Actual local Managers/reservations/inventory/driver/controller/cold restore and GC; mutex/large-image inventory/source transport/value model are explicit local substitutes, not real Actions/RAM/service/quality proof.",
+  "restore_monitor_scope": "Actual local restore/controller/readonly HEAD/Watchdog with FileStore/API/source/value fixtures; not native OSS/RAM or platform-wide real failure proof."
 }

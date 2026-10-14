@@ -16,10 +16,11 @@ import {parseDeployment} from '../../src/config/deployment.js';
 import {readMonitorProjection,readonlyObjectStore} from '../../src/app/watchdog.js';
 import {emptySourceProgress,type SourceProgress,type WebSourceAdapter} from '../../src/collect/sources.js';
 import {parseDispatch} from '../../src/config/dispatch.js';
-const policy:TrustedPolicy={commit:'a'.repeat(40),hash:digest('collection-policy'),semantic_policy_hash:digest('collection-semantics'),paused:false,paused_projects:[],sources:{langchain_blog:{enabled:true,domains:['www.langchain.com']},claude_resources:{enabled:true,domains:['claude.com']}},manual_url:{enabled:true},allowed_domains:['www.langchain.com','claude.com'],denied_domains:[],excluded_topics:[]};
+const policyTemplate:TrustedPolicy={commit:'a'.repeat(40),hash:digest('collection-policy'),semantic_policy_hash:digest('collection-semantics'),paused:false,paused_projects:[],sources:{langchain_blog:{enabled:true,domains:['www.langchain.com']},claude_resources:{enabled:true,domains:['claude.com']}},manual_url:{enabled:true},allowed_domains:['www.langchain.com','claude.com'],denied_domains:[],excluded_topics:[]};
 /** Source adapters, host, records, restore and readonly monitor are real. Selection is
  * a local skip replay so these tests do not claim semantic quality or live delivery. */
 export async function collectionFixture(){
+ const policy=structuredClone(policyTemplate);
  const root=await mkdtemp(join(tmpdir(),'reading-collection-flow-')),workspace='obs-notes-hub/reading-integration';
  const deployment=parseDeployment(JSON.parse(await readFile('agents/reading/deploy/examples/integration.json','utf8')));
  const store=new FileObjectStore(join(root,'objects'),100,{versioning:'never',acl:'private',anonymous_readable:false,lifecycle:[],endpoint:'https://oss-cn-beijing.aliyuncs.com'});

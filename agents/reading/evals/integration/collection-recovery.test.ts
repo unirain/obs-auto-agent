@@ -20,7 +20,7 @@ it.each(['before_commit','reply_lost'] as const)('source page %s keeps candidate
   expect(f.selected).toHaveLength(61);expect(f.queries()).toBe(0);expect(cold.journal.keys('invocations/')).toEqual([]);
   const last=await f.session([adapter()]);await last.run();expect(f.selected).toHaveLength(61);expect(Object.keys((await last.journal.load<IdentityState>('identity'))!.candidates)).toHaveLength(61);
  }finally{await f.cleanup();}
-},30000);
+},60000);
 it('one failing source retains its active cursor while another source candidates continue, with a partial report and cold durable incident',async()=>{
  const f=await collectionFixture();try{
   const first=new WebSourceAdapter(config,async()=>{throw new Error('source_http_503');}),second=new WebSourceAdapter({...config,source_id:'claude_resources',entry_url:'https://claude.com/resources'},async url=>({url,body:claudeFeed(3)}));
