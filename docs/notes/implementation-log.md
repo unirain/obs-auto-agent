@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: source pagination and committed recovery
 
+- Implementation 4b6ddd7 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38503701466). Credential scans found no matches in public commit candidates, and the 299-file fingerprint matches current bytes.
+
 - The previous goal turn made concrete progress through 193a63a/49fdcd4, passing implementation CI and actual local Docker recovery. This continuation preserves G1–G5, 87 layered cases and the full objective.
 - Actual list/feed completion cannot certify missing historical coverage; C029 backfill remains unproven. Current adapters provide no trustworthy completeness statement for unavailable history. No boolean or arbitrary interval was introduced to close that gap.
 - Found and fixed a host bug: disabled/not_attempted sources returned their active cursor and the page loop kept repeating it. The controller now continues only success/partial pages. Executing the new regression against the prior code failed with repeated_suppressed_cursor, confirming both failure branches; fixed code processes the source once then continues the next source.

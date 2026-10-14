@@ -28,7 +28,11 @@
   "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending_for_this_implementation"
+    "status": "passed",
+    "implementation_commit": "4b6ddd7bff4db1ae31842030fb425b306c6bc453",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38503701466",
+    "environment": "Linux / Node 24.10.0",
+    "scope": "Local source/cursor/incident recovery only; sources/selection/Issue API fixtures do not prove live G1-G5."
   },
   "previous_ci": {
     "status": "passed",
