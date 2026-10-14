@@ -69,7 +69,8 @@ async function main(): Promise<void> {
   }
   if (
     options.command === "manage-source-gap" ||
-    options.command === "inspect-source-gaps"
+    options.command === "inspect-source-gaps" ||
+    options.command === "verify-source-backfill"
   ) {
     if (
       options.command === "manage-source-gap" &&
@@ -78,7 +79,7 @@ async function main(): Promise<void> {
     )
       throw new Error("storage_writer_mutex_unverified");
     const { buildMaintenanceApplication } = await import("./app/bootstrap.js");
-    const { acceptSourceGap, inspectSourceGaps } =
+    const { acceptSourceGap, inspectSourceGaps, verifySourceBackfill } =
       await import("./app/source-gap-management.js");
     const app = await buildMaintenanceApplication({
       deployment,
@@ -91,6 +92,11 @@ async function main(): Promise<void> {
       console.log(
         JSON.stringify(await inspectSourceGaps(app.journal), null, 2),
       );
+    else if(options.command === "verify-source-backfill"){
+      const text=await readFile(resolve(options.request_file!),"utf8");
+      if(Buffer.byteLength(text)>32000)throw new Error("source_backfill_request_too_large");
+      console.log(JSON.stringify(await verifySourceBackfill(app.journal,JSON.parse(text)),null,2));
+    }
     else {
       const text = await readFile(resolve(options.request_file!), "utf8");
       if (Buffer.byteLength(text) > 16000)

@@ -468,7 +468,7 @@
     },
     {
       "id": "C015",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/sources.test.ts",
@@ -479,13 +479,14 @@
           "file": "agents/reading/evals/policy/gate.test.ts",
           "test_name": "disabled provenance cannot be repackaged as manual, redirect cannot expand allowance",
           "proves": "外域不可扩大配置许可。"
+        },
+        {
+          "file": "agents/reading/evals/integration/knowledge-selection-acceptance.test.ts",
+          "test_name": "Claude cards alone discover an allowed external official main; actual Gate and driver read its body while navigation links never become candidates",
+          "proves": "实际Claude card唯一候选允许的外域官方正文，经Gate main_read读全文实验再research；nav链接不入队/不fetch，cold零新query。HTTP/模型回放不等同在线官方页面。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补外部官方正文经Gate实际读取以及全部候选均来自card而非nav的断言。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实Claude目录到允许官方外域的完整跳转/正文读取与导航排除。"
@@ -587,7 +588,7 @@
     },
     {
       "id": "C019",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/context/context.test.ts",
@@ -603,13 +604,14 @@
           "file": "agents/reading/evals/context/context.test.ts",
           "test_name": "manual URL with no keyword overlap still gets recent quality examples, heldout remains excluded",
           "proves": "无关键词候选仍得到质量正例（fixture仅单笔记）。"
+        },
+        {
+          "file": "agents/reading/evals/integration/knowledge-selection-acceptance.test.ts",
+          "test_name": "multiple Git-loaded related notes sort by organization date and retain exact date basis, commit and example bytes across a changed checkout and cold continuation",
+          "proves": "四个真实Git笔记按reviewed_at/updated/YYMMDD/first_added_git来源日期排序且绑定原commit+gitshow SHA；修改checkout后cold原context/examples整份JSON不变，实际writer收到原bytes；不使用published/mtime。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补多个相关笔记不同整理日期的明确排序、样例版本/date_basis持久化冷恢复及固定Git目录加载的组合断言；当前单笔记fallback不能证明近期优先。"
-        },
         {
           "layer": "human_quality",
           "requirement": "用户确认真实指定目录样例质量及近期排序适用性。"
@@ -618,7 +620,7 @@
     },
     {
       "id": "C020",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -629,13 +631,14 @@
           "file": "agents/reading/evals/context/context.test.ts",
           "test_name": "heldout URLs and corresponding notes excluded every retrieval; pending contributes summaries but not examples",
           "proves": "质量context与候选/来源许可没有同一授权字段；测试只断言召回/holdout。"
+        },
+        {
+          "file": "agents/reading/evals/integration/knowledge-selection-acceptance.test.ts",
+          "test_name": "excluded and disabled-source historical notes are writing references only; announcements remain excluded, disabled discovery is denied and no historical URL is fetched",
+          "proves": "实际writer收到历史公告/disabled来源Git质量正例；独立新公告只classify excluded，disabled adapter/Gate拒发现；历史URL不进入read/follow registry，不fetch；cold无新calls。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补含被排除内容/停用来源的历史质量正例，同时新候选为公告/禁用来源，断言只作写作参照且不改变分类或发现URL。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实模型不会将质量正例题材误当新选题授权。"
@@ -648,7 +651,7 @@
     },
     {
       "id": "C021",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/driver.test.ts",
@@ -659,13 +662,14 @@
           "file": "agents/reading/evals/runtime/segments.test.ts",
           "test_name": "metadata does not expose body and line segments preserve locators until fully presented",
           "proves": "正文仅通过有范围的片段呈现，metadata不能冒充全文。"
+        },
+        {
+          "file": "agents/reading/evals/integration/knowledge-selection-acceptance.test.ts",
+          "test_name": "%s discovery summary lacks mechanism, but actual full-body presentation supplies evidence before selection and research",
+          "proves": "LangChain实际card空/短摘要没有机制信息；selection真实read_main完整64任务正文后research，定位实验evidence/知识增量cold保留。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补摘要空/短但全文有机制和证据的候选，断言读主文后research而不是提前skip；prompt的unknown-not-absent文字不是测试。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实模型对摘要不足不提前淘汰。"
@@ -678,7 +682,7 @@
     },
     {
       "id": "C022",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/intake.test.ts",
@@ -689,13 +693,14 @@
           "file": "agents/reading/evals/runtime/material-progress.test.ts",
           "test_name": "equal body hashes from different sources retain distinct provenance identities",
           "proves": "证据来源URL/时间仍区分，避免相同hash丢出处。"
+        },
+        {
+          "file": "agents/reading/evals/integration/intake-identity-acceptance.test.ts",
+          "test_name": "two already-created mirror projects consolidate one body owner and one FakePR while preserving the duplicate explanation and cold facts",
+          "proves": "两个项目在首次HTTP前均已创建；不同URL真实提取相同正文hash，skip自有alias后按body owner归并，保留loser解释/正文与两个历史project；单owner五queries/单FakePR、union origins/aliases/hash索引，cold无重复effects，manual mirror回执原PR1。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补两个站已各建项目再读出相同body的controller组合，断言一个active owner/一次研究和Fake PR，loser保留解释并冷恢复。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实转载正文/别名身份。"
@@ -708,19 +713,20 @@
     },
     {
       "id": "C023",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/intake.test.ts",
           "test_name": "same body mirrors merge while same topic with different content does not",
           "proves": "相同标题/主题但body不同不合并candidate，后续相同body才合并。"
+        },
+        {
+          "file": "agents/reading/evals/integration/knowledge-selection-acceptance.test.ts",
+          "test_name": "same-topic articles with different experiments and opposite conclusions both survive selection and persist distinct evidence and knowledge increments across cold restore",
+          "proves": "opaque URL同主题正/反实验均selection/research；反例selection实际read_current_knowledge召回正例实验，定位机制/实验/边界，不同knowledge_increment与writing事实cold exact且10calls不增；不把相关性回放当真人质量。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "尚缺不同实验/相反结论进入selection与research的成对fixture，验证后续知识增量不被主题相似过滤；身份不合并只是前置条件。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实研究保留新证据和反例。"
@@ -795,7 +801,7 @@
     },
     {
       "id": "C026",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/monitor.test.ts",
@@ -811,13 +817,14 @@
           "file": "agents/reading/evals/integration/collection-recovery.test.ts",
           "test_name": "an active cursor whose source becomes %s stops the page loop immediately and lets the next source run",
           "proves": "实际active cursor在disabled/not_attempted两分支仅collect一次；disabled无fetch，policy域名拒绝一次尝试后停，下一来源成功入队；冷恢复原cursor且无虚假故障/恢复事件。旧controller的重复抑制cursor回归被执行证实。此测试未包含PR/真实Actions。"
+        },
+        {
+          "file": "agents/reading/evals/integration/expiry-feedback-acceptance.test.ts",
+          "test_name": "C026 two failed-source runs each deliver another source PR while successful Actions facts cannot erase the source incident in a cold readonly watchdog",
+          "proves": "A连续两次503，B两不同bodyHash actualhost/driver各产FakePR；两Actions-success输入经runWatchdog后run_faults0但A source/reason incident仍active，cold只读无create/delete/重复通知；Actions状态为明确fixture。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补A多轮fail+B真实host回放产PR+success Actions状态的组合，断言source_id+reason告警不被总成功抹除。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实两个来源分化健康。"
@@ -905,7 +912,7 @@
     },
     {
       "id": "C029",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/monitor.test.ts",
@@ -915,7 +922,7 @@
         {
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "recovering read never removes historical gap; transient incident survives monitor interval",
-          "proves": "实际good结果仍保留gaps；validated_fill=false拒处置，true产生gap_resolved。"
+          "proves": "真实good读取仍保留gap；validated_fill false或true均不能无完整性契约制造filled。"
         },
         {
           "file": "agents/reading/evals/integration/source-gap-management.test.ts",
@@ -936,16 +943,32 @@
           "file": "agents/reading/evals/contracts/source-gap-cli.test.ts",
           "test_name": "source gap management only targets an existing workspace and requires an explicit private request file",
           "proves": "CLI拒新URL/project/submission与无请求文件；写入仅可信管理入口，不接受Issue评论/validated_fill命令。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "committed successful range coverage is verified as an observation but cannot certify historical completeness or clear a gap across cold restore",
+          "proves": "可信只读入口核对committed source/run记录sha/source/scope/range及fixed revision；当前两来源没有history completeness contract，即使covers_gap true仍unverified/can_fill false且health/events/cursor/cold不变；新filled布尔声明拒绝，明确accept atomic audit仍可用。不是已实现完整自动补采。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "real diagnostic CLI restores only the existing preview namespace and reports unsupported history without a checkpoint, query, acceptance or cursor change",
+          "proves": "实际CLI+Manager/FileStore现有preview namespace只读diagnostic，revision/records/cursor不变且无query/accept。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "legacy version-one filled facts and gap_resolved events survive cold restore without being rewritten or re-certified by unsupported backfill diagnostics",
+          "proves": "显式legacy fixture filled及gap_resolved immutable事实cold exact保留；新诊断不能重新认证/改写，未追加管理事件。"
+        },
+        {
+          "file": "agents/reading/evals/integration/source-gap-management.test.ts",
+          "test_name": "actual committed run evidence remains insufficient; only the explicit human acceptance event closes that gap while other intervals remain open",
+          "proves": "RunReport范围包围gap仍不是历史完整性证明；明确human accept同checkpoint审计，其他区间仍open，cold相同请求幂等。"
         }
       ],
       "remaining": [
         {
-          "layer": "local",
-          "requirement": "人工接受路径已接线并有原子/冷恢复/漂移断言；真实补采仍缺读取已提交覆盖证据、验证实际区间并调用filled的可信入口，不能用validated_fill boolean当证明。"
-        },
-        {
           "layer": "source_live",
-          "requirement": "真实补采覆盖验证，不能手填validated_fill=true。"
+          "requirement": "真实两来源读取恢复仍保留历史缺口；有完整性契约才验证补齐，否则实际人工accept流程和Issue保持/处置须实测。"
         },
         {
           "layer": "github_live",

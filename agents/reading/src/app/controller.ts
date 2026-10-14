@@ -164,8 +164,9 @@ export class ReadingController {
           s.url === project.candidate.url,
       );
       if (snapshot) {
+        const aliasOwner = identity.aliases[snapshot.url];
         const other =
-          identity.aliases[snapshot.url] ?? identity.content[snapshot.hash];
+          (aliasOwner !== candidate.candidate_id ? aliasOwner : undefined) ?? identity.content[snapshot.hash];
         if (other && other !== candidate.candidate_id) {
           const survivor = identity.candidates[other];
           if (!survivor) throw new Error("identity_index_corrupt");

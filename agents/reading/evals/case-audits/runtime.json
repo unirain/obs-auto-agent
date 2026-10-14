@@ -7,7 +7,7 @@
   "cases": [
     {
       "id": "C059",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/recovery.test.ts",
@@ -18,13 +18,14 @@
           "file": "agents/reading/evals/storage/reading-transitions.test.ts",
           "test_name": "only explicit changed inputs produce g+1; operator preserves source allowance and source changes reset it with registered evidence",
           "proves": "直接检查source_changed_new_generation允许g+1并拒绝用普通stage_completed重置；这是转换规则测试，不是实际来源变化的controller重审。"
+        },
+        {
+          "file": "agents/reading/evals/integration/expiry-feedback-acceptance.test.ts",
+          "test_name": "C059 cold expired unpublished branch detects changed source, archives generation one and reruns research/review in generation two without altering the old branch",
+          "proves": "g1 actualdriver/upload/review/seal/Fakebranch响应丢失；25h cold对账过期，下一cold真实Gateway回放发现body hash变更，archive g1/g2五stage再研究审校newFakePR；旧branchbytes/head/writer calls及费用facts不变，下轮不重复。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺完整controller冷恢复回放：过期后真实verifySources返回变化，归档旧交付、建立g+1、完成重新研究/审校，并断言旧Git分支未写入。"
-        },
         {
           "layer": "github_live",
           "requirement": "在隔离测试仓库验证旧分支/commit与PR状态核对后续建或新版本交付，保持旧分支字节不变。"
@@ -259,7 +260,7 @@
     },
     {
       "id": "C067",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/publisher.test.ts",
@@ -270,13 +271,14 @@
           "file": "agents/reading/evals/runtime/driver.test.ts",
           "test_name": "changed semantic rules archive a known old outcome, classify again, and only then resume research with the fixed generation",
           "proves": "重分类后context_id不变，classified allowed后才有research调用。"
+        },
+        {
+          "file": "agents/reading/evals/integration/batch-management-acceptance.test.ts",
+          "test_name": "C067 pause after committed research blocks writing; cold lifting of the same restriction resumes the original stage, context, skill and example bytes without repeating research",
+          "proves": "真实research_complete提交后暂停阻止写作；cold仍pause零model，解除同限制后原context/skill/sample/evidence bytes/累积计数继续writing/review，不重做research。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺先暂停活跃项目再解除相同限制、冷恢复原证据/skill/sample bytes与计数，并继续原阶段而不重做已完成阶段的完整回放。"
-        },
         {
           "layer": "github_live",
           "requirement": "限制命中真实既有PR时不自动重写/关闭。"
@@ -639,7 +641,7 @@
     },
     {
       "id": "C079",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/resources.test.ts",
@@ -650,13 +652,14 @@
           "file": "agents/reading/evals/delivery/regeneration.test.ts",
           "test_name": "a matched expected branch may be retained, while unknown writes, human changes and untracked old branches are refused",
           "proves": "新生成前核对全部旧branch/PR事实，human修改或unknown不得获得再生成许可。"
+        },
+        {
+          "file": "agents/reading/evals/integration/expiry-feedback-acceptance.test.ts",
+          "test_name": "C079 explicit audited regeneration uploads a new immutable image URL while existing historical PR and merged-note references retain old URL and remote bytes",
+          "proves": "合法未发布项目经actual applyRecovery new_generation/complete readonly readiness产生newPNG/newURL；别篇旧pending PR/merged note合法引用old asset，经实际FakeGitHub API/StoredDelivery v1/currentKnowledge读取；生成后及cold旧PR identity/note Gitblob/default bytes/old URL/old image bytes均不变，不绕过已发布project readiness。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺完整重生成后新URL与已存在旧PR/已合并笔记中的旧URL、旧远端字节同时保持不变的组合断言；当前上传测试仅断言两个对象/receipt数量。"
-        },
         {
           "layer": "image_live",
           "requirement": "真实图床hash新URL和旧字节不可覆盖。"

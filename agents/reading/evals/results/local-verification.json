@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T08:04:54.058036Z",
-  "implementation_sha256": "84b42b7b856b5609671edecbc4bb3f2968867a8a624c13e8b39a7babeaf781aa",
-  "fingerprint_files": 319,
+  "recorded_at": "2026-10-14T09:23:02.199253Z",
+  "implementation_sha256": "1ede29050666325936fb1827b9f5abe6938acf509338956c827b7ee6d218eae5",
+  "fingerprint_files": 322,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 92,
-    "passed": 498,
+    "files": 95,
+    "passed": 519,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "12e1af73893e826b1c3b9945a08a9c46140d236a",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38533078695",
     "environment": "Linux / Node 24.10.0",
     "scope": "Full material/Fake delivery/intake/fixed policy cold replay and audit locally verified; native SDK/service/IAM/human gates remain unpassed."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "006cb2ad7adb4cbaac1849bf178eb4e6b82d1c44",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38529803273",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Frozen quality execution, version/holdout/unknown recovery and preview/factual/visual replay locally verified; native model/service/IAM/human gates remain unpassed."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 74,
-    "partial": 13,
+    "covered": 86,
+    "partial": 1,
     "missing": 0,
-    "cases_with_local_remaining": 13
+    "cases_with_local_remaining": 1
   },
   "evaluation_scope": "Actual host execution entry with immutable preview bindings, label-blind frozen primary sources and heldout filtering locally verified by model/transport replay. G1/published skill required for live CLI; no native model evaluation or human calibration executed. Frozen config also binds actual generation policy; exported run provenance includes real input/implementation commits and policy-check references.",
   "actual_local_docker_fault": {
@@ -86,5 +82,7 @@
     "head": "38589ebab14db0156ae51d3d7c9fec90402fcaef",
     "default_branch_publication": "pending_human_review_merge",
     "forward_evidence": "agents/reading/evals/runtime/evidence/cloud-skill-forward-20261014.json"
-  }
+  },
+  "remaining_case_scope": "Actual persistent mirror/intake, Git knowledge, batches/manual guards/pause, expiry/regeneration/asset refs and source monitor paths locally verified; model/HTTP/GitHub/image/Actions are explicit substitutes. C035 writing/render-budget cold continuation still missing; native SDK/service/human gates unpassed.",
+  "history_scope": "Read-only committed source/run evidence binding and current adapter unsupported-history diagnostics; no verified-fill capability or exhaustive history claim. Boolean fill rejected, explicit acceptance atomic, legacy immutable facts retained. Fixed journal revision is not a remote HEAD freshness claim."
 }

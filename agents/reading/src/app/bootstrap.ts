@@ -1373,7 +1373,11 @@ export async function buildApplication(
         deadline,
         skills,
         commit,
-        read_current_knowledge: () => currentKnowledge(project),
+        read_current_knowledge: async () => {
+          const current=await records.load<HostProject>('projects/'+project.project_id);
+          if(!current||current.generation_version!==project.generation_version||current.context.context_id!==project.context.context_id)throw new Error('fixed_context_unavailable');
+          return currentKnowledge(current);
+        },
         current_limits:async()=>parseRuntimeLimits(parseYaml((await policySource.readSnapshot()).files['runtime.yaml']) as Record<string,unknown>),
         read_related_note: (id: string) => readRelatedNote(project, id),
         read_snapshot_body:reference=>manager.readFile(records.handle,reference.path),

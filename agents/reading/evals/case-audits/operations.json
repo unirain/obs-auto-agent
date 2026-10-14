@@ -170,12 +170,17 @@
           "file": "agents/reading/evals/integration/controller.test.ts",
           "test_name": "records batch yield with stage and resumes without losing the candidate",
           "proves": "FileStore恢复deferred/batch_yield项目保留候选和resume_stage，但fixture没有真实40次工具或8份材料循环。"
+        },
+        {
+          "file": "agents/reading/evals/integration/batch-management-acceptance.test.ts",
+          "test_name": "C035 actual %s budget commits a yield; cold controller resets only batch counters, reuses research subtasks and completes the remaining work",
+          "proves": "40工具/8材料研究边界真实driver/controller/FileStore batch_yield；cold重新准入批次四计数0但累计、revisions及旧calls/evidence bytes保留；已读8材料不重HTTP，第9份继续并完成preview_ready；尚未证明已检查图源的写作预算边界同链续用。"
         }
       ],
       "remaining": [
         {
           "layer": "local",
-          "requirement": "把实际40工具边界及8材料边界各接到FileStore/controller冷恢复，断言已完成子任务/图源继续复用、每批计数按允许条件重置、累计计数不重置且剩余工作完成。"
+          "requirement": "研究40工具/8材料子任务冷恢复已验证；写作阶段已有检查图源、预算耗尽后known-query让出与冷续写的完整Controller链仍缺，不能将独立render-recovery或保留文件当同链完成。"
         },
         {
           "layer": "sdk_live",
@@ -185,7 +190,7 @@
     },
     {
       "id": "C036",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/executor.test.ts",
@@ -201,13 +206,14 @@
           "file": "agents/reading/evals/integration/controller.test.ts",
           "test_name": "unavailable fixed runtime stops only its project and cold restart preserves the manual barrier",
           "proves": "manual barrier跨FileStore冷恢复阻止该项目继续，其他项目可运行；触发原因是runtime不可用。"
+        },
+        {
+          "file": "agents/reading/evals/integration/batch-management-acceptance.test.ts",
+          "test_name": "C036 actual %s guard stays manual across Beijing days and plain resume; only audited changed operator input starts g+1",
+          "proves": "真实3无进展或3 blocking审校/2修订→manual，跨两北京日期scheduled/resume零query/effects且旧facts/counters保存；实际audited changed operator input+readonly readiness创建g+1，归档及旧消耗/classification allowance保留后完成一Fake PR。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "从真实driver产生research_stalled/quality_blocked，经controller保存manual；跨上海日期scheduled冷恢复验证同generation计数未重置且无query，只有显式人工新输入可恢复。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实研究/审校反复无进展后保护计数与人工处理路径验收，不以回放结果宣称实际质量通过。"

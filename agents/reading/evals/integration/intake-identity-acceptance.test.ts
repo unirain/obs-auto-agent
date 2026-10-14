@@ -33,17 +33,17 @@ import {capacityView,assertCapacity} from '../../src/storage/capacity.js';
 
 // Historical PRs and model/HTTP responses are explicit local fixtures. Admission,
 // redirect security, driver, immutable state, seal and new PR publication are real code.
-async function fixture(){
+async function fixture(mirrorBodies=false){
  const root=await mkdtemp(join(tmpdir(),'intake-identity-acceptance-')),store=new FileObjectStore(join(root,'objects'));
  const workspace='obs-notes-hub/reading',policy=policyFixture();policy.allowed_domains.push('independent.dev');
  const manual='https://independent.dev/archive/redirect',final='https://www.langchain.com/blog/intent-ordering';
  const mechanism='Mechanism writes intent before an operation.',boundary='Only a single writer is supported.';
  const publication='2020-01-02T00:00:00Z';
- const article=(url:string)=>`<html><head><title>Journal mechanism ${new URL(url).pathname}</title></head><body><main><h1>Journal ${new URL(url).pathname}</h1><p><time datetime="${publication}">2020-01-02</time></p><p>${mechanism}</p><p>${boundary}</p></main></body></html>`;
+ const article=(url:string)=>`<html><head><title>Journal mechanism ${mirrorBodies?"Identical Mirror":new URL(url).pathname}</title></head><body><main><h1>Journal ${mirrorBodies?"Identical Mirror":new URL(url).pathname}</h1><p><time datetime="${publication}">2020-01-02</time></p><p>${mechanism}</p><p>${boundary}</p></main></body></html>`;
  const templates=Object.fromEntries(await Promise.all(['selection','research','writing','review'].map(async stage=>[stage,await readFile(`agents/reading/prompts/${stage}.md`,'utf8')])));
  const marker=`<!-- ${READING_CLOUD_CONTRACT.documentation_marker} -->`,skillFiles:Record<string,string>={'.agents/skills/obsidian-note/SKILL.md':marker+'\nUse VAULT_ROOT for fixed evidence notes.','.agents/skills/obsidian-note/references/diagram-playbook.md':marker+'\nInline Mermaid and HTML cards are allowed.','.agents/skills/fireworks-tech-graph/SKILL.md':marker+'\nFixed tools only.',[CLOUD_CONTRACT_PATH]:canonicalJson(READING_CLOUD_CONTRACT)};
  const hashes=Object.fromEntries(Object.entries(skillFiles).map(([path,text])=>[path,digest(text)]));
- const remotes=new Map<string,FakeGitHub>(),calls:{stage:string;project:string;source:string}[]=[],requests:string[]=[],modelErrors:string[]=[];
+ const projectCountsAtRead:number[]=[],remotes=new Map<string,FakeGitHub>(),calls:{stage:string;project:string;source:string}[]=[],requests:string[]=[],modelErrors:string[]=[];
  let sessions=0,capacityStopped=false,expired=false,selectionOnly=false;
  const context=()=>buildContext({index:[],query:'intent ordering',heldout:{urls:new Set(),note_paths:new Set()},preferences_hash:digest('preferences'),skill_commit:'a'.repeat(40),skill_hash:digest(canonicalJson(hashes)),prompt_hash:digest(Buffer.concat(['selection','research','writing','review'].map(stage=>Buffer.from(templates[stage]!)))),prompt_templates:templates,model:'intake-identity-model-replay',evidence_versions:[]});
  const session=async(initialize=false)=>{
@@ -71,7 +71,7 @@ async function fixture(){
    yield {message_id:'model-result-'+calls.length,type:'result',summary:true,success:true,result,usage:{input_tokens:3,output_tokens:1,cost_status:'unknown',cost_usd:null},observable:{}};
   }};
   const executor=new StageExecutor({preflight:()=>model.preflight!(),async *stream(request){try{yield* model.stream(request);}catch(error){modelErrors.push(error instanceof Error?error.message:String(error));throw error;}}},gate,new ApplicationInvocationJournal(journal));
-  const gateway=new UrlGateway(async()=>{},async()=>[{address:'8.8.8.8',family:4}],async(url):Promise<GatewayReply>=>{requests.push(url.href);return url.href===manual?{status:302,headers:{location:final},body:Buffer.from('redirect')}:{status:200,headers:{'content-type':'text/html'},body:Buffer.from(article(url.href))};});
+  const gateway=new UrlGateway(async()=>{},async()=>[{address:'8.8.8.8',family:4}],async(url):Promise<GatewayReply>=>{requests.push(url.href);projectCountsAtRead.push(journal.keys('projects/').length);return url.href===manual?{status:302,headers:{location:final},body:Buffer.from('redirect')}:{status:200,headers:{'content-type':'text/html'},body:Buffer.from(article(url.href))};});
   const remoteFor=(id:string)=>{let remote=remotes.get(id);if(!remote){remote=new FakeGitHub();remotes.set(id,remote);}return remote;};
   const permission:PermissionCheck=async(_capability,id)=>{const project=(await journal.load<HostProject>('projects/'+id))!;return gate.require({subject_ref:'project:'+id,project_id:id,candidate_id:project.candidate.candidate_id,execution_scope:'production',origin_source_ids:project.candidate.origin_source_ids,urls:[project.candidate.url],main_url:project.candidate.url,source_snapshot_hash:project.classification!.source_snapshot_hash,classification:project.classification!.credential!},'publish','local_publisher_write');};
   const delivery=async(project:HostProject)=>decodeDelivery((await journal.load<Parameters<typeof decodeDelivery>[0]>('pending-delivery/'+project.delivery_id))!);
@@ -85,7 +85,7 @@ async function fixture(){
   const intake=(url:string,id='manual-request')=>intakeManual({read:async()=>await journal.load<IdentityState>('identity')??emptyIdentity(),commit:(identity,reason)=>journal.commitMany({identity},reason)},gate,{submission_id:id,urls:[url],submitted_by:'fixture-owner',submitted_at:new Date().toISOString(),execution_scope:'production'});
   return {local,manager,journal,ports,run,intake,closeLocal:()=>rm(local,{recursive:true,force:true})};
  };
- return {root,store,workspace,manual,final,publication,policy,remotes,calls,requests,modelErrors,article,context,session,stopCapacity:(value:boolean)=>{capacityStopped=value;},expire:(value:boolean)=>{expired=value;},selectOnly:(value:boolean)=>{selectionOnly=value;},cleanup:()=>rm(root,{recursive:true,force:true})};
+ return {root,store,workspace,manual,final,publication,policy,remotes,calls,requests,projectCountsAtRead,modelErrors,article,context,session,stopCapacity:(value:boolean)=>{capacityStopped=value;},expire:(value:boolean)=>{expired=value;},selectOnly:(value:boolean)=>{selectionOnly=value;},cleanup:()=>rm(root,{recursive:true,force:true})};
 }
 
 it('dated manual input outside the first sources bypasses only the seven-day discovery window and reaches real production selection without moving subscription cursors',async()=>{
@@ -156,5 +156,35 @@ it.each(['available','deadline','capacity'] as const)('three recorded outputs an
   else{expect(f.calls).toEqual([]);expect(first.journal.keys('invocations/')).toEqual([]);expect(project.state).toBe(mode==='deadline'?'discovered':'deferred');if(mode==='capacity')expect(project).toMatchObject({reason:'storage_capacity',resume_policy:'when_capacity_available'});expect([...f.remotes.values()].filter(remote=>remote.pr?.state==='open')).toHaveLength(10);}
   await first.closeLocal();f.expire(false);f.stopCapacity(false);const cold=await f.session();await cold.run();
   expect(cold.journal.keys('projects/')).toHaveLength(11);const resumed=(await cold.journal.load<HostProject>('projects/'+project.project_id))!;expect(resumed).toMatchObject({state:'pr_open',generation_version:1,candidate:{candidate_id:candidate.candidate_id}});expect(resumed.context.context_id).toBe(project.context.context_id);expect(f.calls.map(call=>call.stage),f.modelErrors.join(',')).toEqual(['classify','selection','research','writing','review']);expect(f.remotes.get(project.project_id)!.calls.filter(call=>call==='pr')).toHaveLength(1);expect([...f.remotes.values()].filter(remote=>remote.pr?.state==='open')).toHaveLength(11);expect(cold.journal.handle.snapshot.manifest.files.filter(file=>file.role==='output')).toHaveLength(3);
+ }finally{await f.cleanup();}
+},60_000);
+
+
+it('two already-created mirror projects consolidate one body owner and one FakePR while preserving the duplicate explanation and cold facts',async()=>{
+ const f=await fixture(true);try{
+  const first=await f.session(true),a='https://independent.dev/mirror-a',b='https://www.langchain.com/blog/mirror-b';
+  const source=new WebSourceAdapter({source_id:'langchain_blog',entry_url:'https://www.langchain.com/blog',enabled:true,window_days:7,batch_size:50},async url=>({url,body:`<div class="blog-list is-normal"><div class="blog-item"><a class="blog-link-absolute" href="${b}"></a><h3>Mirror</h3></div></div>`}));
+  await first.run([a,b],[source]);
+  expect(f.projectCountsAtRead[0]).toBe(2);
+  const projects=await Promise.all(first.journal.keys('projects/').map(key=>first.journal.load<HostProject>(key)));
+  expect(projects).toHaveLength(2);const owner=projects.find(project=>project!.state==='pr_open')!,duplicate=projects.find(project=>project!.state==='skipped')!;
+  expect(owner,JSON.stringify(projects.map(project=>({state:project!.state,reason:project!.reason})))).toBeDefined();expect(duplicate,JSON.stringify({projects:projects.map(p=>({state:p!.state,reason:p!.reason})),errors:f.modelErrors,calls:f.calls})).toBeDefined();
+  expect(duplicate.reason).toBe('duplicate_identity:'+owner.candidate.candidate_id);
+  expect(duplicate.snapshots[0]!.hash).toBe(owner.snapshots[0]!.hash);
+  const identity=(await first.journal.load<IdentityState>('identity'))!;
+  expect(identity.aliases[a]).toBe(owner.candidate.candidate_id);expect(identity.aliases[b]).toBe(owner.candidate.candidate_id);
+  expect(identity.content[owner.snapshots[0]!.hash]).toBe(owner.candidate.candidate_id);
+  expect(identity.candidates[owner.candidate.candidate_id]!.origin_source_ids.sort()).toEqual(['langchain_blog','manual_url']);
+  expect(f.calls.map(call=>call.stage),f.modelErrors.join(',')).toEqual(['classify','selection','research','writing','review']);
+  expect(f.calls.every(call=>call.project===owner.project_id)).toBe(true);
+  expect([...f.remotes.values()].filter(remote=>remote.pr!==null)).toHaveLength(1);
+  expect([...f.remotes.values()].flatMap(remote=>remote.calls).filter(call=>call==='pr')).toHaveLength(1);
+  const facts=structuredClone(first.journal.handle.records),queries=[...f.calls],effects=[...f.remotes.values()].map(remote=>[...remote.calls]);
+  await first.closeLocal();const cold=await f.session();
+  expect(await cold.journal.load('projects/'+duplicate.project_id)).toEqual(duplicate);
+  for(const key of Object.keys(facts).filter(key=>/^(invocations|responses|pending-delivery|artifact-seals|sealed-|delivery-)/.test(key)))expect(await cold.journal.load(key)).toEqual(facts[key]);
+  const receipt=await cold.intake(b,'known-mirror');expect(receipt.items[0]).toMatchObject({status:'already_known',project_id:owner.project_id,pr_number:1});
+  await cold.run();expect(f.calls).toEqual(queries);expect([...f.remotes.values()].map(remote=>remote.calls)).toEqual(effects);
+  expect(cold.journal.keys('projects/')).toHaveLength(2);expect(await cold.journal.load('projects/'+duplicate.project_id)).toEqual(duplicate);
  }finally{await f.cleanup();}
 },60_000);
