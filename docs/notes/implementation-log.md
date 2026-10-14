@@ -1,5 +1,13 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: expired receipt recovery and authoritative knowledge
+
+- Previous turn progressed through c372d3e/3202616, passed Linux CI and closed six local classification scenarios. This turn retains every service/human layer and the original objective.
+- Found an actual recall bug: currentKnowledge mixed the default/pending remote note with the original workspace draft; merged projects could be surfaced as authoritative old content even after human edits. Extracted the same production composition into currentKnowledgeView, preserving current index retrieval/heldout/recording behavior while excluding merged/closed drafts and remote-covered pending draft copies.
+- Extended the full domain fixture into closed_unmerged and merged runs. Its original PR creation succeeds with response loss, then clock advances 25 hours and a cold manager recovers the same PR before any fresh classification check. Same seal/generation/five model replies/all Fake GitHub writes remain unchanged; no remote replacement or research is added.
+- Actual Publisher.reconcile→mappedState→Controller.save projects/candidate identity from terminal PR facts. Destroyed local workspace/new manager preserves closed/merged and PR1. Closing yields no default/recalled note and no repeat next scheduled run. Merging consumes modified default fixture bytes and actual Git-blob content hash; index/title/fulltext/current hash use corrected text, with no original project draft duplicate. Pending actual fixture bytes likewise override local drafts. This is typed local remote-fact simulation, not a real GitHub or human merge.
+- At 13:57 Asia/Shanghai, 81 files / 444 local tests, typecheck/build, 38 schemas, mapping and diff check passed; four gated live tests skipped. C040/C042/C056 local requirements are closed; audit 50 covered / 37 partial / 0 missing, with 37 local requirements left. Full-layer cases remain zero complete and G1–G5 unpassed.
+
 ## 2026-10-14 Continuation: classification routing and denied capabilities
 
 - Evidence commit c372d3e pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38513538301). Public credential scans found no matches; the 303-file fingerprint matches current bytes.

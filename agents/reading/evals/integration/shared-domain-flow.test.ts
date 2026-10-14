@@ -1,4 +1,5 @@
 import { it, expect } from "vitest";
+import {createHash} from 'node:crypto';
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -21,7 +22,8 @@ import {
   type ArtifactSeal,
 } from "../../src/workspace/seal.js";
 import { canonicalJson, type JsonValue } from "../../src/contracts/index.js";
-import { buildContext } from "../../src/context/index.js";
+import { buildContext,indexNote,type NoteIndex } from "../../src/context/index.js";
+import {currentKnowledgeView} from '../../src/app/knowledge.js';
 import {
   discoverCandidate,
   emptyIdentity,
@@ -171,11 +173,12 @@ class Issues implements IssuePort {
 
 // This is a local, explicitly replayed domain fixture. It supplies no G1 proof, SDK transport,
 // RAM permission, live PR or human/visual quality evidence.
-it("one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts", async () => {
+it.each(['closed_unmerged','merged'] as const)("one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts (%s)", async terminal => {
   const root = await mkdtemp(join(tmpdir(), "reading-domain-flow-"));
   const at = "2026-10-13T00:00:00Z",
     later = "2026-10-13T01:00:00Z";
-  const now = () => new Date(later),
+  let clock=later;
+  const now = () => new Date(clock),
     projectId = "p1",
     key = `projects/${projectId}`;
   const example = JSON.parse(
@@ -864,14 +867,15 @@ it("one complete domain fixture crosses durable source, paid-reply, seal, delive
     await journal.commitMany({ [key]: project }, "publishing_started");
     const remote = new FakeGitHub();
     remote.failure = "pr";
+    let classificationChecks=0;
     const publisher = () =>
       new Publisher(remote, journal, permission, {
         workspace_id: workspace,
         committedRevision: async () => journal.handle.revision,
-        classificationCurrent: async (value) =>
-          value.context_id === project.context.context_id &&
+        classificationCurrent: async (value) => {
+          classificationChecks++;return value.context_id === project.context.context_id &&
           credentialValid(subject(), await gate().current()) &&
-          project.classification?.credential?.content_eligibility === "allowed",
+          project.classification?.credential?.content_eligibility === "allowed";},
         identity: { name: "Replay Bot", email: "replay@example.com" },
         now,
         verifyCommittedDelivery: async (value) => {
@@ -897,6 +901,8 @@ it("one complete domain fixture crosses durable source, paid-reply, seal, delive
     expect(
       await journal.load(`delivery-${delivery.delivery_id}`),
     ).toMatchObject({ uncertain_action: "create_pr" });
+    clock=new Date(Date.parse(later)+25*3_600_000).toISOString();
+    const oldCheckCount=classificationChecks,oldWrites=[...remote.calls];
     // Cold restart after the remote PR exists but its response was lost. No replacement PR or query.
     ({ manager, journal } = await open("domain-3"));
     project = (await journal.load<HostProject>(key))!;
@@ -905,6 +911,7 @@ it("one complete domain fixture crosses durable source, paid-reply, seal, delive
     parseDeliveryRecord(delivered);
     expect(delivered.status).toBe("awaiting_review");
     expect(delivered.pr?.number).toBe(1);
+    expect(classificationChecks).toBe(oldCheckCount);expect(remote.calls).toEqual(oldWrites);expect(journal.keys('artifact-seals/')).toHaveLength(1);expect(project.generation_version).toBe(1);
     project.state = "pr_open";
     await journal.commitMany({ [key]: project }, "delivery_result");
     expect(calls).toEqual([
@@ -1114,6 +1121,22 @@ it("one complete domain fixture crosses durable source, paid-reply, seal, delive
     expect((await intakeManual(replayPort,gate(),manualInput)).items[0]).toMatchObject({project_id:projectId,pr_number:1,candidate_status:'pr_open'});
     expect(calls).toEqual(['classification','selection','research','writing','review']);expect(journal.keys('invocations/')).toHaveLength(5);expect(remote.calls).toEqual(prEffects);
     expect(()=>mappedState(project,{...delivered,generation_version:2})).toThrow('delivery_project_binding_mismatch');
+    // A trusted readonly reconciliation updates the identity from actual remote
+    // terminal facts, and the knowledge view must never resurrect an old draft.
+    const modified=markdown.replace('title: Durable checkpoints','title: Human corrected checkpoints').replace('Intent is committed before remote writes.','Human corrected the default branch mechanism after review.');
+    const probe=structuredClone(project);probe.project_id='p2';probe.candidate={...probe.candidate,url:'https://example.org/checkpoints',title:'checkpoints'};
+    const pending=indexNote({path:notePath,text:modified,commit:'d'.repeat(40),first_added_at:at,pending:true});const pendingView=await currentKnowledgeView(journal,probe,[pending],{urls:new Set(),note_paths:new Set()});expect(pendingView).toHaveLength(1);expect(pendingView[0]!.hash).toBe(digest(modified));
+    const blobSha=createHash('sha1').update(`blob ${Buffer.byteLength(modified)}\0`).update(modified).digest('hex');
+    const inspect=remote.inspect.bind(remote);remote.inspect=async(...args)=>{const fact=await inspect(...args);return terminal==='merged'?{...fact,merged_notes:[{path:notePath,content:modified,sha:blobSha}],review_outcome:'accepted_with_changes' as const}:fact;};
+    remote.pr!.state=terminal;await controller.run(parseDispatch({mode:'scheduled'}),'owner');
+    expect(await journal.load<HostProject>(key)).toMatchObject({state:terminal,candidate:{pr_number:1}});expect((await journal.load<IdentityState>('identity'))!.candidates[candidate.candidate_id]!.status).toBe(terminal);
+    await rm(journal.handle.root_dir,{recursive:true,force:true});({manager,journal}=await open('domain-terminal-cold'));project=(await journal.load<HostProject>(key))!;
+    const record=(await publisher().history(projectId))[0]!;const target=structuredClone(project);target.project_id='p2';target.candidate={...target.candidate,url:'https://example.org/checkpoints',title:'checkpoints'};
+    const actualDefault=(record.merged_notes??[]).map(note=>indexNote({path:note.path,text:note.content,commit:'d'.repeat(40),first_added_at:at}));
+    const related=new Map<string,NoteIndex>();const view=await currentKnowledgeView(journal,target,actualDefault,{urls:new Set(),note_paths:new Set()},related);
+    if(terminal==='merged'){expect(actualDefault[0]!.text).toBe(modified);expect(view).toHaveLength(1);expect(view[0]).toMatchObject({title:'Human corrected checkpoints',hash:digest(modified),pending:false});expect([...related.values()][0]).toMatchObject({text:modified});expect(view.some(note=>note.id===projectId)).toBe(false);}else{expect(actualDefault).toEqual([]);expect(view).toEqual([]);expect(record.merged_notes).toBeUndefined();}
+    const terminalPorts={...ports,journal,gate:gate()};await new ReadingController(terminalPorts).run(parseDispatch({mode:'scheduled',submission_id:'after-terminal',input_urls:[url]}),'owner');
+    expect((await journal.load<HostProject>(key))!.state).toBe(terminal);expect(calls).toEqual(['classification','selection','research','writing','review']);expect(remote.calls).toEqual(prEffects);
     expect(() =>
       executionTarget(deployment, parseDispatch({ input_urls: [url] })),
     ).toThrow("scope mismatch");

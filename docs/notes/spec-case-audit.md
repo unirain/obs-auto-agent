@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 47、partial 40、missing 0，40 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 50、partial 37、missing 0，37 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -43,9 +43,9 @@
 | C037 剩余五分钟但 SDK 仍在执行 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, sdk_live |
 | C038 PR 创建成功但响应丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C039 PR 已待审多日 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, production_smoke |
-| C040 用户关闭未合并 | partial | 增加关闭未合并事实经host reconcile后冷恢复的candidate/project状态与default知识索引断言，确保没有已入库条目且下一scheduled不重提。 | github_live |
+| C040 用户关闭未合并 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C041 用户手工修改 PR 分支 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
-| C042 用户合并 PR | partial | 补实际host reconcile→identity入库状态→后续召回索引的冷恢复闭环，输入默认分支真实修改后的note bytes，验证索引用default内容而非原封存草稿。 | github_live |
+| C042 用户合并 PR | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C043 首次运行且提交链为空、零号对象不存在 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C044 读取 OSS 超时、403 或 manifest 损坏 | partial | 补writer restore的commit/manifest read超时、403和manifest字节损坏；allow_initialize=true时检查零新create/不丢旧快照，不能用list错误或blob损坏代替每种边界。 | oss_live, ram_live |
 | C045 产物已上传但提交记录尚未发布时退出 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
@@ -59,7 +59,7 @@
 | C053 工具容器在绘图中退出 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | image_live, sdk_live |
 | C054 同时触发两个 Actions | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, production_smoke |
 | C055 PR 已创建但回执失败 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, sdk_live |
-| C056 回执丢失超过二十四小时且 PR 已存在 | partial | 组合PR已创建/未确认回执+推进25小时以上+publisher冷恢复，明确记录先找到PR再判来源过期，assert不新增seal/generation/model/PR。当前两个分开的测试不证明整个组合。 | github_live, oss_live |
+| C056 回执丢失超过二十四小时且 PR 已存在 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C057 超过二十四小时且 GitHub 结果无法确认 | partial | 补同一旧delivery的GitHub结果不可确认→host下一run及maintenance，核对所有sealed IDs/generation保持、PR/model调用无增加、图床对象与reservation不删除；不能用独立GC保护例冒充组合。 | github_live, image_live, oss_live |
 | C058 仅有机器人分支／commit，尚无 PR | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C059 未发布结果过期，来源未变／发生变化 | partial | 缺完整controller冷恢复回放：过期后真实verifySources返回变化，归档旧交付、建立g+1、完成重新研究/审校，并断言旧Git分支未写入。 | github_live |
@@ -103,3 +103,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C037/C064 使用活动 stream、真实执行器/计时器/持久化与 cold restore 验证55分钟截止、pause/unavailable/semantic刷新；clock和SDK为明确替身。语义刷新现在会中止仍获classify_only执行许可的旧语义请求；无终结回执的SDK异常统一返回request_unknown并保留cause，立即触发既有人工对账路由。Native SDK停止/Actions取消仍未证明。
 
 2026-10-14 续验：C002/C003/C004/C005/C007/C008 增加真实driver/Controller/HostManager调用的分类组合与冷恢复。模型标签、来源传输为明确回放；产品教程/公告边界不由该回放宣称真实识别正确。SDK权限钩子实际拒绝四类越权请求及原生文件/脚本工具，但Native SDK/MCP执行仍未验证。全部本地missing有具体证据后，仍有40项partial/local要求，完整层完成仍0。
+
+2026-10-14 续验：C040/C042/C056 延伸同一完整pipeline，分别closed/merged参数化运行；PR回执丢失后推进25小时再coldrestore，先找到PR而不再检查分类/来源有效期。真实host对账与索引composition消费默认/待审fixture bytes，排除关闭/已合并或已由远端视图覆盖的旧草稿。GitHub、模型与图床仍为服务替身，未代替真实人审。

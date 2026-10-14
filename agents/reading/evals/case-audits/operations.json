@@ -308,7 +308,7 @@
     },
     {
       "id": "C040",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/publisher.test.ts",
@@ -319,13 +319,14 @@
           "file": "agents/reading/evals/delivery/metrics.test.ts",
           "test_name": "counts actual unique PR outcomes and preserves unknown edits/cost/human effort",
           "proves": "closed_unmerged实际PR计为rejected，与merged/pending分开统计。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts (%s)",
+          "proves": "完整本地五阶段/图像/封存/单Fake PR后，将实际PR fact变为closed_unmerged；actualPublisher.reconcile→mappedState→hostController.save同步candidate/project，销毁本地目录冷恢复；currentKnowledgeView排除关闭草稿/default无条目，下一scheduled人工重复URL无新项目/query/PR。GitHub为替身。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "增加关闭未合并事实经host reconcile后冷恢复的candidate/project状态与default知识索引断言，确保没有已入库条目且下一scheduled不重提。"
-        },
         {
           "layer": "github_live",
           "requirement": "人工关闭真实测试PR且不merge，随后实际App核对closed_unmerged、无重提/入库；不能以FakeGitHub枚举变化当真实事实。"
@@ -356,7 +357,7 @@
     },
     {
       "id": "C042",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/publisher.test.ts",
@@ -367,13 +368,14 @@
           "file": "agents/reading/evals/delivery/github-read.test.ts",
           "test_name": "merged review outcome compares actual PR HEAD delivery bytes (modified=%s)",
           "proves": "OctokitGitHub实际实现返回default tree里的merged_notes.content，并比较PR HEAD修改；已断言默认内容包含原笔记。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts (%s)",
+          "proves": "同一完整域fixture在Fake PR merge后返回默认分支修改后的真实fixture bytes/blob SHA；actualhost reconcile同步merged、identity及PR1，newmanager后currentKnowledgeView使用indexNote(default bytes)，只有新title/hash/fulltext，旧工作区草稿不再作为merged知识，也验证actual pending bytes优先。默认分支/PR是服务替身，未证明真实人工merge。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补实际host reconcile→identity入库状态→后续召回索引的冷恢复闭环，输入默认分支真实修改后的note bytes，验证索引用default内容而非原封存草稿。"
-        },
         {
           "layer": "github_live",
           "requirement": "真实测试PR人工merge后核对default branch实际note/blob以及已入库回执和下一次检索；自动agent不得代替人工merge。"
@@ -757,7 +759,7 @@
     },
     {
       "id": "C056",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/publisher.test.ts",
@@ -768,13 +770,14 @@
           "file": "agents/reading/evals/delivery/publisher.test.ts",
           "test_name": "reconciles lost %s response in the next process",
           "proves": "丢PR响应后下一次找回原PR，但now保持1小时，没有跨24小时。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts (%s)",
+          "proves": "实际完整五阶段/封存及PR创建成功但响应丢失后，推进25小时，再coldmanager+Publisher.publish找到旧PR才返回awaiting_review；classificationCurrent没有新调用，所有GitHub writes不变、seal数1/generation1、原五modelquery不增加，继续manual重复提交与terminal对账仍保留原交付。不是分离的过期helper测试。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "组合PR已创建/未确认回执+推进25小时以上+publisher冷恢复，明确记录先找到PR再判来源过期，assert不新增seal/generation/model/PR。当前两个分开的测试不证明整个组合。"
-        },
         {
           "layer": "github_live",
           "requirement": "实际旧PR在超期丢回执环境找回并补确认，不进行来源重验/重生成。"
