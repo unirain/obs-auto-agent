@@ -189,3 +189,5 @@
 - Final follow-up at 22:24: 375 tests passed; SDK VAULT_ROOT explicitly points to projects/<id>/draft and rejects escaping the trusted model view, whose draft directory is created by the host. After that directory follow-up, affected bootstrap 7/recovery 8 tests and typecheck/build passed. Implementation 65cffd9 passed Linux CI run 38412794310; follow-up b49ab0a passed Linux Node 24 CI run 38413545670.
 
 - G0 implementation ec366b7 pushed and Linux Node 24 CI run 38421910653 passed. No credential values entered tracked commit candidates; the public staged scan was clean.
+
+Known-secret boundary evidence 6131326 pushed to origin/master; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38525717503). The recorded 311-file fingerprint matches current bytes. Local audit remains 60 covered / 27 partial; G1–G5 remain pending and production cron disabled.
