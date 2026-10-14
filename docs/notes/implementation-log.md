@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: shared capacity and zero-selection reporting
 
+- Evidence commit 310dba1 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38522415087). Public credential scans found no matches; the 307-file fingerprint matches current bytes.
+
 - Previous goal turn progressed through 99f8012/621b7a3 and passed Linux CI. This turn verifies more full local combinations without redefining live service/human acceptance.
 - Production and preview use actual separate FileStore workspace control ledgers with one global managedInventory/capacityView/reservation mutex. Readonly large image/version inventory is an explicit metadata fixture, not a real 49GB allocation. Either scope can win; the other cannot independently spend the same remaining capacity. Cross-handle writes fail, cold state preserves both scopes, verified missing-object release removes only its own reservation and lets the other unchanged request succeed.
 - Actual driver/StageExecutor/Controller pauses through capacity admission before any SDK intent; candidate and immutable main body remain committed. All committed revisions are protected during actual GC and zero bytes are deleted. Cold scheduling remains capacity-paused without a body refetch or classification allowance reset. After the readonly inventory reports freed space, a new physical run continues the same project/generation/context/pending classification, with one classification and value-stage reply. One-batch-per-physical-run remains intact.
