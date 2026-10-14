@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T06:44:29.404700Z",
-  "implementation_sha256": "06b4c7bbe406ddbc101160a1bfb2c0739cc87eeed5b8576406105a6830d6fc73",
-  "fingerprint_files": 309,
+  "recorded_at": "2026-10-14T07:01:30.224610Z",
+  "implementation_sha256": "e4946f494e0766dcde0bdce35fc93e597a8e636bfe7b6325f2086c1dd40155a6",
+  "fingerprint_files": 311,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 85,
-    "passed": 459,
+    "files": 86,
+    "passed": 463,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "3c7e9323523d5a9b5620550e3fffa1c390747793",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38523997546",
     "environment": "Linux / Node 24.10.0",
     "scope": "Local failed restore/suppression/outage replay with four workers; native OSS/RAM and real platform/service/human gates unpassed."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "310dba1e97e87ebd2b87f898fcb53f89cfe975f3",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38522415087",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local capacity/queue/no-selection replay only; native inventory/RAM/service/model/human gates unpassed."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 59,
-    "partial": 28,
+    "covered": 60,
+    "partial": 27,
     "missing": 0,
-    "cases_with_local_remaining": 28
+    "cases_with_local_remaining": 27
   },
   "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance.",
   "actual_local_docker_fault": {
@@ -75,5 +71,6 @@
   "knowledge_and_delivery_scope": "Actual local host/publisher/journal/index/cold restore; GitHub/default note/model/image facts are explicit substitutes. No real merge, PR recovery or human quality acceptance.",
   "concurrency_gc_scope": "Actual local independent filesystem clients/manager/checkpoint/GC/cold restore and same-delivery maintenance; GitHub/image/reference/model adapters are substitutes, not real service/IAM acceptance.",
   "capacity_scope": "Actual local Managers/reservations/inventory/driver/controller/cold restore and GC; mutex/large-image inventory/source transport/value model are explicit local substitutes, not real Actions/RAM/service/quality proof.",
-  "restore_monitor_scope": "Actual local restore/controller/readonly HEAD/Watchdog with FileStore/API/source/value fixtures; not native OSS/RAM or platform-wide real failure proof."
+  "restore_monitor_scope": "Actual local restore/controller/readonly HEAD/Watchdog with FileStore/API/source/value fixtures; not native OSS/RAM or platform-wide real failure proof.",
+  "secret_scope": "Known host credentials/common forms and explicit paths only; actual local guards/restore/Publisher/image boundaries, not universal unknown-secret DLP or native service isolation."
 }

@@ -1,3 +1,4 @@
+import {createSecretGuard,type SecretContentGuard} from '../security/secrets.js';
 import { randomUUID } from "node:crypto";
 import {
   mkdir,
@@ -49,6 +50,7 @@ import {
   MAX_FILE_BYTES,
 } from "./paths.js";
 export interface ManagerOptions {
+  content_validator?: (bytes:Uint8Array)=>void;
   store: ObjectStore;
   scope: ExecutionScope;
   local_root: string;
@@ -74,7 +76,8 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
   private readonly handles = new WeakSet<object>();
   private readonly historical = new WeakSet<object>();
   private readonly writing = new Set<string>();
-  constructor(readonly options: ManagerOptions) {}
+  private readonly contentGuard:SecretContentGuard;
+  constructor(readonly options: ManagerOptions) {this.contentGuard=options.content_validator??createSecretGuard();}
   prefix(id: string): string {
     validateWorkspaceIdentity(
       id,
@@ -374,6 +377,7 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
         this.prefix(workspaceId),
         file,
       );
+      this.contentGuard(bytes);
       await unlink(cache).catch((error) => {
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
       });
@@ -387,6 +391,7 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
         await unlink(pending);
       }
     }
+    this.contentGuard(bytes!);
     try {
       const actual = await readFile(destination);
       assertBytes(actual, file.sha256, file.size);
@@ -427,6 +432,8 @@ export class ImmutableWorkspaceManager implements WorkspaceManager {
     if (this.writing.has(handle.workspace_id))
       return { status: "conflict", reason: "Concurrent local checkpoint" };
     validateChange(handle, change);
+    for(const file of change.files??[])this.contentGuard(file.bytes);
+    if(change.records)this.contentGuard(encode(change.records));
     validateRecords(handle, change);
     const proposed: Record<string, JsonValue | null> = Object.assign(
       Object.create(null),

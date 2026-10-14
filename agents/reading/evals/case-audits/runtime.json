@@ -658,7 +658,7 @@
     },
     {
       "id": "C080",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/workspace.test.ts",
@@ -669,13 +669,24 @@
           "file": "agents/reading/evals/runtime/sdk-spawn.test.ts",
           "test_name": "installed SDK hands its actual subprocess a replacement environment without inherited controller credentials",
           "proves": "真实SDK spawn hook启动无模型Node子进程，OSS/GitHub/DeepSeek controller等sentinel env均不继承，仅指定模型token与VAULT_ROOT存在。"
+        },
+        {
+          "file": "agents/reading/evals/integration/secret-boundaries.test.ts",
+          "test_name": "sensitive paths, cookies and browser profiles/cache never enter an explicit checkpoint list; allowed text and records containing known credentials also fail before writes",
+          "proves": "actual Manager/FileStore显式checkpoint逐项拒credentials/auth.json/cookies/profile/cache/storage/scratch/dotpaths；合法note与records内宿主known密钥/raw与常见编码被scan拒绝，零create/delete、恢复manifest为空、错误/操作日志无匹配值。"
+        },
+        {
+          "file": "agents/reading/evals/integration/secret-boundaries.test.ts",
+          "test_name": "cold legacy secret data is rejected before eager materialization or lazy file exposure, with the original immutable chain preserved",
+          "proves": "显式不安全旧fixture写入secret后，fresh manager配置known guard分别拒绝eager restore及lazy read，secret未作为模型文件物化，原immutable revision保持。实际程序不迁移/擦除旧事实。"
+        },
+        {
+          "file": "agents/reading/evals/integration/secret-boundaries.test.ts",
+          "test_name": "Publisher and image uploader reject known secret content before journal, permission or remote effects and expose no matched value in errors",
+          "proves": "actual Publisher/ResourcePublisher在合法note或PNG bytes带known key时先拒绝；权限、reservation、journal、FakeGitHub及ImageStore外部effects全0，constant错误无secret值。Host构建从env/nested credential JSON/加载OSS凭据注入闭包guard，Handle/工具不接收keys。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺针对credentials/auth.json/cookies、浏览器profile/cache文件的逐项同步清单断言；现测试未证明任意allowed文件内容中的凭据会被识别/排除（paths.ts主要按路径/扩展名过滤）。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK/浏览器落盘日志和缓存清单核对，确保未进入OSS。"

@@ -1,3 +1,4 @@
+import {secretGuardFromEnvironment} from '../security/secrets.js';
 import {currentKnowledgeView} from './knowledge.js';
 import { execFile } from "node:child_process";
 import {parseDeliveryRecord} from '../publish/contracts.js';
@@ -429,6 +430,7 @@ export async function buildApplication(
   );
   await mkdir(root, { recursive: true });
   const runId = options.run_id ?? `run_${randomUUID()}`;
+  let workspaceSecretValues:string[]=[];
   let store: ObjectStore;
   if (options.local) store = new FileObjectStore(join(root, "object-store"));
   else {
@@ -436,12 +438,14 @@ export async function buildApplication(
       deployment.workspace.credential_ref,
       env,
     );
+    workspaceSecretValues=Object.values(credentials).filter((value):value is string=>typeof value==='string');
     store = new OssObjectStore({
       ...deployment.workspace,
       ...credentials,
       allowed_prefix: deployment.workspace.prefix,
     });
   }
+  const contentGuard=secretGuardFromEnvironment(env,workspaceSecretValues);
   const meteredStore = new MeteredObjectStore(store, {
     run_id: runId,
     execution_scope: target.execution_scope,
@@ -485,6 +489,7 @@ export async function buildApplication(
     ? "workspaces"
     : deployment.workspace.prefix.replace(/\/$/, "");
   const manager = new ImmutableWorkspaceManager({
+    content_validator:contentGuard,
     record_validator:validateHostRecords,
     store,
     scope: target.execution_scope,
@@ -1113,9 +1118,12 @@ export async function buildApplication(
         },
         permission,
         deployment.image.prefix,
+        ()=>new Date(),
+        contentGuard,
       );
     }
     publisher = new Publisher(github, records, permission, {
+      content_validator:contentGuard,
       workspace_id: target.workspace_id,
       sources_freshness_hours:operationalLimits.sources_freshness_hours,
       committedRevision: async () => records.handle.revision,
@@ -1859,11 +1867,13 @@ export async function buildMaintenanceApplication(
     options.local_root ?? env.RUNNER_TEMP ?? ".reading-local",
   );
   await mkdir(root, { recursive: true });
+  const workspaceCredentials=options.local?undefined:await credentialsFor(deployment.workspace.credential_ref,env);
+  const contentGuard=secretGuardFromEnvironment(env,Object.values(workspaceCredentials??{}));
   const store: ObjectStore = options.local
     ? new FileObjectStore(join(root, "object-store"))
     : new OssObjectStore({
         ...deployment.workspace,
-        ...(await credentialsFor(deployment.workspace.credential_ref, env)),
+        ...workspaceCredentials!,
         allowed_prefix: deployment.workspace.prefix,
       });
   if (!options.local) await preflight(store);
@@ -1874,6 +1884,7 @@ export async function buildMaintenanceApplication(
       : undefined);
   let journal: WorkspaceJournal | undefined;
   const manager = new ImmutableWorkspaceManager({
+    content_validator:contentGuard,
     record_validator:validateHostRecords,
     store,
     scope: target.execution_scope,

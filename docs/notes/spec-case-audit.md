@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 59、partial 28、missing 0，28 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 60、partial 27、missing 0，27 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -83,7 +83,7 @@
 | C077 容量不足且所有对象仍被保护 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C078 上传成功但容量回执丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | image_live, oss_live |
 | C079 已发布图片在重生成中发生变化 | partial | 缺完整重生成后新URL与已存在旧PR/已合并笔记中的旧URL、旧远端字节同时保持不变的组合断言；当前上传测试仅断言两个对象/receipt数量。 | github_live, image_live |
-| C080 凭据、浏览器登录信息或缓存出现在工作目录 | partial | 缺针对credentials/auth.json/cookies、浏览器profile/cache文件的逐项同步清单断言；现测试未证明任意allowed文件内容中的凭据会被识别/排除（paths.ts主要按路径/扩展名过滤）。 | oss_live, sdk_live |
+| C080 凭据、浏览器登录信息或缓存出现在工作目录 | covered | 已知秘密与常见形态扫描、路径矩阵、恢复及交付前拦截；未知/隐写内容不由本检测器保证 | oss_live, sdk_live |
 | C081 原文带恶意指令 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
 | C082 生成目录包含符号链接或 workflow 文件 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C083 图片无法渲染或无法视觉检查 | partial | 缺renderer实际报错后符合skill的HTML/Mermaid降级并在笔记/PR披露，以及非core skipped可交付、core skipped不可交付的driver/publisher完整分支测试；目前validation.ts有条件检查但这些路径未被断言。 | human_quality, image_live |
@@ -111,3 +111,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C073 两scope真实FileStore/Manager在同一全局容量view和互斥下竞争；图床大对象/版本为readonly库存fixture，不实际申请49GB。C077 actual driver保留容量暂停后的候选/body/次数，真实GC保护后new physical run恢复，不把一次run反复领取当合法重试。C085 两SourceAdapter scheduled有效空/全skip数据回放持久success_no_selection，无空PR。真实库存/RAM/来源/质量仍待证明。
 
 2026-10-14 续验：C030/C044/C087 补六种read边界故障、已有故障之后五模式/策略抑制，以及Actions+Issue同时不可用。新host/readonly HEAD组合不误初始化、不把suppression当recovery；全部同平台API不可用时函数失败且没有通知，不宣称平台外可用。故障为服务替身，真实timeout/403及同平台整体停调度边界仍待验证。
+
+2026-10-14 续验：C080 检测宿主known credential/常见整值编码/私钥/token形态，阻止显式秘密路径、browser profile/cache/storage目录，以及合法文件中的已知秘密。恢复与公共交付前均检查，constant错误不带值。未知值/任意混淆/编码对齐不被宣称通用DLP，凭据不进入模型/工具仍是主要隔离边界。

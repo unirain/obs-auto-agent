@@ -1,3 +1,4 @@
+import {createSecretGuard,type SecretContentGuard} from '../security/secrets.js';
 import { AgentError } from "../contracts/index.js";
 import { parseResourceReceipt, assertWritePolicyReceipt } from "./contracts.js";
 import { validateStaticSVG } from "./svg.js";
@@ -51,11 +52,13 @@ export class ResourcePublisher {
     private permission: PermissionCheck,
     private prefix = "reading-agent/",
     private now = () => new Date(),
+    private contentValidator:SecretContentGuard=createSecretGuard(),
   ) {
     if (!prefix.endsWith("/") || prefix.includes(".."))
       throw new Error("Unsafe image prefix");
   }
   async upload(input: ResourceInput): Promise<ResourceReceipt> {
+    this.contentValidator(input.content);
     if (
       !/^[a-zA-Z0-9_-]+$/.test(input.project_id) ||
       !/^\d{4}-\d{2}-\d{2}$/.test(input.first_generated_date) ||

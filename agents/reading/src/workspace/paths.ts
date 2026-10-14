@@ -41,7 +41,7 @@ export function validatePath(path: string): void {
           p === "." ||
           p === ".." ||
           p.startsWith(".") ||
-          ["node_modules", "scratch", "venv", "__pycache__"].includes(p),
+          ["node_modules", "scratch", "venv", "__pycache__", "cache", "profile", "browser-profile", "browser-cache", "local-storage", "session-storage", "indexeddb"].includes(p.toLowerCase()),
       )
   )
     throw new AgentError("corrupt", "Unsafe persisted path");

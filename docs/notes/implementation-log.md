@@ -1,5 +1,13 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: known-secret content and browser cache exclusion
+
+- Previous turn progressed through 3c7e932/20e8cdc and passed Linux CI. This turn found an actual content boundary gap: valid Markdown/JSON paths were checked structurally but could contain a known host credential, and browser profile/cache directories were not explicitly excluded.
+- Added a host-only SecretContentGuard closure sourced from known env values, nested credential JSON (including App names without a SECRET suffix), and actually loaded workspace credentials. It checks known values/common whole-value encodings plus private-key/common token syntax. Neither Model/Handle nor errors carry its value set. It is not universal detection of unknown/obfuscated/encrypted/hidden secrets; documented in sensitive-content runbook.
+- Manager scans new file/control bytes before any blob/manifest/commit effect, and restored bytes before cache/model materialization or lazy read. Publisher scans all public metadata/file bytes; ResourcePublisher checks image bytes before reservations, permission or remote IO. Production and maintenance composition use the same host guard. Added browser profile/cache/local-storage/session-storage/IndexedDB path exclusions; actual models/tools still have no credentials or browser login state.
+- Four real local boundary tests cover explicit credentials/auth/cookies/cache/dot/scratch lists, legal-path known credential payloads/records, nested env collection, legacy immutable secret snapshot eager/lazy refusal, and zero Publisher/image/journal/permission/reservation effects with constant no-value errors. Old data is not automatically deleted, redacted or rehashed; unsafe fixture adapter is test-only.
+- At 14:58 Asia/Shanghai, 86 files / 463 local tests passed; typecheck/build, 38 schemas, mapping and diff checks passed; four gated live tests skipped. Moving one import after verification is nonbehavioral. C080 local scope closed; audit 60 covered / 27 partial / 0 missing and 27 local requirements remain. G1–G5/all 87 full-layer cases remain unpassed; native credentials/IAM/SDK isolation is separately required.
+
 ## 2026-10-14 Continuation: failed restore, policy suppression and platform outage
 
 - Evidence commit 3c7e932 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38523997546). Public credential scans found no matches; the 309-file fingerprint including Vitest configuration matches current bytes.

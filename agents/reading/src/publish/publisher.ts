@@ -13,6 +13,7 @@ import { runtimeHours } from "../config/runtime-limits.js";
 import { isUtcInstant } from "../contracts/utc.js";
 import { parseDeliveryRecord, parseStoredDelivery } from "./contracts.js";
 export interface PublisherOptions {
+  content_validator?: (bytes:Uint8Array)=>void;
   workspace_id: string;
   committedRevision: () => Promise<string>;
   /** Must compare the sealed manifest against the restored committed snapshot. */
@@ -117,7 +118,7 @@ export class Publisher {
     validateDelivery(next, {
       id: this.options.workspace_id,
       revision: await this.options.committedRevision(),
-    });
+    },this.options.content_validator);
     await this.options.verifyCommittedDelivery(next);
     const record: DeliveryRecord = {
       ...old,
@@ -157,7 +158,7 @@ export class Publisher {
     validateDelivery(d, {
       id: this.options.workspace_id,
       revision: await this.options.committedRevision(),
-    });
+    },this.options.content_validator);
     await this.options.verifyCommittedDelivery(d);
     let records = await this.reconcile(d);
     let record = records.find((r) => r.delivery_id === d.delivery_id);

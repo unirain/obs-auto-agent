@@ -2,6 +2,8 @@ import { normalizeUrl } from "../collect/identity.js";
 import { validateStaticSVG } from "./svg.js";
 import { createHash } from "node:crypto";
 import { canonicalJson } from "../contracts/index.js";
+import {createSecretGuard,type SecretContentGuard} from '../security/secrets.js';
+const baselineGuard=createSecretGuard();
 import type { SealedDelivery, PreparedCommit } from "./types.js";
 export const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
@@ -22,7 +24,11 @@ export function deliveryValidationHash(d: SealedDelivery): string {
 export function validateDelivery(
   d: SealedDelivery,
   workspace: { id: string; revision: string },
+  contentValidator:SecretContentGuard=baselineGuard,
 ): void {
+  const {files,...metadata}=d;
+  contentValidator(Buffer.from(canonicalJson({...metadata,files:files.map(({content,...metadata})=>metadata)})));
+  for(const file of d.files)contentValidator(file.content);
   if (
     d.schema_version !== 1 ||
     d.execution_scope !== "production" ||
