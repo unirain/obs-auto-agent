@@ -28,6 +28,7 @@ storage_stop_generation_bytes: 49000000000
 max_run_minutes: 60
 shutdown_reserve_minutes: 5
 max_tools_per_batch: 40
+max_sdk_turns: 44
 max_references_per_batch: 8
 max_revision_rounds: 2
 max_no_progress_batches: 3

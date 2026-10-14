@@ -12,12 +12,13 @@ import {readInstalledSdkVersion} from '../../src/runtime/versions.js';
 import {READING_CLOUD_CONTRACT} from '../../src/tools/skills.js';
 import {parseDeployment} from '../../src/config/deployment.js';
 import {indexNote,buildContext} from '../../src/context/index.js';
+import {mergeEvaluationExecutions} from './aggregate.js';
 import {heldoutExclusion,freezeDataset,type LabeledSample} from './evaluation.js';
 import {executeEvaluation,readEvaluationVersions,validatedSnapshots,verifyPublishedSkill,type ExecuteEvaluationOptions,type SnapshotDocument} from './execute.js';
 const exec=promisify(execFile),roots:string[]=[];
 afterEach(async()=>{await Promise.all(roots.splice(0).map(async root=>{await exec('chmod',['-R','u+rwX',root]);await rm(root,{recursive:true,force:true});}));});
 
-async function fixture(unknown=false,selection?:'research'|'skip'|'defer'){
+async function fixture(unknown=false,selection?:'research'|'skip'|'defer',priced=false){
  const root=await mkdtemp(join(tmpdir(),'quality-execution-'));roots.push(root);
  const notes=join(root,'notes');
  const marker='<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->\n';
@@ -54,7 +55,8 @@ async function fixture(unknown=false,selection?:'research'|'skip'|'defer'){
   const classified={content_eligibility:selection?'allowed':'excluded',content_type:selection?'engineering_practice':'product_announcement',topic:'agent',reason_codes:selection?[]:['product_announcement'],evidence:[{start_line:1,end_line:1,excerpt:text}]};
   if(selection&&calls>2)throw new Error('research response lost');
   const result=selection&&calls===2?{decision:selection,reason_codes:[selection==='defer'?'insufficient_material':'knowledge_increment'],reason:'Fixed replay selection',dimension_ratings:{relevance:'strong',mechanism:'strong',evidence:selection==='defer'?'unknown':'strong',transferability:'strong',increment:'strong'},questions:['How does this work?'],related_note_ids:[],evidence_ids:[]}:classified;
-  yield {message_id:'result-'+calls,type:'result',summary:true,success:true,usage:{input_tokens:20,output_tokens:5,cost_usd:null,cost_status:'unknown'},result,observable:{}};
+  if(priced)yield {message_id:'step-'+calls,type:'assistant',summary:false,usage:{input_tokens:10,output_tokens:2,cost_usd:1,cost_status:'known'},observable:{}};
+  yield {message_id:'result-'+calls,type:'result',summary:true,success:true,usage:{input_tokens:20,output_tokens:5,cost_usd:priced?2:null,cost_status:priced?'known':'unknown'},result,observable:{}};
  }};
  const options:ExecuteEvaluationOptions={frozen,snapshots,deployment,session:'frozen_fixture',split:'holdout',sample_ids:['0'],notes_repository:notes,local_root:join(root,'workspace'),env:{},replay:{build:async(options:BuildApplicationOptions)=>{
   const application=await buildApplication({...options,local:true,policy_source:{readSnapshot:async()=>({commit:'a'.repeat(40),files})},model_adapter:model,runtime_versions_provider:async()=>({...await readInstalledSdkVersion(),tools_image_id:'sha256:'+'0'.repeat(64),tools_manifest_hash:'0'.repeat(64)}),gateway_resolver:async()=>[{address:'8.8.8.8',family:4}],gateway_transport:async()=>{transports++;throw new Error('frozen main must not fetch live');}});
@@ -144,3 +146,14 @@ it('reconciles a lost execution return from committed run facts, and keeps missi
  expect(recovered.cases[0]!.known_duration_ms).toBeGreaterThanOrEqual(0);expect(recovered.samples[0]!.duration_ms).toBeNull();
  await expect(verifyPublishedSkill(f.notes,f.options.frozen.versions.skill_commit)).rejects.toThrow('evaluation_published_skill_unverified');
 });
+
+it('actual host execution and aggregate preserve whole-query priced summaries beside an unknown research query and interrupted duration',async()=>{
+ const f=await fixture(false,'research',true);const first=await executeEvaluation(f.options);
+ expect(f.calls()).toBe(3);expect(first.cases[0]!.usage).toMatchObject({invocation_count:3,unresolved_invocations:1,cost_usd:null,known_cost_usd:4});
+ expect(first.samples[0]).toMatchObject({cost_usd:null,known_cost_usd:4,execution_scope:'preview'});
+ await f.journals[0]!.commit('evaluations/attempts/interrupted-no-report',{schema_version:1,run_id:'interrupted-no-report',started_at:new Date().toISOString()});
+ const cold=await executeEvaluation(f.options);expect(f.calls()).toBe(3);expect(cold.samples[0]).toMatchObject({cost_usd:null,known_cost_usd:4,duration_ms:null,execution_scope:'preview'});
+ expect(cold.samples[0]!.known_duration_ms).toBeGreaterThan(0);
+ const merged=mergeEvaluationExecutions(f.options.frozen,[first,cold]);expect(merged.samples[0]).toMatchObject({cost_usd:null,known_cost_usd:4,duration_ms:null,known_duration_ms:cold.cases[0]!.known_duration_ms,execution_scope:'preview'});
+ expect(merged.cases).toHaveLength(1);expect(merged.cases[0]!.usage.invocation_count).toBe(3);
+},60_000);

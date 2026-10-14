@@ -154,7 +154,7 @@
     },
     {
       "id": "C035",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/executor.test.ts",
@@ -174,14 +174,50 @@
         {
           "file": "agents/reading/evals/integration/batch-management-acceptance.test.ts",
           "test_name": "C035 actual %s budget commits a yield; cold controller resets only batch counters, reuses research subtasks and completes the remaining work",
-          "proves": "40工具/8材料研究边界真实driver/controller/FileStore batch_yield；cold重新准入批次四计数0但累计、revisions及旧calls/evidence bytes保留；已读8材料不重HTTP，第9份继续并完成preview_ready；尚未证明已检查图源的写作预算边界同链续用。"
+          "proves": "40工具/8材料研究边界真实driver/controller/FileStore batch_yield；cold重新准入批次四计数0但累计、revisions及旧calls/evidence bytes保留；已读8材料不重HTTP，第9份继续并完成preview_ready；写作同链另见writing-budget acceptance的具体证据。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "C035 a known writing-budget yield cold-restores the actual checked render source, resets only batch counters and completes a new writing query with export-only reuse and independent image review",
+          "proves": "实际Controller/driver/ApplicationInvocationJournal/FileStore/固定本地renderer进程：40工具后成功yield，checked input/SVG/receipt与invoice/hash保留，cold新query仅export后完成Writing并独立read_image；6种marker/consumed/response篡改在独立writer均拒绝且zero create/delete、revision/commit keys不变。非真实Fireworks图义/模型质量证据。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "a resumed batch consumes its old yield reason before a mid-query crash; the next cold host retains its new tool counters, pending input and partial usage without resetting or querying again",
+          "proves": "R1已知yield、R2领取一次reset并消费旧reason，在新的tool1/累计41与partial11/3提交后硬停；R3 cold保留batch/input/counters/invoice并manual request_unknown，zero新query/export。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "C035 an atomic writing-yield checkpoint survives a stop before outer stage_yielded, so the cold next batch resets its tools and resumes the checked source",
+          "proves": "真实yield/consumed/调度barrier同CP后硬停、外层stage_yielded未提交；cold工具重新0但累计保留，新query仅从原checked source导出。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "three unchanged writing-yield batches count repeated skill reads as no progress; the atomic third checkpoint stays manual after a stop and a cold next day never starts another query",
+          "proves": "连续3物理批重复skill读取不算产物进展；第3批cached known reply无额外付费query，manual/stalled3与yield同CP后硬停，次日cold零query，真实为2queries/3batches。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "a cold review continuation retains its previous blocking issue when the final model reply omits it; missing or null review checkpoints are rejected",
+          "proves": "已读像素回执与exact manifest/file hashes绑定，cold Review checkpoint的blocking issue在最终回复遗漏时仍合并保留；缺少/null checkpoint不符合成功Review yield schema。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "a revision writing checkpoint yields and cold-resumes the same round without incrementing twice, then persistent blocking reviews still stop at two revisions",
+          "proves": "旧draft真正revision计数1，known writing yield与cold续写保持round1，不重新+1；之后真实blocking review修订到2停止，跨批不放宽cap。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "C035 an unknown writing reply with the same checked source and exhausted budget stays manual on a cold host without resetting counters, repeating the query or exporting again",
+          "proves": "同checked source与40工具后未知SDK回复保持pending/invoice/manual与全部计数；cold无替代query、无再export。"
+        },
+        {
+          "file": "agents/reading/evals/integration/writing-budget-acceptance.test.ts",
+          "test_name": "C035 a lost consumption checkpoint replays the original known writing prompt without a new query or false stall, then the next physical batch reuses its checked source",
+          "proves": "成功SDK回复后消费CP失败，cold保留原pending prompt/progress baseline、缓存原结果零新query且stalled0；下一物理batch才用checked source export-only继续。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "研究40工具/8材料子任务冷恢复已验证；写作阶段已有检查图源、预算耗尽后known-query让出与冷续写的完整Controller链仍缺，不能将独立render-recovery或保留文件当同链完成。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK在预算耗尽时产出可确认batch_yield或明确unknown，后续继续不能盲重付费。"

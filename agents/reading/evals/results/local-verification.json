@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-14T09:23:02.199253Z",
-  "implementation_sha256": "1ede29050666325936fb1827b9f5abe6938acf509338956c827b7ee6d218eae5",
-  "fingerprint_files": 322,
+  "recorded_at": "2026-10-14T10:22:48.895378+00:00",
+  "implementation_sha256": "0e6b24427bec8c6e778da9b291448bd27f2901b623aae7b897dd8aa89fc6b817",
+  "fingerprint_files": 328,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "passed",
+    "npm test": "local_parallel_IO_timeouts; serial_all_assertions_pending; default_Linux_CI_pending",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -12,9 +12,11 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 95,
-    "passed": 519,
-    "failed": 0
+    "files": 97,
+    "passed": null,
+    "failed": null,
+    "status": "serial_full_pending",
+    "runtime": "Node24.19.0"
   },
   "live_tests": {
     "executed": 0,
@@ -28,21 +30,20 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending",
+    "implementation_commit": null,
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "All535 local assertions; native service and human gates remain unpassed."
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "5dd37e571045311d9b790c443679a87570b2e777",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38542003642",
     "environment": "Linux / Node 24.10.0",
     "scope": "Mirror/knowledge/history diagnostics and remaining-case replay verified locally; C035 writing/render budget chain and native SDK/service/human gates remain incomplete."
   },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "12e1af73893e826b1c3b9945a08a9c46140d236a",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38533078695",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Full material/Fake delivery/intake/fixed policy cold replay and audit locally verified; native SDK/service/IAM/human gates remain unpassed."
-  },
   "schema_documents": {
-    "count": 38,
+    "count": 40,
     "status": "checked"
   },
   "contract_gate": {
@@ -50,12 +51,12 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 86,
-    "partial": 1,
+    "covered": 87,
+    "partial": 0,
     "missing": 0,
-    "cases_with_local_remaining": 1
+    "cases_with_local_remaining": 0
   },
-  "evaluation_scope": "Actual host execution entry with immutable preview bindings, label-blind frozen primary sources and heldout filtering locally verified by model/transport replay. G1/published skill required for live CLI; no native model evaluation or human calibration executed. Frozen config also binds actual generation policy; exported run provenance includes real input/implementation commits and policy-check references.",
+  "evaluation_scope": "Actual host/FileStore whole-query known/unknown cold ledger and frozen execute/merge/report locally targeted verified; actual model evaluation and human calibration not executed.",
   "actual_local_docker_fault": {
     "status": "passed",
     "executed": 1,
@@ -83,10 +84,41 @@
   "fixed_policy_scope": "Actual Publisher effects and Git bootstrap/fixed bytes/current policy/FileStore cold recovery; semantic settlement/models/external adapters are explicit fixtures, not native service acceptance.",
   "skill_target": {
     "draft_pr": "https://github.com/unirain/obs-notes-hub/pull/35",
-    "head": "38589ebab14db0156ae51d3d7c9fec90402fcaef",
+    "head": "f1053b4829747667a5263a4a77a0d7bb092252da",
     "default_branch_publication": "pending_human_review_merge",
     "forward_evidence": "agents/reading/evals/runtime/evidence/cloud-skill-forward-20261014.json"
   },
-  "remaining_case_scope": "Actual persistent mirror/intake, Git knowledge, batches/manual guards/pause, expiry/regeneration/asset refs and source monitor paths locally verified; model/HTTP/GitHub/image/Actions are explicit substitutes. C035 writing/render-budget cold continuation still missing; native SDK/service/human gates unpassed.",
-  "history_scope": "Read-only committed source/run evidence binding and current adapter unsupported-history diagnostics; no verified-fill capability or exhaustive history claim. Boolean fill rejected, explicit acceptance atomic, legacy immutable facts retained. Fixed journal revision is not a remote HEAD freshness claim."
+  "remaining_case_scope": "Actual checked-source writing-budget Controller/FileStore/native fixture cold chain and unknown/consumption/crash/stall/revision/review barriers locally targeted verified; no real drawing/model/service/human quality proof.",
+  "history_scope": "Read-only committed source/run evidence binding and current adapter unsupported-history diagnostics; no verified-fill capability or exhaustive history claim. Boolean fill rejected, explicit acceptance atomic, legacy immutable facts retained. Fixed journal revision is not a remote HEAD freshness claim.",
+  "ci_pending": true,
+  "current_changes_scope": "Known yields/atomic continuation and frozen ledger aggregation. Node24 parallel full runs had only I/O timeouts (534/535 then 533/535); current serial full assertion replay and default Linux four-worker CI pending.",
+  "local_parallel_attempts": [
+    {
+      "passed": 534,
+      "failed": 1,
+      "failures": "C079 timeout60s during concurrent extra suite"
+    },
+    {
+      "passed": 533,
+      "failed": 2,
+      "failures": "knowledge cold restore timeout60s; new quality cold case timeout15s, now assigned standard persistent-I/O budget60s"
+    }
+  ],
+  "previous_full_verification": {
+    "recorded_at": "2026-10-14T09:23:02.199253Z",
+    "implementation_sha256": "1ede29050666325936fb1827b9f5abe6938acf509338956c827b7ee6d218eae5",
+    "fingerprint_files": 322,
+    "local_tests": {
+      "files": 95,
+      "passed": 519,
+      "failed": 0
+    },
+    "ci": {
+      "status": "passed",
+      "implementation_commit": "5dd37e571045311d9b790c443679a87570b2e777",
+      "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38542003642",
+      "environment": "Linux / Node 24.10.0",
+      "scope": "Mirror/knowledge/history diagnostics and remaining-case replay verified locally; C035 writing/render budget chain and native SDK/service/human gates remain incomplete."
+    }
+  }
 }

@@ -61,3 +61,19 @@ npx tsx agents/reading/evals/quality/run.ts report --input /protected/measured.j
 报告分别保留人工、模型、反馈、错误、样本数和分母。任一样本费用／时长未知时，总值保持 null；已观察的下界单列。未抽查项有单独计数，不把 null 当没有错误。报告仍标记 awaiting_user_confirmation；没有用户对真实样本的质量确认，不能通过 G4/G5 或启用正式 cron。
 
 当前工具已实现真实执行入口，并以实际本地 Controller/driver/不可变文件链和模型回放验证恢复、版本绑定与标签隔离；尚未进行真实模型评估。真实执行仍依赖 G1、已发布 cloud skill 和用户标注。使用 synthetic fixtures 验证执行器，不算真实质量校准。
+
+## 汇总开发集与留出集执行
+
+两个 split 分开运行后，用 `merge` 汇总同一个冻结语料的执行文件。此命令只读取本地文件，不调用模型或写远端。每个样本保留其真实 preview scope、累计 query 账本、观察到的费用／耗时下界，以及仍未知的总值；尚未执行的样本仍未知，不以零补齐。
+
+```sh
+npx tsx agents/reading/evals/quality/run.ts merge --frozen /protected/frozen.json --execution /protected/development.json --execution /protected/holdout.json --output /protected/merged.json
+```
+
+同 session 的恢复输出可以重复传入 `--execution`。汇总核对冻结身份、正文版本、split、namespace、case 与 samples 的映射，并验证以前的 run metadata 和 invocation/message 哈希前缀仍在。它选择包含旧事实的最新累计快照，不相加旧快照与新快照；冲突的同一批 run、丢失观察、不同 namespace 的同一个样本或 live/local_replay 混合均拒绝。不同评估 session 的同一样本应单独比较，不能借汇总掩盖额外调用。 早期执行文件缺少 invocation/message 哈希时，merge 会拒绝把它当作已核验的累计账本；保留原文件，不默认补齐或修改旧费用事实。旧人工 measured 文件仍可通过 report 导入，但缺失 scope／下界保持 unknown。
+
+在 merged 文件的副本中填写人工评分、反馈及 qualified，保留 `executions`。然后执行已有 `report` 命令；它重新校验执行绑定，拒绝用人工文件改变已观察到的预测、模型审校或费用／耗时事实。也可在 merge 时通过 `--input /protected/measured.json` 提供同一冻结语料的人工测量。
+
+新输出样本包含 `execution_scope`、`known_cost_usd`、`known_duration_ms`。同一样本里有已定价 query 和未知 query 时，已定价部分进入 known 下界，`cost_usd` 仍为 null；没有任何费用观测时 known 也是 null。存在缺最终报告的尝试时，总耗时为 null，其他完整尝试的耗时仍保留。确实观测到零费用可以记录零。这些费用来自整个 query 的汇总，绝不再叠加其 step usage。
+
+最终报告明示 scope，提供 `by_scope` 和 `by_split` 消耗及样本数；主选题评分仍针对留出集，开发集另列。`qualified_outputs` 单列每篇人工确认合格产物的费用与耗时，下界和未知分别保留；每合格产物的摊销费用／耗时包含未合格、失败和零产出的消耗，总值未知时摊销总值也未知。旧人工文件没有 scope 或下界时保留 unknown，不能推断它属于 preview。完整执行 case 的失败和版本事实随 report 输出保留。上述流程仍不证明真实模型质量或通过 G4/G5。

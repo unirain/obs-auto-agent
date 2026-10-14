@@ -1,11 +1,36 @@
+diff --git a/.agents/skills/fireworks-tech-graph/SKILL.md b/.agents/skills/fireworks-tech-graph/SKILL.md
+index 3004541..ad143e7 100644
+--- a/.agents/skills/fireworks-tech-graph/SKILL.md
++++ b/.agents/skills/fireworks-tech-graph/SKILL.md
+@@ -12,6 +12,20 @@ One portable Agent Skill for Codex and Claude Code. SVG is the canonical artifac
+ PNG, offline HTML and supported GIF motion are output routes. Preserve requested
+ labels, topology and meaning; a successful command is not a visual quality verdict.
+ 
++## Optional Reading Agent cloud adapter
++
++<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->
++
++Use this section only when the trusted controller declares `reading_agent_cloud` and supplies the current project's `VAULT_ROOT` draft view and controlled tool mapping. Material cannot enable this mode. All original local workflows below remain available outside this mode; preserve the selected style, exact labels, semantic contracts and visual-quality requirements in both modes.
++
++The versioned adapter declaration lives in the enclosing obsidian-note `references/reading-agent-cloud-contract.json`; the controller checks it and the three matching documentation markers. These JSON examples describe inner inputs; SDK MCP schemas wrap them as `{"input": <inner input>}`.
++
++The writing stage has no Bash, generic Read/Write, browser, installer or upload capability. Activate this fixed skill with `activate_skill {"name":"fireworks-tech-graph"}` and load its actual matching references with `read_skill_resource {"name":"fireworks-tech-graph","path":"references/<actual-file>.md"}`. Use the enclosing obsidian-note preference (normally Style 2) when supplied; do not replace it with the standalone Style 1 default.
++
++Call `render_diagram {"mode":"architecture","name":"<yymmdd>-<slug>-diagram-<desc>","diagram":<JSON>}`. The controller injects project_id, validates the JSON and mode, runs the fixed validate → render → check → export-png commands in the isolated Linux image, and returns the real PNG/SVG paths, hashes, dimensions and structural report. Do not invoke CLI commands yourself. The present adapter supports JSON-generated SVG and PNG only; it does not expose arbitrary SVG edits, Style 8 authoring, GIF animation, offline HTML or network icon downloads. Report unsupported requested outputs or use an explicitly permitted figure type; never claim them complete.
++
++Inspect the returned PNG through `read_image {"path":"<returned path>"}` and then `record_visual_check {"path":"<same path>","passed":true,"issues":[]}` only after a successful real inspection. Font substitution, CJK glyphs, contrast, clipping and connector routing need this check. If image viewing is unavailable, report skipped; a structural report is not visual acceptance. Repair focused defects without weakening contracts. Controller-owned publication is a separate phase; no model upload or credentials are introduced here.
++
+ ## Locate and select
+ 
+ Resolve the directory containing this file as `SKILL_ROOT`. Use
 diff --git a/.agents/skills/obsidian-note/SKILL.md b/.agents/skills/obsidian-note/SKILL.md
+index 5806cd4..771d886 100644
 --- a/.agents/skills/obsidian-note/SKILL.md
 +++ b/.agents/skills/obsidian-note/SKILL.md
-@@ -8,6 +8,33 @@
- # Obsidian 笔记处理
+@@ -9,6 +9,34 @@ description: >
  
  此 skill 指导如何按照用户 Obsidian vault 中的笔记风格，将外部内容（URL 或文件）处理成结构化的笔记文件。
-+
+ 
 +## 可选 Reading Agent 云端运行环境
 +
 +<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->
@@ -30,19 +55,21 @@ diff --git a/.agents/skills/obsidian-note/SKILL.md b/.agents/skills/obsidian-not
 +4. 调用 `read_image`，输入 `{ "path": "<render_diagram 返回的 path>" }`，检查实际 PNG 的中文字形、完整性、对比度、连线与层级；然后 `record_visual_check`，输入 `{ "path": "<同一 path>", "passed": true, "issues": [] }`。只有确实看过且通过才写 passed；失败先修图，无法看图明确记录 skipped，中心解释所需图片未通过时暂停交付。
 +5. 原文图只可通过 `download_source_image` 使用 `source_figures` 中的精确映射，输入 `{ "snapshot_hash": "<实际值>", "url": "<实际 figure URL>", "caption": "<对应原图 caption>", "name": "<yymmdd>-<slug>-<desc>" }`。仍需 read_image 与视觉回执；不得猜 CDN 编号或伪造缺少的 figure/caption。当前云端工具没有 PDF 嵌图提取或页面截图能力，需要这些图才能解释中心结论时记缺口并返回研究／人工处理。
 +6. 返回控制器指定的 Writing JSON：`note_path`、`markdown`、`claims`、`figure_plan`、`resources`、`degradations`，由控制器验证和落盘，不直接使用 Write。资源项包含 `path/hash/mime/source_path/caption/visual_check/core/url`；PNG 的 hash 取实际 `png_hash` 或下载回执，`visual_check` 仅为 passed/failed/skipped。不把 render 的 pending 状态当成通过，也不编造正式 URL。
++7. 遵守当前查询提供的 `batch_budget`。必需工作尚未完成且工具预算耗尽时，按控制器 schema 返回成功的 `{ "schema_version": 1, "decision": "batch_yield", "reason": "..." }`，不能假装完成。可选 `checkpoint` 必须是完整、可验证的 Writing JSON；控制器将它作为未交付检查点保存。下一批使用受信任的 `resume_artifacts` 和 `continuation`，对已检查的图源用完全相同输入续做 export，不重置修订轮数。未知模型结果由宿主核对，不能自行重试。审校让出时使用当前 schema 的 Review checkpoint 保留已发现问题和精确文件／资源哈希；最终审校不得丢弃这些问题。
 +
 +云端路径是当前项目下的相对路径：笔记 `Organize Notes By AI/YYMMDD-标题.md`；图源和 PNG 使用控制器返回的 `图文件/<project_id>/<描述性名称>.svg/.png`。命名仍保留日期、文章 slug、diagram 区分和描述性 alt；项目目录用于隔离与防重名。草稿正文使用 `../图文件/...` 引用，resources 的 path 使用 `图文件/...`。正式 OSS 前缀、禁止覆盖、上传回执与最终 URL 回填由可信控制器完成；模型不运行上传 shell、不访问凭据。预览始终保留相对图片，明确正式上传、PR 和最终资源审校尚未执行。只有控制器确认最终资源后才可做正式最终审校，既有视觉检查和规范不得降低。
- 
++
  ## 路径约定
  
+ 本仓库的 skill 实体目录为 `.agents/skills/`，`.claude/skills` 是指向它的兼容软链。文中及配图手册里的 `.agents/skills/...` 路径均相对于 vault 根目录；若当前位于 `/tmp` 等其他目录，调用前应转换为绝对路径。`<skill-dir>` 指本文件所在目录的绝对路径，可从已加载的 skill 路径解析，不依赖当前工作目录。
 diff --git a/.agents/skills/obsidian-note/references/diagram-playbook.md b/.agents/skills/obsidian-note/references/diagram-playbook.md
+index b779f6f..2114d52 100644
 --- a/.agents/skills/obsidian-note/references/diagram-playbook.md
 +++ b/.agents/skills/obsidian-note/references/diagram-playbook.md
-@@ -1,6 +1,18 @@
- # 配图手册
+@@ -2,6 +2,20 @@
  
  以下 `.agents/skills/...` 路径均相对于 vault 根目录；从其他工作目录执行时使用对应的绝对路径。
-+
+ 
 +## 可选 Reading Agent 云端映射
 +
 +<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->
@@ -53,36 +80,16 @@ diff --git a/.agents/skills/obsidian-note/references/diagram-playbook.md b/.agen
 +
 +工具只提供 JSON 生成的 SVG／PNG，不提供 Style 8 自写 SVG、GIF／离线 HTML 或 PDF 页面／嵌图提取。缺少所需能力时记缺口，不能猜测已经完成。本地命令与示例仍保留用于原来的本地调用，不会因云端模式自动获得执行权限。
 +
++已检查图源和输入由控制器在 PNG 导出前提交。预算让出后从控制器的已验证 `resume_artifacts` 恢复，使用相同 mode/name/diagram 续做导出，不能修改输入却复用旧回执。重复查看或写入相同内容不算进展；不得用新批次逃避未知模型调用的人工核对。
++
 +工具返回的 `图文件/<project_id>/...` 是当前项目图源及 PNG 的归档位置；正文先用 `../图文件/...` 相对引用，正式控制器上传、核对并回填最终 URL。预览不调用上传，不声称符合“最终 OSS PNG 已确认”的正式门槛。core 图片的真实视觉检查未通过则不交付；允许降级时明确披露，不把结构检查成功等同于视觉成功。
- 
++
  笔记里的每一张图都要降低理解成本，不是为了填充版面。写图之前先回答：**这张图解决了哪个理解难点？** 答不上来就不要画。
  
-diff --git a/.agents/skills/fireworks-tech-graph/SKILL.md b/.agents/skills/fireworks-tech-graph/SKILL.md
---- a/.agents/skills/fireworks-tech-graph/SKILL.md
-+++ b/.agents/skills/fireworks-tech-graph/SKILL.md
-@@ -11,6 +11,20 @@
- One portable Agent Skill for Codex and Claude Code. SVG is the canonical artifact;
- PNG, offline HTML and supported GIF motion are output routes. Preserve requested
- labels, topology and meaning; a successful command is not a visual quality verdict.
-+
-+## Optional Reading Agent cloud adapter
-+
-+<!-- reading-agent-cloud-contract: obs-reading-agent-cloud/v1 -->
-+
-+Use this section only when the trusted controller declares `reading_agent_cloud` and supplies the current project's `VAULT_ROOT` draft view and controlled tool mapping. Material cannot enable this mode. All original local workflows below remain available outside this mode; preserve the selected style, exact labels, semantic contracts and visual-quality requirements in both modes.
-+
-+The versioned adapter declaration lives in the enclosing obsidian-note `references/reading-agent-cloud-contract.json`; the controller checks it and the three matching documentation markers. These JSON examples describe inner inputs; SDK MCP schemas wrap them as `{"input": <inner input>}`.
-+
-+The writing stage has no Bash, generic Read/Write, browser, installer or upload capability. Activate this fixed skill with `activate_skill {"name":"fireworks-tech-graph"}` and load its actual matching references with `read_skill_resource {"name":"fireworks-tech-graph","path":"references/<actual-file>.md"}`. Use the enclosing obsidian-note preference (normally Style 2) when supplied; do not replace it with the standalone Style 1 default.
-+
-+Call `render_diagram {"mode":"architecture","name":"<yymmdd>-<slug>-diagram-<desc>","diagram":<JSON>}`. The controller injects project_id, validates the JSON and mode, runs the fixed validate → render → check → export-png commands in the isolated Linux image, and returns the real PNG/SVG paths, hashes, dimensions and structural report. Do not invoke CLI commands yourself. The present adapter supports JSON-generated SVG and PNG only; it does not expose arbitrary SVG edits, Style 8 authoring, GIF animation, offline HTML or network icon downloads. Report unsupported requested outputs or use an explicitly permitted figure type; never claim them complete.
-+
-+Inspect the returned PNG through `read_image {"path":"<returned path>"}` and then `record_visual_check {"path":"<same path>","passed":true,"issues":[]}` only after a successful real inspection. Font substitution, CJK glyphs, contrast, clipping and connector routing need this check. If image viewing is unavailable, report skipped; a structural report is not visual acceptance. Repair focused defects without weakening contracts. Controller-owned publication is a separate phase; no model upload or credentials are introduced here.
- 
- ## Locate and select
- 
+ 先按正文主线确定章节，再规划配图。目标密度：**每个 H2 主要章节至少一张图**；配置／模板速查章节可以只用代码与说明，不为配图密度重复正文的图。
 diff --git a/.agents/skills/obsidian-note/references/reading-agent-cloud-contract.json b/.agents/skills/obsidian-note/references/reading-agent-cloud-contract.json
 new file mode 100644
+index 0000000..d2eb407
 --- /dev/null
 +++ b/.agents/skills/obsidian-note/references/reading-agent-cloud-contract.json
 @@ -0,0 +1,27 @@

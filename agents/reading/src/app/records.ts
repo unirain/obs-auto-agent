@@ -1,5 +1,5 @@
 import {Type} from '@sinclair/typebox';
-import {canonicalJson,type JsonValue,type ExecutionScope,type ScopedRecordValidator} from '../contracts/index.js';
+import {canonicalJson,type JsonValue,type ExecutionScope,type ScopedRecordValidator,type InvocationRecord} from '../contracts/index.js';
 import {READING_PROJECT_STATES,validateReadingProjectTransition} from '../contracts/transitions.js';
 import {parseRunReport} from './run-records.js';
 import {parsePolicyCheck} from '../policy/gate.js';
@@ -8,6 +8,8 @@ import {parseSourceGapAudit} from './source-gap-management.js';
 import {parseSourceResult,parseSourceProgress} from '../collect/records.js';
 import {UtcInstantSchema} from '../contracts/utc.js';
 import {parseContextBundle,parseRuntimeProject,RuntimeProjectSchema} from '../stages/records.js';
+import {ReviewStageSchema} from '../stages/continuation.js';
+import {WritingStageSchema} from '../stages/writing.js';
 import {parseModel,CandidateSchema,SelectionSchema} from '../stages/contracts.js';
 const text=Type.String({minLength:1}),optionalText=Type.Union([text,Type.Null()]);
 const safeCount=Type.Integer({minimum:1,maximum:Number.MAX_SAFE_INTEGER});
@@ -35,6 +37,7 @@ export function validateHostRecords(records:Record<string,JsonValue|null>,execut
   else{
    const project=parseRuntimeProject(row,{allow_references:true});parseModel(hostSchema,row);
    if(Object.keys(row).some(field=>!projectKeys.has(field)))throw new Error('host_project_field_unknown');
+   if(project.stage_continuation){const marker=project.stage_continuation,invocation=records['invocations/'+marker.invocation_id] as unknown as InvocationRecord|undefined;const consumed=records['consumed/'+marker.invocation_id] as Record<string,JsonValue>|undefined;const rawResponse=records['responses/'+marker.invocation_id];if(!invocation||invocation.status!=='succeeded'||invocation.subject_id!=='project:'+project.project_id||invocation.execution_scope!==execution_scope||invocation.capability!==(marker.stage==='writing'?'write':'review')||invocation.context_hash!==marker.context_id||invocation.input_hash!==marker.input_hash||!consumed||consumed.project_id!==project.project_id||consumed.reason!==marker.stage+'_batch_yield')throw new Error('stage_continuation_invocation_mismatch');const response=parseModel<{decision?:string}>(marker.stage==='writing'?WritingStageSchema:ReviewStageSchema,typeof rawResponse==='string'?JSON.parse(rawResponse):rawResponse);if(response.decision!=='batch_yield')throw new Error('stage_continuation_result_mismatch');}
    const context=records[`contexts/${project.context.context_id}`];
    if(!context||canonicalJson(parseContextBundle(context))!==canonicalJson(project.context))throw new Error('host_context_record_missing');
   }

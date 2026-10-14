@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 86、partial 1、missing 0，1 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 87、partial 0、missing 0；当前命名 local 组合缺口已由具体断言闭合，仍须真实服务及人工分层验收。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -38,7 +38,7 @@
 | C032 SDK query 内包含多步模型请求 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C033 SDK query 结果不明或仅存启动意图 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, sdk_live |
 | C034 未配置模型金额上限或价格未知 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
-| C035 四十次工具调用后仍有必需工作，或补充材料超过八份 | partial | 研究40工具/8材料子任务冷恢复已验证；写作阶段已有检查图源、预算耗尽后known-query让出与冷续写的完整Controller链仍缺，不能将独立render-recovery或保留文件当同链完成。 | sdk_live |
+| C035 四十次工具调用后仍有必需工作，或补充材料超过八份 | covered | 已验证真实host/持久化与固定本地renderer进程的40工具让出、checked source冷续写、unknown/消费丢失/提交后硬停、无进展与修订/审校保护；模型、图片与服务语义仍是local fixture | sdk_live |
 | C036 跨天恢复持续无进展或已用完两轮修订的项目 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C037 剩余五分钟但 SDK 仍在执行 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, sdk_live |
 | C038 PR 创建成功但响应丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |

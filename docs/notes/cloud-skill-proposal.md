@@ -3,7 +3,7 @@
 2026-10-13 建立提案，2026-10-14 提交目标库草稿 PR。提案基于目标笔记库固定提交 `edb8abf75690dae7fb9244c46cfe6d09babfe912`，保留其新长文规范。
 
 - 适配补丁：`agents/reading/tools/obsidian-note-cloud.patch`。
-- 本机隔离 Git 仓库：`.reading-local/cloud-skill-proposal`；提案 commit：`38589ebab14db0156ae51d3d7c9fec90402fcaef`。
+- 本机隔离 Git 仓库：`.reading-local/cloud-skill-proposal`；当前提案 commit：`f1053b4829747667a5263a4a77a0d7bb092252da`。
 - 改动仅为四个 skill 文件新增内容：obsidian-note/SKILL.md、diagram-playbook.md、fireworks-tech-graph/SKILL.md、reading-agent-cloud-contract.json。既有正文、long-form-structure.md 和渲染脚本不改。
 - 三个规范入口共享版本 marker；固定 JSON 契约列真实写作／审校工具、SVG 图源及 PNG 图片能力。提到 VAULT_ROOT 不再构成已适配的证据。受信任写作提示词明确声明 reading_agent_cloud。
 
@@ -29,3 +29,7 @@ git -C .reading-local/cloud-skill-proposal diff edb8abf75690dae7fb9244c46cfe6d09
 - 待用户审阅并合入后，固定实际已发布 commit，再核验镜像、SDK 激活和真实图文质量。PR 创建不代表 G2/G5 完成。
 
 独立指令 dry-run 使用三行 synthetic 研究包，仅提供 host 对固定 skill 的读取，未注册 mcp__reading。Agent 读取实际 SKILL/playbook/contract，返回标为候选的 Writing JSON 与手册允许的内联 Mermaid，并披露无激活/渲染/像素回执，没有借本机 shell、外网或旧回执冒充完成。机器范围记录在 agents/reading/evals/runtime/evidence/cloud-skill-forward-20261014.json；它证明该受限场景下的指令处理，不证明 SDK/Controller 验收或真实文章质量。
+
+## 2026-10-14 写作预算续跑说明
+
+草稿 PR #35 已更新到 `f1053b4829747667a5263a4a77a0d7bb092252da`，远端 head 已回读一致。只增补云端预算让出、已检查图源续做 export、未交付 Writing checkpoint 和审校问题保留说明；工具列表与版本 1 能力契约、渲染脚本、本地默认流程保持原样。两个 skill 的 quick_validate 和两个本机候选文件凭据扫描通过。先前 Linux 渲染及指令 dry-run 对应旧 proposal commit；本次未重新执行模型或原生图文质量验收。默认分支发布仍等待人工审阅合并。

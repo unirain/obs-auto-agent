@@ -7,4 +7,6 @@ export const WritingSchema=Type.Object({note_path:text,markdown:text,
   figure_plan:Type.Array(Type.Object({section:text,type:text,goal:text,resource_path:nullable,no_figure_reason:nullable},strict)),
   resources:Type.Array(Type.Object({path:text,hash:text,mime:text,source_path:nullable,caption:text,visual_check:Type.Union([Type.Literal('passed'),Type.Literal('failed'),Type.Literal('skipped')]),core:Type.Boolean(),url:nullable},strict)),degradations:Type.Array(text)},strict);
 export type WritingOutput=Static<typeof WritingSchema>;
+/** A successful SDK result may yield; unfinished/unknown SDK calls never use this contract. */
+export const WritingStageSchema=Type.Union([WritingSchema,Type.Object({schema_version:Type.Literal(1),decision:Type.Literal('batch_yield'),reason:text,checkpoint:Type.Optional(Type.Union([WritingSchema,Type.Null()]))},strict)]);
 export const parseWriting=(raw:unknown):Writing=>parseModel<Writing>(WritingSchema,raw);

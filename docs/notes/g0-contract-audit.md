@@ -46,3 +46,7 @@ README 将 G0 定义为“工程骨架可构建，schema 与状态转换有样�
 最终检查：69 files / 394 tests、typecheck/build、38 schema documents 检查、87-case mapping 和 diff 检查通过。前三轨各自的 freeze 输出是较早的局部证据；最终实现指纹与命令结果以 `evals/results/local-verification.json` 为准。
 
 本轮没有运行 paid model、创建云资源或新增 live pass。G0 complete 仅指 README 的共享契约与本地组合门槛。G1–G5、真实 SDK/OSS/RAM/GitHub/图床、文章与人类质量要求仍未达到，完整目标没有完成。
+
+## 2026-10-14 成功让出契约扩展
+
+导出文档表新增 WritingStage/ReviewStage，公开 schema 现为 40。host continuation version 1 校验真实 succeeded/consumed invocation 的项目/scope/context/input/round；未消费 known 结果按原 pending prompt/progress baseline 缓存重放，unknown 不重试。Review yield 必须携带 non-null exact-hash checkpoint，Writing checkpoint 使用既有完整验证。具体 assertions 见 writing-budget-acceptance.test.ts 的 8 个实际 Controller/FileStore 冷恢复 case，Node v24.19.0 针对测试/typecheck/build/40-schema check 通过。完整回归与 Linux CI 在当前实现验证中单独记录；本段不改变 G1–G5 权限。

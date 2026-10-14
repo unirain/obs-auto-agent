@@ -346,6 +346,7 @@ function validateNewGeneration(
       "fresh " + key,
     );
   required(equivalent(next.format_repairs, {}), "fresh format repairs");
+  required(next.stage_continuation == null, "fresh stage continuation");
   required(
     Object.values(row(next.counters, "Counters")).every((value) => value === 0),
     "fresh generation counters",
@@ -590,6 +591,8 @@ export function validateReadingProjectTransition(
     [
       "project_transition",
       "stage_yielded",
+      "writing_batch_yield",
+      "review_batch_yield",
       "invocation_reconciled",
       "fixed_generation_input_unavailable",
     ].includes(reason)

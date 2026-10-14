@@ -1,0 +1,180 @@
+{
+  "anyOf": [
+    {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "issues",
+        "file_hashes",
+        "resource_manifest_hash"
+      ],
+      "properties": {
+        "issues": {
+          "type": "array",
+          "items": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+              "severity",
+              "file",
+              "location",
+              "evidence_ids",
+              "problem",
+              "correction"
+            ],
+            "properties": {
+              "severity": {
+                "anyOf": [
+                  {
+                    "const": "blocking",
+                    "type": "string"
+                  },
+                  {
+                    "const": "advisory",
+                    "type": "string"
+                  }
+                ]
+              },
+              "file": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "location": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "evidence_ids": {
+                "type": "array",
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "problem": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "correction": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        },
+        "file_hashes": {
+          "type": "object",
+          "patternProperties": {
+            "^(.*)$": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        },
+        "resource_manifest_hash": {
+          "minLength": 1,
+          "type": "string"
+        }
+      }
+    },
+    {
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "schema_version",
+        "decision",
+        "reason",
+        "checkpoint"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "type": "number"
+        },
+        "decision": {
+          "const": "batch_yield",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "checkpoint": {
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "issues",
+            "file_hashes",
+            "resource_manifest_hash"
+          ],
+          "properties": {
+            "issues": {
+              "type": "array",
+              "items": {
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "severity",
+                  "file",
+                  "location",
+                  "evidence_ids",
+                  "problem",
+                  "correction"
+                ],
+                "properties": {
+                  "severity": {
+                    "anyOf": [
+                      {
+                        "const": "blocking",
+                        "type": "string"
+                      },
+                      {
+                        "const": "advisory",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "file": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "location": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "problem": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "correction": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "file_hashes": {
+              "type": "object",
+              "patternProperties": {
+                "^(.*)$": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              }
+            },
+            "resource_manifest_hash": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

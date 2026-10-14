@@ -40,6 +40,7 @@ import {
   type PolicyGate,
   type PolicySubject,
 } from "../policy/gate.js";
+import {effectiveRuntimeLimits} from '../runtime/limits.js';
 import type { RunDeadline } from "../runtime/deadline.js";
 import type { ContextBundle } from "../context/index.js";
 import { previewReport } from "../preview/report.js";
@@ -223,6 +224,8 @@ export class ReadingController {
           research_batch_yield: "research",
           research_deferred: "research",
           research_skipped: "research",
+          writing_batch_yield: "write",
+          review_batch_yield: "review",
           draft_complete: "write",
           review_result: "review",
         } as Record<string, string>
@@ -231,6 +234,7 @@ export class ReadingController {
       const order =
         (await this.ports.journal.load<string[]>("invocation_order")) ?? [];
       for (const id of [...order].reverse()) {
+        if(["writing_batch_yield","review_batch_yield"].includes(reason)&&id!==project.stage_continuation?.invocation_id)continue;
         const invocation = await this.ports.journal.load<{
           subject_id: string;
           capability: string;
@@ -492,6 +496,11 @@ export class ReadingController {
               : "validated";
           project.resume_stage = blocked ? "writing" : null;
         }
+        if(reason==='writing_batch_yield'||reason==='review_batch_yield'){
+          const limits=effectiveRuntimeLimits(project.context.runtime_limits,environment.current_limits?await environment.current_limits():undefined);
+          const stalled=project.counters.stalled_batches>=limits.max_no_progress_batches;
+          project=this.hold(project,reason==='writing_batch_yield'?'writing':'review',stalled?'research_stalled':'batch_yield',stalled);
+        }
         const formatCapability =
           /^(classify_only|select|research|write|review)_format_(invalid|exhausted)$/.exec(
             reason,
@@ -520,6 +529,8 @@ export class ReadingController {
         project.counters.download_bytes = 0;
         project.counters.download_resources = 0;
         project.batch_id = `batch_${randomUUID()}`;
+        // The old yield grants one batch reset, not a reset on every cold run.
+        project.reason = null;
       }
       project.last_run_id = report.run_id;
       await this.save(project, [], "batch_claimed");
@@ -630,6 +641,10 @@ export class ReadingController {
             ),
           );
           break;
+        }
+        // A known yield checkpoint already committed the scheduling/manual barrier.
+        if(project.resume_policy==='manual'&&project.reason==='research_stalled'){
+          step.decision='manual';step.reason='research_stalled';
         }
         project = { ...project, ...step.project };
         if (step.reason === "classification_refreshed" && step.resume_stage) {

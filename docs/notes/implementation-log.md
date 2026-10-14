@@ -225,3 +225,13 @@ Full-chain/intake/fixed-policy acceptance 12e1af7 is pushed to origin/master; [L
 - Final full regression 2026-10-14 17:21 Asia/Shanghai: 519 tests / 95 files passed, typecheck/build/38-schema/spec mapping/diff checks passed. Current two historical sources have no completeness certificate; verified-fill is unavailable rather than fabricated. C035 remains a concrete local writing/render-budget scenario, and all native/human layers remain pending.
 
 Mirror/knowledge/backfill-diagnostic implementation 5dd37e5 pushed to origin/master; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38542003642). All 519 tests / 95 files and checks passed; 322-file fingerprint matches current bytes. Local audit 86 covered / 1 partial (C035 writing/render budget continuation); G1–G5 and all 87 full-layer cases remain pending, production cron disabled.
+
+## 2026-10-14 预算续跑与质量汇总进行中
+
+SDK installed declarations 的 maxTurns 是 conversation turn，并非工具调用计数。新增受信任 max_sdk_turns 默认 44，与每批工具硬限 40 分开；WritingStage/ReviewStage 允许成功 typed batch_yield，SDK 未知／确认付费失败依旧转人工。host continuation 绑定 schema/version、context、round、input 和真实 succeeded/consumed invocation，保存原始有效产物进展 hash，消费检查点丢失后按原 pending query 重放。Writing checkpoint 必须通过现有 Writing 验证，未交付；Review checkpoint 按 exact files/manifest 验证，已发现 issues 不因续批丢失。源检查提交先于 PNG export，恢复只接受 verified restored artifacts。原子让出同时保存无进展计数；3 次无进展仍转人工。当前阶段实现已落地，完整本地验证待确认，不构成 G1–G5 或 native SDK 证据。
+
+目标库技能草稿 PR #35 已回读更新 head f1053b4829747667a5263a4a77a0d7bb092252da；两处云端说明增补通过 quick_validate/实际本机凭据扫描。本机原 notes checkout 未改；渲染脚本未变，旧 commit 的渲染证据未升级到新 commit 的真实模型验收。
+
+续跑最终针对证据：实际 bundle Node v24.19.0 下，writing-budget acceptance 8/8、quality 22/22，通过typecheck/build/40 schemas。已修两次atomic窗口：yield消费与host deferred/manual屏障同CP；batch_claimed消费旧yield理由，新query硬停后不得再次清空批次计数。明确无进展时用已知缓存回复计3批保护，不以opaque invocation nonce制造新付费query。A9 merge保留开发/留出、scope、qualified单产物耗时与whole-query known部分；没有观测仍null，累计快照只取最新且校验旧run/invocation/message哈希前缀。此前Homebrew node@24路径实际执行26，不能作为Node24证据；本批使用实际v24.19.0，Linux CI固定24.10.0。Local audit现87 covered/0 partial，全部87 full-layer状态仍pending，G1–G5未通过。完整suite正在运行。
+
+完整并行回归记录：实际Node24四workers首轮534/535过、C079在60s I/O预算超时；无其它suite并行的第二轮533/535过、C024知识冷恢复60s与新A9费用冷恢复15s超时，没有事实断言失败。新A9持久化case按既有60s预算标注；当前额外运行全部535断言的顺序文件回归，默认Vitest仍四workers。标准四worker命令还须该实现Linux CI验证，不能将这两次本机并行结果写成通过。完整输出在ignored .reading-local/verification/。

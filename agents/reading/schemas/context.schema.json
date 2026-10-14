@@ -62,6 +62,10 @@
           "minimum": 1,
           "type": "integer"
         },
+        "max_sdk_turns": {
+          "minimum": 1,
+          "type": "integer"
+        },
         "max_references_per_batch": {
           "minimum": 1,
           "type": "integer"
