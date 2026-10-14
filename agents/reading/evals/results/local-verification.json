@@ -1,22 +1,23 @@
 {
-  "recorded_at": "2026-10-14T10:22:48.895378+00:00",
+  "recorded_at": "2026-10-14T10:27:52.802193+00:00",
   "implementation_sha256": "0e6b24427bec8c6e778da9b291448bd27f2901b623aae7b897dd8aa89fc6b817",
   "fingerprint_files": 328,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "local_parallel_IO_timeouts; serial_all_assertions_pending; default_Linux_CI_pending",
+    "npm test": "passed in default four-worker Linux CI; local serial all535 assertions passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
     "git diff --check": "passed",
-    "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
+    "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed",
+    "npm test -- --no-file-parallelism": "passed locally Node24.19.0"
   },
   "local_tests": {
     "files": 97,
-    "passed": null,
-    "failed": null,
-    "status": "serial_full_pending",
-    "runtime": "Node24.19.0"
+    "passed": 535,
+    "failed": 0,
+    "runtime": "Node24.19.0",
+    "file_parallelism": false
   },
   "live_tests": {
     "executed": 0,
@@ -27,13 +28,20 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
+  "scope": "Actual local Node24.19.0 serial full assertion suite and default Linux Node24.10.0 four-worker CI; no new native OSS/RAM/SDK/delivery/human evidence.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending",
-    "implementation_commit": null,
+    "status": "passed",
+    "implementation_commit": "2a3755ca47d41e31abfc5da9eeb9024eb95bd00e",
     "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "All535 local assertions; native service and human gates remain unpassed."
+    "scope": "All535 local assertions; native service and human gates remain unpassed.",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38549166391",
+    "tests": {
+      "files": 97,
+      "passed": 535,
+      "failed": 0,
+      "workers": 4
+    }
   },
   "previous_ci": {
     "status": "passed",
@@ -90,8 +98,7 @@
   },
   "remaining_case_scope": "Actual checked-source writing-budget Controller/FileStore/native fixture cold chain and unknown/consumption/crash/stall/revision/review barriers locally targeted verified; no real drawing/model/service/human quality proof.",
   "history_scope": "Read-only committed source/run evidence binding and current adapter unsupported-history diagnostics; no verified-fill capability or exhaustive history claim. Boolean fill rejected, explicit acceptance atomic, legacy immutable facts retained. Fixed journal revision is not a remote HEAD freshness claim.",
-  "ci_pending": true,
-  "current_changes_scope": "Known yields/atomic continuation and frozen ledger aggregation. Node24 parallel full runs had only I/O timeouts (534/535 then 533/535); current serial full assertion replay and default Linux four-worker CI pending.",
+  "current_changes_scope": "Known writing/review atomic continuation and frozen ledger aggregation verified locally and by default Linux CI; native service/human gates unpassed.",
   "local_parallel_attempts": [
     {
       "passed": 534,

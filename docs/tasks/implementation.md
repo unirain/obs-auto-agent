@@ -43,9 +43,9 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 ## Current verification
 
-- Targeted verification on actual Node v24.19.0: writing/render/review budget and cold failures 8/8; quality execute/merge/report 22/22. Typecheck/build, all 40 exported schema documents and spec mapping passed. Complete regression is running; the previous full verification remains 519 tests / 95 files at 17:21 Asia/Shanghai.
+- Targeted verification on actual Node v24.19.0: writing/render/review budget and cold failures 8/8; quality execute/merge/report 22/22. Typecheck/build, all 40 exported schema documents and spec mapping passed. All 535 tests / 97 files passed locally with sequential files on Node v24.19.0 and in default four-worker Linux Node24.10.0 CI. Two earlier local parallel I/O timeout attempts are retained in the evidence; no test assertion was removed.
 - Current local case audit: 87 covered / 0 partial / 0 missing, with named assertions. All 87 full-layer cases remain pending / 0 complete; local coverage is not native service or human acceptance.
-- Last fully verified implementation `5dd37e571045311d9b790c443679a87570b2e777`: [Linux Node 24.10.0 CI](https://github.com/unirain/obs-auto-agent/actions/runs/38542003642). Current modifications await full regression and their own implementation CI. Sanitized evidence: agents/reading/evals/results/local-verification.json.
+- Fully verified implementation `2a3755ca47d41e31abfc5da9eeb9024eb95bd00e` is pushed: [Linux Node24.10.0 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38549166391), including npm ci/typecheck/test/build/spec coverage. The 328-file implementation fingerprint matches current bytes. Sanitized evidence: agents/reading/evals/results/local-verification.json.
 - Production generation cron remains disabled. G0 permits local contracts/replays only; G1–G5 stay pending.
 
 ## External resources and remaining acceptance
