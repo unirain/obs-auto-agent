@@ -1,5 +1,13 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: immutable intent races and unknown delivery maintenance
+
+- Previous turn progressed through 60e3cfa/9eee29d, passing Linux CI and fixing authoritative knowledge recall. This continuation closes concrete persistence/maintenance assertions while keeping real service/human gates.
+- Two independent FileObjectStore clients race the exact bytes prepared by an actual Manager at one sequence. One creates, one sees conflict, both verify the same readback SHA; initiating response loss is reconciled committed. A stale manager cannot use different intent to advance/jump sequence, including repeated attempts; a cold client restores the winner. This proves local filesystem atomicity/protocol, not native OSS/IAM.
+- GC protection now has a combined cold test: an old 33MiB/two-chunk source is detached from HEAD but protected by historical revision. Actual GC deletes an orphan while every immutable commit key/hash remains equal. Destroying local files and a fresh store/manager reconstruct HEAD and read the full protected historical bytes/hash/last byte/chunk count.
+- The same complete domain delivery, already beyond 24h with PR reply loss, is made remotely unreadable. A new host runs scheduled recovery with all generation/upload/seal/publication entrypoints blocked; it preserves publishing/unknown. Actual maintainWorkspace and collectImageGarbage run with an unavailable references adapter, retain the existing image and pending capacity reservation, preserve sealed IDs/generation, and make no delete/release or additional model/PR effect. No separate synthetic GC result substitutes for this chain.
+- At 14:10 Asia/Shanghai, 82 files / 446 local tests passed, typecheck/build, 38 schemas, mapping and diff check passed; four gated live tests skipped. C047/C051/C057 local evidence closed; audit 53 covered / 34 partial / 0 missing, 34 local requirements remain. Full-layer cases remain zero complete and G1–G5 unpassed.
+
 ## 2026-10-14 Continuation: expired receipt recovery and authoritative knowledge
 
 - Implementation 60e3cfa pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38519561168). Public credential scans found no matches; the 304-file fingerprint matches current bytes.

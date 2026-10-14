@@ -24,6 +24,8 @@ import {
 import { canonicalJson, type JsonValue } from "../../src/contracts/index.js";
 import { buildContext,indexNote,type NoteIndex } from "../../src/context/index.js";
 import {currentKnowledgeView} from '../../src/app/knowledge.js';
+import {maintainWorkspace} from '../../src/app/maintenance.js';
+import {collectImageGarbage} from '../../src/publish/image-gc.js';
 import {
   discoverCandidate,
   emptyIdentity,
@@ -903,6 +905,17 @@ it.each(['closed_unmerged','merged'] as const)("one complete domain fixture cros
     ).toMatchObject({ uncertain_action: "create_pr" });
     clock=new Date(Date.parse(later)+25*3_600_000).toISOString();
     const oldCheckCount=classificationChecks,oldWrites=[...remote.calls];
+    // The same expired delivery also passes through an unknown-read run and
+    // actual maintenance; incomplete remote facts cannot authorize deletion.
+    remote.failure='read';await expect(publisher().publish(delivery,'publish-only')).rejects.toThrow('read unavailable');
+    const pendingKey=deployment.image!.prefix+projectId+'/pending-'+digest('pending-image')+'.png';await capacity.reserve(pendingKey,7);
+    const protectedSeals=journal.keys('sealed-');({manager,journal}=await open('domain-expired-unknown'));project=(await journal.load<HostProject>(key))!;
+    const unknownPorts:ControllerPorts={journal,gate:gate(),deadline:new RunDeadline(),sources:[],context:async()=>{throw new Error('unknown_delivery_new_context');},environment:async()=>{throw new Error('unknown_delivery_new_query');},prepareResources:async()=>{throw new Error('unknown_delivery_new_upload');},verifySources:async()=>{throw new Error('unknown_delivery_freshness_before_reconcile');},seal:async()=>{throw new Error('unknown_delivery_new_seal');},publish:async()=>{throw new Error('unknown_delivery_new_pr');},reconcile:async current=>{const facts=await publisher().reconcile(delivery);return mappedState(current,facts[0]!);}};
+    await new ReadingController(unknownPorts).run(parseDispatch({mode:'scheduled'}),'owner');
+    let imageDeletes=0,releases=0;const maintenance=await maintainWorkspace({manager,journal,store,prefix:manager.prefix(workspace),now:new Date(Date.parse(clock)+365*86400000),with_mutex:async work=>work(),delivery_fact:async()=>({status:'unknown',complete:false}),image_gc:()=>collectImageGarbage({execution_scope:'production',prefix:deployment.image!.prefix,journal,records:()=>journal.handle.records,store:{inventory:async()=>({complete:true,objects:[{key:resource.object_key,version_id:null,bytes:png.length,created_at:at}]}),getVersion:async objectKey=>images.get(objectKey),deleteVersion:async()=>{imageDeletes++;throw new Error('unknown_delivery_image_delete');}},references:async()=>{throw new Error('GitHub references unavailable');},beforeDelete:async()=>{throw new Error('unknown_delivery_delete_permission');},afterKeyAbsent:async()=>{releases++;},now:()=>new Date(Date.parse(clock)+365*86400000)})});
+    expect(maintenance.detached_projects).toEqual([]);expect(maintenance.image_gc.status).toBe('incomplete');expect(imageDeletes).toBe(0);expect(releases).toBe(0);expect(images.objects.has(resource.object_key)).toBe(true);
+    expect(await journal.load('storage/reservations/'+digest(pendingKey))).toMatchObject({state:'pending',expected_bytes:7});expect(journal.keys('sealed-')).toEqual(protectedSeals);expect((await journal.load<HostProject>(key))!.generation_version).toBe(1);expect(remote.calls).toEqual(oldWrites);expect(calls).toHaveLength(5);
+    expect(await journal.load('delivery-'+delivery.delivery_id)).toMatchObject({status:'publishing',uncertain_action:expect.any(String)});remote.failure=null;
     // Cold restart after the remote PR exists but its response was lost. No replacement PR or query.
     ({ manager, journal } = await open("domain-3"));
     project = (await journal.load<HostProject>(key))!;

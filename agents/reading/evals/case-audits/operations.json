@@ -485,7 +485,7 @@
     },
     {
       "id": "C047",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/workspace.test.ts",
@@ -496,13 +496,14 @@
           "file": "agents/reading/evals/storage/workspace.test.ts",
           "test_name": "reconciles create-success-response-lost at the same sequence and persists effects",
           "proves": "同一prepared写意图在单caller响应丢失后读回补确认；不是两个客户端共享相同prepared bytes的race。"
+        },
+        {
+          "file": "agents/reading/evals/storage/concurrent-intent-gc.test.ts",
+          "test_name": "two independent filesystem clients race identical prepared commit bytes and both read back the same intent; different stale intent cannot jump sequence",
+          "proves": "实际Manager准备的同一sequence/commit bytes在create边界由两个独立FileObjectStore客户端并发禁止覆盖创建，一创建一conflict后两者read/hash相同；发起方响应丢失通过manager对账committed。另一manager旧handle尝试不同意图两次均conflict，commit keys仅0/1，cold manager恢复同intent。非原生OSS。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补两个客户端同序号且完全相同prepared commit bytes/意图的对账回执；并核对败方不同意图停止后不能再以旧handle跳号。当前只有不同意图竞争与单caller丢回执。"
-        },
         {
           "layer": "oss_live",
           "requirement": "原生OSS并发同key同/不同字节完整race及forbid-overwrite返回，读回相同者补确认、不同者停止。"
@@ -601,7 +602,7 @@
     },
     {
       "id": "C051",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/workspace.test.ts",
@@ -617,13 +618,14 @@
           "file": "agents/reading/evals/storage/maintenance.test.ts",
           "test_name": "detach commit survives exit before GC; next fresh run retains audit and deletes only unreferenced aged blobs",
           "proves": "detach之后退出，下次新manager保留调用/候选审计再清旧source，commits数量>4且HEAD identity恢复；没有比较全部commit键前后相等。"
+        },
+        {
+          "file": "agents/reading/evals/storage/concurrent-intent-gc.test.ts",
+          "test_name": "GC preserves every immutable commit byte and protected historical chunks, then a fresh manager reconstructs HEAD and complete protected bytes",
+          "proves": "实际33MiB/两个chunks历史文件被HEAD解除引用但protected revision保护；collectGarbage删除真实孤立blob前后全部commit key/hash集合相同。删本地目录、新FileStore/manager冷恢复HEAD revision/sequence/records；restoreRevision读取完整33MiB hash/末字节/两块，证明实际历史bytes可恢复。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补GC前后完整commit key/hash集合不变、GC之后protected历史revision新manager读取完整bytes以及逻辑HEAD重建的组合断言；当前覆盖保护集合与HEAD，不完整证明所有承诺。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实版本/分页库存与保留期清理后可恢复HEAD及受保护历史版本，永久commit前缀不删。"
@@ -790,7 +792,7 @@
     },
     {
       "id": "C057",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/publisher.test.ts",
@@ -801,13 +803,14 @@
           "file": "agents/reading/evals/delivery/image-gc.test.ts",
           "test_name": "protects %s images and never releases capacity",
           "proves": "GC的未知调用及待审交付保护例均deleted=[]、store.deletes=0、release=0；不是同一超期GitHub read故障的host维护闭环。"
+        },
+        {
+          "file": "agents/reading/evals/integration/shared-domain-flow.test.ts",
+          "test_name": "one complete domain fixture crosses durable source, paid-reply, seal, delivery and readonly monitor boundaries across cold restarts (%s)",
+          "proves": "同一完整域交付已有PR但回执unknown，推进25小时GitHub读失败→new manager→actual scheduled Controller仍publishing且无新model/PR。actualmaintainWorkspace+collectImageGarbage在远端引用不可读时保留图床对象、pending reservation、原sealed ID/generation及模型5次/FakeGithub所有写次数；delete和容量释放回调均0。不是独立GC替身结果。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补同一旧delivery的GitHub结果不可确认→host下一run及maintenance，核对所有sealed IDs/generation保持、PR/model调用无增加、图床对象与reservation不删除；不能用独立GC保护例冒充组合。"
-        },
         {
           "layer": "github_live",
           "requirement": "真实GitHub超时/权限错误不能当无PR，历史所有PR状态完整读取失败仍publishing。"

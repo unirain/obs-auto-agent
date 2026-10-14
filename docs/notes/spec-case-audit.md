@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 50、partial 37、missing 0，37 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 53、partial 34、missing 0，34 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -50,17 +50,17 @@
 | C044 读取 OSS 超时、403 或 manifest 损坏 | partial | 补writer restore的commit/manifest read超时、403和manifest字节损坏；allow_initialize=true时检查零新create/不丢旧快照，不能用list错误或blob损坏代替每种边界。 | oss_live, ram_live |
 | C045 产物已上传但提交记录尚未发布时退出 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C046 提交记录创建成功但响应丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
-| C047 两个客户端争写同一提交序号 | partial | 补两个客户端同序号且完全相同prepared commit bytes/意图的对账回执；并核对败方不同意图停止后不能再以旧handle跳号。当前只有不同意图竞争与单caller丢回执。 | oss_live |
+| C047 两个客户端争写同一提交序号 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C048 workspace bucket 版本控制已开启或已暂停 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C049 提交前缀列举中断、提交链有缺口或哈希不符 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C050 workspace bucket 不存在或匿名可读 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |
-| C051 GC 清理超过保留期的历史数据 | partial | 补GC前后完整commit key/hash集合不变、GC之后protected历史revision新manager读取完整bytes以及逻辑HEAD重建的组合断言；当前覆盖保护集合与HEAD，不完整证明所有承诺。 | oss_live, ram_live |
+| C051 GC 清理超过保留期的历史数据 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |
 | C052 Actions 超时或被取消 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, sdk_live |
 | C053 工具容器在绘图中退出 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | image_live, sdk_live |
 | C054 同时触发两个 Actions | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, production_smoke |
 | C055 PR 已创建但回执失败 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, sdk_live |
 | C056 回执丢失超过二十四小时且 PR 已存在 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
-| C057 超过二十四小时且 GitHub 结果无法确认 | partial | 补同一旧delivery的GitHub结果不可确认→host下一run及maintenance，核对所有sealed IDs/generation保持、PR/model调用无增加、图床对象与reservation不删除；不能用独立GC保护例冒充组合。 | github_live, image_live, oss_live |
+| C057 超过二十四小时且 GitHub 结果无法确认 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, image_live, oss_live |
 | C058 仅有机器人分支／commit，尚无 PR | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C059 未发布结果过期，来源未变／发生变化 | partial | 缺完整controller冷恢复回放：过期后真实verifySources返回变化，归档旧交付、建立g+1、完成重新研究/审校，并断言旧Git分支未写入。 | github_live |
 | C060 下载不完整或文件哈希不符 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
@@ -105,3 +105,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C002/C003/C004/C005/C007/C008 增加真实driver/Controller/HostManager调用的分类组合与冷恢复。模型标签、来源传输为明确回放；产品教程/公告边界不由该回放宣称真实识别正确。SDK权限钩子实际拒绝四类越权请求及原生文件/脚本工具，但Native SDK/MCP执行仍未验证。全部本地missing有具体证据后，仍有40项partial/local要求，完整层完成仍0。
 
 2026-10-14 续验：C040/C042/C056 延伸同一完整pipeline，分别closed/merged参数化运行；PR回执丢失后推进25小时再coldrestore，先找到PR而不再检查分类/来源有效期。真实host对账与索引composition消费默认/待审fixture bytes，排除关闭/已合并或已由远端视图覆盖的旧草稿。GitHub、模型与图床仍为服务替身，未代替真实人审。
+
+2026-10-14 续验：C047/C051 使用独立FileObjectStore客户端、实际Manager准备的同字节提交和完整GC/冷恢复。C057 在同一过期unknown delivery下走actual Controller/maintenance/image GC，不以独立保护集合代替组合；GitHub/图床引用不可读，objects/reservation/sealed/generation均保留，零delete/释放/新PR/模型。RAM/OSS/真实GitHub/图床仍待证明。

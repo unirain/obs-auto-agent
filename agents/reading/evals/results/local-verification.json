@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T05:58:44.089777Z",
-  "implementation_sha256": "3332c429335f080561a4e105a8fab7cf5205196942e7e8c2da107eaa7811e40c",
-  "fingerprint_files": 304,
+  "recorded_at": "2026-10-14T06:11:40.467790Z",
+  "implementation_sha256": "de4f248f2906c6f209f26f4499424356dad8115437cc50a2f1ca83a77526b4bc",
+  "fingerprint_files": 305,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 81,
-    "passed": 444,
+    "files": 82,
+    "passed": 446,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "60e3cfae3d4e79440443897b6c2497b4c4ef5a88",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38519561168",
     "environment": "Linux / Node 24.10.0",
     "scope": "Local 25-hour recovery/terminal identity/authoritative knowledge replay only; no real GitHub/image/model/human gates."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "c372d3e10a7b49265fdcd3c8c83e7f89d77d227e",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38513538301",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local classifier/tool capability contracts and replay only; not native SDK, real semantic labels or human quality acceptance."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 50,
-    "partial": 37,
+    "covered": 53,
+    "partial": 34,
     "missing": 0,
-    "cases_with_local_remaining": 37
+    "cases_with_local_remaining": 34
   },
   "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance.",
   "actual_local_docker_fault": {
@@ -72,5 +68,6 @@
     "reason": "Late policy checkpoint raced cold restore with stale HEAD; repaired with refresh-task join."
   },
   "classification_scope": "Actual local driver/controller/gate/journal/FileStore and SDK permission hook; semantic labels and source transport are explicit replays, not native SDK or human quality acceptance.",
-  "knowledge_and_delivery_scope": "Actual local host/publisher/journal/index/cold restore; GitHub/default note/model/image facts are explicit substitutes. No real merge, PR recovery or human quality acceptance."
+  "knowledge_and_delivery_scope": "Actual local host/publisher/journal/index/cold restore; GitHub/default note/model/image facts are explicit substitutes. No real merge, PR recovery or human quality acceptance.",
+  "concurrency_gc_scope": "Actual local independent filesystem clients/manager/checkpoint/GC/cold restore and same-delivery maintenance; GitHub/image/reference/model adapters are substitutes, not real service/IAM acceptance."
 }
