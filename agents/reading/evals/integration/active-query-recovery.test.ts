@@ -13,6 +13,7 @@ import {StageExecutor,stageInputHash,type StageExecution} from '../../src/stages
 import {RunDeadline} from '../../src/runtime/deadline.js';
 import {digest} from '../../src/stages/contracts.js';
 import type {QueryRequest} from '../../src/runtime/sdk.js';
+const nextRealTurn=globalThis.setImmediate;
 async function fixture(){
  const root=await mkdtemp(join(tmpdir(),'active-query-recovery-')),store=new FileObjectStore(join(root,'objects'));let policy:TrustedPolicy=policyFixture(),unavailable=false,nextRun=0,queries=0;const signals:AbortSignal[]=[];
  const session=async(initialize=false)=>{const local=join(root,'local-'+(++nextRun)),manager=new ImmutableWorkspaceManager({store,scope:'production',verify_preflight:false,record_validator:validateHostRecords,local_root:local}),journal=new WorkspaceJournal(manager,await manager.restore('obs-notes-hub/reading',{allow_initialize:initialize}),'run'+nextRun);const gate=new PolicyGate(async()=>{if(unavailable)throw new Error('policy_unreadable');return policy;},check=>journal.commit('policy-checks/'+check.check_id,check));return {local,manager,journal,gate};};
@@ -55,4 +56,15 @@ it('a policy checkpoint that crosses the generation cutoff cannot prepare a new 
   first.gate.require=async(...args)=>{const result=await require(...args);if(++checks===2)vi.setSystemTime(input.deadline.generation_deadline);return result;};
   await expect(new StageExecutor(f.adapter,first.gate,new ApplicationInvocationJournal(first.journal)).execute(input)).rejects.toThrow('run_deadline');expect(first.journal.keys('invocations/')).toEqual([]);expect(f.queries()).toBe(0);
  }finally{vi.useRealTimers();f.terminate();await f.cleanup();}
+});
+it('query completion joins an already started policy checkpoint before a new host can restore and write',async()=>{
+ const f=await fixture();let release!:()=>void;let running:Promise<unknown>|undefined;try{
+  const first=await f.session(true),calls=new ApplicationInvocationJournal(first.journal),check=first.gate.check.bind(first.gate);let refreshStarted!:()=>void,finished!:()=>void;const started=new Promise<void>(resolve=>{refreshStarted=resolve;}),finishCommitted=new Promise<void>(resolve=>{finished=resolve;}),permit=new Promise<void>(resolve=>{release=resolve;});
+  first.gate.check=async(...args)=>{if(args[2]==='active_query_refresh'){refreshStarted();await permit;}return check(...args);};const finish=calls.finish.bind(calls);calls.finish=async(...args)=>{await finish(...args);finished();};
+  vi.useFakeTimers();vi.setSystemTime(new Date('2026-10-14T06:00:00Z'));const input=f.input(first,new RunDeadline(Date.now()-54*60_000));let returned=false;
+  running=new StageExecutor(f.adapter,first.gate,calls).execute(input);const observed=running.catch(error=>error).then(result=>{returned=true;return result;});await f.ready;
+  await vi.advanceTimersByTimeAsync(60_000);await started;await finishCommitted;await new Promise<void>(resolve=>nextRealTurn(resolve));expect(returned).toBe(false);
+  release();expect(await observed).toMatchObject({message:'request_unknown:run_deadline'});vi.useRealTimers();await rm(first.local,{recursive:true,force:true});const cold=await f.session();
+  expect(cold.journal.handle.revision).toBe(first.journal.handle.revision);await cold.journal.commitMany({'inspection/after-stop':{schema_version:1,verified:true}},'source_incidents_reconciled');expect(await cold.journal.load('inspection/after-stop')).toMatchObject({verified:true});expect(f.queries()).toBe(1);
+ }finally{release?.();vi.useRealTimers();f.terminate();if(running)await running.catch(()=>{});await f.cleanup();}
 });

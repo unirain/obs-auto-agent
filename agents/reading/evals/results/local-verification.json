@@ -1,6 +1,6 @@
 {
-  "recorded_at": "2026-10-14T03:39:34.165271Z",
-  "implementation_sha256": "f5c323740c044df01eb834dba308b70a235c7c8bc1105158c29b04ba66e834d3",
+  "recorded_at": "2026-10-14T03:48:26.649703Z",
+  "implementation_sha256": "9064bd113cc3de8b5288f7d2f71a9882386ba7832403a604f4d28266d8add129",
   "fingerprint_files": 302,
   "commands": {
     "npm run typecheck": "passed",
@@ -13,7 +13,7 @@
   },
   "local_tests": {
     "files": 80,
-    "passed": 434,
+    "passed": 435,
     "failed": 0
   },
   "live_tests": {
@@ -25,7 +25,7 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
+  "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
     "status": "pending_for_this_implementation"
@@ -60,5 +60,11 @@
   },
   "source_collection_scope": "Actual local adapter/controller/journal/FileStore/cold restore/readonly monitor; semantic selection and Issue API are substitutes. No real sources, SDK or cloud service acceptance.",
   "admission_and_intake_scope": "Actual local executor/gate/journal/FileStore/controller/delivery mapping; model and GitHub are explicit substitutes. No real paid SDK/service/human acceptance.",
-  "active_query_scope": "Actual local executor/timers/journal/FileStore/cold restore; model and clock are substitutes. No native SDK/Actions/process stopping or paid service proof."
+  "active_query_scope": "Actual local executor/timers/journal/FileStore/cold restore; model and clock are substitutes. No native SDK/Actions/process stopping or paid service proof.",
+  "failed_prior_ci": {
+    "implementation_commit": "81a89927b9a759268632614d795b4e6fc7749901",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38507466323",
+    "status": "failed",
+    "reason": "Late policy checkpoint raced cold restore with stale HEAD; repaired with refresh-task join."
+  }
 }

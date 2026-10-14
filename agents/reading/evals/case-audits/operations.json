@@ -215,7 +215,7 @@
     },
     {
       "id": "C037",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/executor.test.ts",
@@ -226,13 +226,24 @@
           "file": "agents/reading/evals/integration/recovery.test.ts",
           "test_name": "SIGTERM interrupts an active paid query and a cold restart preserves unknown fees without repeating it",
           "proves": "活动回放query的SIGTERM链主动abort，11/3部分tokens与unknown费用冷恢复且不重复调用；触发源不是最后5分钟timer。"
+        },
+        {
+          "file": "agents/reading/evals/integration/active-query-recovery.test.ts",
+          "test_name": "the actual 55-minute generation timer aborts an active query; prior artifacts and unknown usage survive a cold host without another query",
+          "proves": "实际RunDeadline/StageExecutor/ApplicationInvocationJournal/scoped FileStore，模型替身已输出并提交partial usage后停在在途await。真实deadline计时器用受控clock准确推进到55分钟，中止signal；已提交证据和11/3未知费用账本冷恢复，当前收尾期与新host分别拒绝新query，原模型调用计数1。不是只调用deadline helper。"
+        },
+        {
+          "file": "agents/reading/evals/integration/active-query-recovery.test.ts",
+          "test_name": "a policy checkpoint that crosses the generation cutoff cannot prepare a new query",
+          "proves": "第二次策略checkpoint期间越过生成时限，executor在prepare前复查时限，invocation=0/query=0。"
+        },
+        {
+          "file": "agents/reading/evals/integration/active-query-recovery.test.ts",
+          "test_name": "query completion joins an already started policy checkpoint before a new host can restore and write",
+          "proves": "故意把active刷新checkpoint阻塞在SDK中止之后；已有unknown提交后executor仍不能返回，直到policy任务完成。新manager读取最终同一revision再写无conflict；去掉join的旧代码回归实际失败。该测试覆盖Linux CI发现的late-checkpoint race。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "用活动StageExecutor stream推进generation_deadline timer，核对先前已提交产物仍在、query中止后unknown账本冷恢复和新付费拒绝，补精确最后5分钟场景。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK abort使模型子进程/请求停止，终结summary缺失仍按未知收费对账。"

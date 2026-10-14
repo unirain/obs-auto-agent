@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: active query deadline and policy recovery
 
+- Linux CI for 81a8992 exposed a genuine late policy checkpoint race: cold restore could precede the last refresh write and receive checkpoint_conflict. The executor now joins already-started refresh tasks before returning. A deterministically blocked refresh test proves execute cannot return before the final writer finishes and a new host can restore/write; removing join reproduces failure. After repair at 11:47, all 435 local tests and required checks passed. The C037 operations audit, initially omitted from the implementation staging set, is included with the corrected complete-current fingerprint in this follow-up; no successful CI claim is made for 81a8992.
+
 - Previous goal turn made concrete progress through b56693a/525a65b and passed Linux CI. The full objective and external service/human gates remain unfulfilled.
 - Found a semantic refresh gap: classify_only can remain executable when the semantic policy changes, so checking only execution_permission let a stale classification query continue. Active refresh now compares its fixed semantic hash, aborts on drift/unavailable/denied policy, and ignores callbacks after the query stops. The new semantic regression was run without the fix and failed as expected.
 - Recheck generation deadline after the current policy checkpoint. A checkpoint that crosses the cutoff cannot create a new query intent. Nonterminal SDK errors now consistently expose request_unknown (with diagnostic cause); cutoff/policy/cancellation aborts have bounded reason codes. Existing unknown replacement and transport-loss tests now assert this contract plus the preserved original cause.
