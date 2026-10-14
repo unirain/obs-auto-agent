@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: classification routing and denied capabilities
+
+- Previous turn made concrete progress through 81a8992/0ea5c1e/bc8359f; Linux exposed a late-checkpoint race, then the repaired implementation passed CI. This continuation adds missing evidence to already implemented routing rather than inventing semantic results or shrinking G1–G5.
+- Added an actual driver/StageExecutor/Controller/HostManager/journal/FileStore fixture with strict domain records, fixed prompt bytes, policy receipts and immutable lazy body references. Model and source transport are explicit replays. It presents the full registered main slice before anchored classification output; candidates begin with no topic/content label and no manual eligibility barrier.
+- Product-name tutorial and announcement take distinct permitted/excluded routes; pure marketing and LangChain/Claude official-provenance announcements persist specific response reasons, skipped projects and no drafts or delivery. These replay labels test contracts/routing only, not real model semantic judgment.
+- Mixed body allowed/excluded/unresolved branches run in one fixture family. Two unresolved queries persist policy_review_required/manual, blocked-project report and usage across destroyed local directory/new manager; scheduled replay makes no third classification query. Allowed classification is reused while the value stage can legitimately continue on the next physical run; the test separates classification allowance from value-stage queries.
+- The actual classifier exposes only read_main/read_source/read_candidate/read_related_summary. Actual sdkOptions.canUseTool rejects paper-follow/render/note-write/publish requests and native Read/Write/Bash/Skill. The registered read_source middleware rejects an unregistered supplementary hash. Only the main source is fetched; no draft/artifact/output/resource/delivery effects occur, including cold rerun. Native SDK/MCP behavior still requires its own evidence.
+- At 12:02 Asia/Shanghai, 81 files / 443 local tests passed; typecheck/build, 38 schema checks, case mapping and diff check passed. Four opt-in live tests skipped. C002/C003/C004/C005/C007/C008 local gaps closed; audit 47 covered / 40 partial / 0 missing, 40 local requirements left. Full-layer cases remain zero complete, G1–G5 unpassed, and human labels/real previews/delivery resources still required.
+
 ## 2026-10-14 Continuation: active query deadline and policy recovery
 
 - Repaired implementation 0ea5c1e pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38508155509). The failed 81a8992 result remains recorded separately. Complete 302-file fingerprint matches current bytes; public credential scans found no matches.

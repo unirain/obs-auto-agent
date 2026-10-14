@@ -1,17 +1,17 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 41、partial 45、missing 1，46 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 47、partial 40、missing 0，40 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
 | C001 合格文章有论文和代码 | partial | 补同一主文+论文+固定commit代码→证据→图片→最终审校→一个Fake PR的组合测试；现有各层fixture独立。 | github_live, human_quality, image_live, sdk_live |
-| C002 文章只有营销描述 | partial | 现测试未直接断言对外/持久淘汰理由及无笔记文件；分类输出是product_announcement，需补纯marketing类别fixture。 | human_quality, sdk_live |
-| C003 LangChain 或 Claude 入口出现产品发布公告 | partial | 两官方source_id+产品公告正文的集成fixture，断言reason_code product_announcement与无研究/交付；不能由两独立fixture合成已覆盖。 | human_quality, sdk_live, source_live |
-| C004 技术教程提到产品名，但主体解释机制与取舍 | missing | 未找到含产品名的机制教程与公告成对输入测试；selection prompt有指令，但不能当执行断言。 | human_quality, sdk_live |
-| C005 新候选没有标签，正文同时介绍新产品与技术机制 | partial | 补无标签混合正文的真实driver/Manager组合，断言没有人工前置屏障且已呈现主文片段后分类。 | human_quality, sdk_live |
+| C002 文章只有营销描述 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
+| C003 LangChain 或 Claude 入口出现产品发布公告 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live, source_live |
+| C004 技术教程提到产品名，但主体解释机制与取舍 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
+| C005 新候选没有标签，正文同时介绍新产品与技术机制 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
 | C006 内容未知但来源被停用、域名被拒绝或项目暂停 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
-| C007 受限分类判为技术实践／产品发布／仍未决 | partial | 补actual driver+持久Manager的unresolved两次→deferred/manual/policy_review_required冷恢复，及三分类路由同组断言；现是分散额度/分支测试。 | human_quality, sdk_live |
-| C008 分类过程中尝试跟读论文、绘图、写笔记或发布 | partial | 补实际classify_only工具表对论文/绘图/写笔记/发布四类调用的拒绝且无外部效果；现direct helper只测follow_reference，options断言不等于所有具体工具调用。 | sdk_live |
+| C007 受限分类判为技术实践／产品发布／仍未决 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
+| C008 分类过程中尝试跟读论文、绘图、写笔记或发布 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C009 语义规则更新令旧分类失效 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, image_live, sdk_live |
 | C010 首次正式提交首批信源之外、早于七天窗口的公开 URL | partial | 补explicit published_at早于窗口且不属于首批域名的scheduled输入，种入订阅cursor并断言人工入队不改变它、进入正式选题。 | oss_live, sdk_live |
 | C011 两次正式提交同一 URL，或提交回执响应丢失后重试 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, sdk_live |
@@ -101,3 +101,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C006/C011/C013 补齐实际持久化分类准入、人工拒绝与重复提交的组合。预检后新增当前许可复核；已确认 PR 编号现在通过严格交付记录映射、控制器同步到候选与回执。Native SDK、OSS/RAM 与真实 PR 验收不由这些替身推断。
 
 2026-10-14 续验：C037/C064 使用活动 stream、真实执行器/计时器/持久化与 cold restore 验证55分钟截止、pause/unavailable/semantic刷新；clock和SDK为明确替身。语义刷新现在会中止仍获classify_only执行许可的旧语义请求；无终结回执的SDK异常统一返回request_unknown并保留cause，立即触发既有人工对账路由。Native SDK停止/Actions取消仍未证明。
+
+2026-10-14 续验：C002/C003/C004/C005/C007/C008 增加真实driver/Controller/HostManager调用的分类组合与冷恢复。模型标签、来源传输为明确回放；产品教程/公告边界不由该回放宣称真实识别正确。SDK权限钩子实际拒绝四类越权请求及原生文件/脚本工具，但Native SDK/MCP执行仍未验证。全部本地missing有具体证据后，仍有40项partial/local要求，完整层完成仍0。

@@ -50,19 +50,20 @@
     },
     {
       "id": "C002",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/bootstrap.test.ts",
           "test_name": "wired local preview uses real durable manager, controlled source/classifier and no remote publication on next run",
           "proves": "输入正文仅为产品发布/定价描述；回放分类excluded后真实FileStore项目skipped、success_no_selection、模型只调用一次，冷续跑不再调用。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "pure marketing has a persisted exclusion reason and no note on the next physical run",
+          "proves": "实际driver/StageExecutor/hostController/scoped journal/FileStore保存marketing分类响应的排除原因与skipped项目，无draft/交付，下一物理run不再分类。分类结果为明确模型回放，不证明真实营销识别。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "现测试未直接断言对外/持久淘汰理由及无笔记文件；分类输出是product_announcement，需补纯marketing类别fixture。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实分类模型对仅营销正文给出可定位淘汰依据。"
@@ -75,7 +76,7 @@
     },
     {
       "id": "C003",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/bootstrap.test.ts",
@@ -86,13 +87,14 @@
           "file": "agents/reading/evals/collect/sources.test.ts",
           "test_name": "Claude uses exact resource cards; skips video/webinar, external official linked main allowed",
           "proves": "官方Claude卡片进入发现；该测试不判断内容是否产品公告。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "%s official entry product announcement is skipped with a durable reason before research or delivery",
+          "proves": "LangChain/Claude两个实际source ID provenance经过人工入队和当前Gate保留；actual driver分类排除product_announcement响应有持久原因，未研究/写作/交付，冷恢复不重查。来源正文与模型为回放，未证明真实信源或语义质量。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "两官方source_id+产品公告正文的集成fixture，断言reason_code product_announcement与无研究/交付；不能由两独立fixture合成已覆盖。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实官方公告分类为excluded而非因官方来源优先收录。"
@@ -109,13 +111,15 @@
     },
     {
       "id": "C004",
-      "local_status": "missing",
-      "evidence": [],
-      "remaining": [
+      "local_status": "covered",
+      "evidence": [
         {
-          "layer": "local",
-          "requirement": "未找到含产品名的机制教程与公告成对输入测试；selection prompt有指令，但不能当执行断言。"
-        },
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "a product-name mechanism tutorial and announcement take different persisted routes without a keyword exclusion rule",
+          "proves": "同含AgentHubX产品名的机制教程与公告，受控主文片段真实呈现且证据locators校验。教程allowed后进入select，公告excluded→持久skipped且无draft。两标签是明确replay，因此产品名主体边界真实模型/人工仍待核对。"
+        }
+      ],
+      "remaining": [
         {
           "layer": "sdk_live",
           "requirement": "真实模型不因产品关键词误删工程教程。"
@@ -128,7 +132,7 @@
     },
     {
       "id": "C005",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -139,13 +143,14 @@
           "file": "agents/reading/evals/runtime/driver.test.ts",
           "test_name": "replays the actual four-stage driver with current knowledge, durable evidence, fixed skill and independent review",
           "proves": "无classification的新项目自动调用classify并使用read_main，随后select/research；回放正文是机制文本，不是产品/机制混合体。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "unlabelled mixed main is presented before %s classification and its route/allowance survives a cold manager",
+          "proves": "未标注混合产品/机制正文经actual driver+Controller+HostManager持久化；模型先调用read_main并真实锚定段落后才输出分类，没有人工标签屏障。cold manager恢复分类凭证与次数，主文只抓一次，allowed可继续value阶段、不重复classify。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补无标签混合正文的真实driver/Manager组合，断言没有人工前置屏障且已呈现主文片段后分类。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实混合正文受限分类的SDK/工具链。"
@@ -195,7 +200,7 @@
     },
     {
       "id": "C007",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/driver.test.ts",
@@ -211,13 +216,14 @@
           "file": "agents/reading/evals/policy/gate.test.ts",
           "test_name": "two queries include one format repair and attempts persist across resume",
           "proves": "分类及格式修复共享两次query额度，第三次reserve抛policy_review_required。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "unlabelled mixed main is presented before %s classification and its route/allowance survives a cold manager",
+          "proves": "同组allowed/excluded/unresolved三路由；未决两次query后deferred/manual/policy_review_required与blocked项目队列持久保存，删除本地目录/newmanager后不再query，原两次调用/不明价格事实不清零；允许类1次classify进入value阶段，排除类1次后skipped。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补actual driver+持久Manager的unresolved两次→deferred/manual/policy_review_required冷恢复，及三分类路由同组断言；现是分散额度/分支测试。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实三种语义结果及恢复后不超分类额度。"
@@ -230,7 +236,7 @@
     },
     {
       "id": "C008",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -241,13 +247,14 @@
           "file": "agents/reading/evals/runtime/executor.test.ts",
           "test_name": "SDK replacement env omits controller secrets; builtin shells/files/network are denied",
           "proves": "SDK options禁止内建shell/file/network并不继承OSS/GitHub秘密。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "the actual classifier tool table and SDK permission hook deny paper, rendering, note write and publish attempts without effects",
+          "proves": "实际driver向ModelAdapter只给四个受限工具；actual sdkOptions.canUseTool逐次拒绝follow_reference/render_diagram/write_note/publish与Read/Write/Bash/Skill。已注册read_source伪造补充材料hash也经过真实controlledTool拒绝。仅主文网络替身调用，无artifact/output/资源/交付，冷恢复后不再请求。未运行Native SDK/MCP query。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补实际classify_only工具表对论文/绘图/写笔记/发布四类调用的拒绝且无外部效果；现direct helper只测follow_reference，options断言不等于所有具体工具调用。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK/MCP/native工具权限不扩大分类能力。"

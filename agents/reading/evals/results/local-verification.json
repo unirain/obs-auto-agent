@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T03:48:26.649703Z",
-  "implementation_sha256": "9064bd113cc3de8b5288f7d2f71a9882386ba7832403a604f4d28266d8add129",
-  "fingerprint_files": 302,
+  "recorded_at": "2026-10-14T04:03:33.822413Z",
+  "implementation_sha256": "f66e1bfb49e0848798c3b75b7e92326f664656212eaf810f206132bdabb8642d",
+  "fingerprint_files": 303,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 80,
-    "passed": 435,
+    "files": 81,
+    "passed": 443,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "0ea5c1e60e4de8b3679cde109b581c1f5b36f8d2",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38508155509",
     "environment": "Linux / Node 24.10.0",
     "scope": "Local active-query clock/policy/ledger/cold restore only; native SDK and service/human G1-G5 remain unpassed."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "b56693a4d83695c899a732da85acd8bead69163a",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38505877284",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local admission/identity/delivery replay only; no real SDK/model/service/human G1-G5 proof."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 41,
-    "partial": 45,
-    "missing": 1,
-    "cases_with_local_remaining": 46
+    "covered": 47,
+    "partial": 40,
+    "missing": 0,
+    "cases_with_local_remaining": 40
   },
   "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance.",
   "actual_local_docker_fault": {
@@ -70,5 +66,6 @@
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38507466323",
     "status": "failed",
     "reason": "Late policy checkpoint raced cold restore with stale HEAD; repaired with refresh-task join."
-  }
+  },
+  "classification_scope": "Actual local driver/controller/gate/journal/FileStore and SDK permission hook; semantic labels and source transport are explicit replays, not native SDK or human quality acceptance."
 }
