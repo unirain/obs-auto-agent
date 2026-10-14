@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: current admission policy and manual identity feedback
 
+- Implementation b56693a pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38505877284). Public credential scans found no matches, and the 301-file fingerprint matches current bytes.
+
 - Previous goal turn made progress through 4b6ddd7/9c93492 with verified Linux CI and four cold source/monitor scenarios. This turn keeps the full objective, G1–G5 and 87 layered cases intact.
 - Found a policy race: an asynchronous model admission/capacity preflight could revoke permission after the initial check, yet StageExecutor would prepare/start the replay query. It now persists current policy again after admission, checks fixed semantic binding and stops before a paid intent on revocation/unavailable policy. Executing the new asynchronous admission regression without this fix failed, proving the gap. Initial source/domain/project refusals also have durable cold verification with zero preflight/intent/stream.
 - Found a missing feedback link: known PR facts were not copied into the Candidate. Strict mappedState now parses DeliveryRecord, rejects foreign scope/project/generation/delivery, and copies its known PR; controller saves preserve it in identity. Manual input feedback can report the confirmed PR rather than an unknown reference.
