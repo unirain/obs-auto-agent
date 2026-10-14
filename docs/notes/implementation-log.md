@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: immutable intent races and unknown delivery maintenance
 
+- Evidence commit 99f8012 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38520789931). Public credential scans found no matches; the 305-file fingerprint matches current bytes.
+
 - Previous turn progressed through 60e3cfa/9eee29d, passing Linux CI and fixing authoritative knowledge recall. This continuation closes concrete persistence/maintenance assertions while keeping real service/human gates.
 - Two independent FileObjectStore clients race the exact bytes prepared by an actual Manager at one sequence. One creates, one sees conflict, both verify the same readback SHA; initiating response loss is reconciled committed. A stale manager cannot use different intent to advance/jump sequence, including repeated attempts; a cold client restores the winner. This proves local filesystem atomicity/protocol, not native OSS/IAM.
 - GC protection now has a combined cold test: an old 33MiB/two-chunk source is detached from HEAD but protected by historical revision. Actual GC deletes an orphan while every immutable commit key/hash remains equal. Destroying local files and a fresh store/manager reconstruct HEAD and read the full protected historical bytes/hash/last byte/chunk count.
