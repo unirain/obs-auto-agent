@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 53、partial 34、missing 0，34 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 56、partial 31、missing 0，31 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -76,11 +76,11 @@
 | C070 preview 产物声明 ready_for_delivery，或传入正式发布参数 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, ram_live |
 | C071 对 preview_id 调用正式 resume／publish-only | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |
 | C072 预览图文审校通过 | partial | 缺对controller提交的previews/<id>.checks三个not_exercised字段及PNG相对Markdown引用的同时断言；现seal字段不是整份preview报告的完整证明。 | human_quality, sdk_live |
-| C073 正式与预览同时请求存储 | partial | 缺两个真实FileStore manager模拟preview/production同时申请的统一预留互斥及不交叉改控制状态回放；workflow静态group与纯费用汇总不能代替该竞争场景。 | oss_live, production_smoke, ram_live |
+| C073 正式与预览同时请求存储 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, production_smoke, ram_live |
 | C074 OSS 快照包含伪造 skill 或可执行配置 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, sdk_live |
 | C075 清理时旧 blob 仍被 HEAD 或待审版本引用 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C076 OSS workspace 与新图床资源合计接近容量上限 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |
-| C077 容量不足且所有对象仍被保护 | partial | 缺所有对象均受保护导致GC无法释放、仍保留实际候选queue并报告storage_capacity，随后空间释放后恢复同项目的完整controller冷启动回放。 | oss_live |
+| C077 容量不足且所有对象仍被保护 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C078 上传成功但容量回执丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | image_live, oss_live |
 | C079 已发布图片在重生成中发生变化 | partial | 缺完整重生成后新URL与已存在旧PR/已合并笔记中的旧URL、旧远端字节同时保持不变的组合断言；当前上传测试仅断言两个对象/receipt数量。 | github_live, image_live |
 | C080 凭据、浏览器登录信息或缓存出现在工作目录 | partial | 缺针对credentials/auth.json/cookies、浏览器profile/cache文件的逐项同步清单断言；现测试未证明任意allowed文件内容中的凭据会被识别/排除（paths.ts主要按路径/扩展名过滤）。 | oss_live, sdk_live |
@@ -88,7 +88,7 @@
 | C082 生成目录包含符号链接或 workflow 文件 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C083 图片无法渲染或无法视觉检查 | partial | 缺renderer实际报错后符合skill的HTML/Mermaid降级并在笔记/PR披露，以及非core skipped可交付、core skipped不可交付的driver/publisher完整分支测试；目前validation.ts有条件检查但这些路径未被断言。 | human_quality, image_live |
 | C084 模型连续修订仍有事实错误 | partial | 缺真实driver/model回放连续事实错误blocking review→两轮修订→持久quality_blocked、冷恢复模型/上传/PR零新增的完整链路；当前只证明计数保护和转换。 | human_quality, sdk_live |
-| C085 当天没有合格文章 | partial | 缺scheduled模式两来源完整空/全不合格且无合格积压的真实controller回放，确认零产出run记录、无空PR与正确success_no_selection；当前端到端仅preview excluded。 | production_smoke, source_live |
+| C085 当天没有合格文章 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, source_live |
 | C086 阅读调度未触发而监控工作流正常 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, production_smoke |
 | C087 故障恢复或 GitHub 平台整体不可用 | partial | 代码和reading-operations runbook明确同平台限制，但缺GitHub Actions/API/Issue全部不可用时无法保证通知的专门故障回放；不能拿可用Issue服务的read_failed测试替代。 | github_live, production_smoke |
 
@@ -107,3 +107,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C040/C042/C056 延伸同一完整pipeline，分别closed/merged参数化运行；PR回执丢失后推进25小时再coldrestore，先找到PR而不再检查分类/来源有效期。真实host对账与索引composition消费默认/待审fixture bytes，排除关闭/已合并或已由远端视图覆盖的旧草稿。GitHub、模型与图床仍为服务替身，未代替真实人审。
 
 2026-10-14 续验：C047/C051 使用独立FileObjectStore客户端、实际Manager准备的同字节提交和完整GC/冷恢复。C057 在同一过期unknown delivery下走actual Controller/maintenance/image GC，不以独立保护集合代替组合；GitHub/图床引用不可读，objects/reservation/sealed/generation均保留，零delete/释放/新PR/模型。RAM/OSS/真实GitHub/图床仍待证明。
+
+2026-10-14 续验：C073 两scope真实FileStore/Manager在同一全局容量view和互斥下竞争；图床大对象/版本为readonly库存fixture，不实际申请49GB。C077 actual driver保留容量暂停后的候选/body/次数，真实GC保护后new physical run恢复，不把一次run反复领取当合法重试。C085 两SourceAdapter scheduled有效空/全skip数据回放持久success_no_selection，无空PR。真实库存/RAM/来源/质量仍待证明。

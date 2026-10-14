@@ -17,6 +17,11 @@ import {sdkOptions,type QueryRequest} from '../../src/runtime/sdk.js';
 import {digest,type Classification} from '../../src/stages/contracts.js';
 import type {SourceSlice} from '../../src/tools/segments.js';
 import {parseDispatch} from '../../src/config/dispatch.js';
+import {AgentError} from '../../src/contracts/index.js';
+import {capacityView,assertCapacity} from '../../src/storage/capacity.js';
+import {managedInventory} from '../../src/storage/inventory.js';
+import {collectGarbage} from '../../src/workspace/gc.js';
+import {listAll} from '../../src/storage/preflight.js';
 type ResultKind='allowed'|'excluded'|'unresolved';
 const tutorial='AgentHubX stores intent before retrying an action, making its effects idempotent.';
 const announcement='AgentHubX is launching today; upgrade to our new product plan.';
@@ -24,11 +29,12 @@ const mixed='AgentHubX is new. Its checkpoint mechanism saves evidence before an
 const marketing='AgentHubX transforms everything. Subscribe now for revolutionary productivity.';
 async function fixture(kind:ResultKind,paragraph=tutorial,source:'manual'|'langchain'|'claude'='manual',attemptForbidden=false){
  const root=await mkdtemp(join(tmpdir(),'classification-flow-')),store=new FileObjectStore(join(root,'objects')),policy=policyFixture();let runs=0;const calls:string[]=[],fetches:string[]=[],refusals:string[]=[],presented:string[]=[];
+ let admission:()=>Promise<void>=async()=>{};
  const url=source==='langchain'?'https://www.langchain.com/blog/agenthubx':source==='claude'?'https://claude.com/resources/articles/agenthubx':'https://independent.dev/agenthubx';
  const html=`<html><head><title>AgentHubX</title></head><body><main><h1>AgentHubX</h1><p>${paragraph}</p><p>Only one writer can commit a generation.</p><a href="https://arxiv.org/abs/1234.5678">Related paper</a></main></body></html>`;
  const templates=Object.fromEntries(await Promise.all(['selection','research','writing','review'].map(async stage=>[stage,await readFile('agents/reading/prompts/'+stage+'.md','utf8')])) ) as Record<string,string>;
  const session=async(initialize=false)=>{const local=join(root,'restored-'+(++runs)),manager=new ImmutableWorkspaceManager({store,scope:'production',verify_preflight:false,local_root:local,record_validator:validateHostRecords}),journal=new WorkspaceJournal(manager,await manager.restore('obs-notes-hub/reading',{allow_initialize:initialize}),'classify-run-'+runs),gate=new PolicyGate(async()=>policy,check=>journal.commit('policy-checks/'+check.check_id,check)),deadline=new RunDeadline();
-  const adapter={async *stream(request:QueryRequest){const payload=JSON.parse(request.prompt) as {task:string;data:{candidate?:Record<string,unknown>}},classification=Object.hasOwn((request.schema as {properties:object}).properties,'content_eligibility');if(!classification&&payload.task!=='selection')throw new Error('unexpected_research_or_write');
+  const adapter={preflight:()=>admission(),async *stream(request:QueryRequest){const payload=JSON.parse(request.prompt) as {task:string;data:{candidate?:Record<string,unknown>}},classification=Object.hasOwn((request.schema as {properties:object}).properties,'content_eligibility');if(!classification&&payload.task!=='selection')throw new Error('unexpected_research_or_write');
    const main=await request.tools.find(tool=>tool.name==='read_main')!.run({}) as SourceSlice;expect(main.url).toBe(url);const anchor=main.lines.find(line=>line.text.includes(paragraph));expect(anchor).toBeDefined();presented.push(anchor!.text);
    if(classification){calls.push('classify');expect(payload.data.candidate).not.toHaveProperty('topic');expect(payload.data.candidate).not.toHaveProperty('content_type');
     if(attemptForbidden){const options=sdkOptions(request,{api_key:'fixture-not-sent'},join(root,'sdk-home'));expect(request.tools.map(tool=>tool.name).sort()).toEqual(['read_candidate','read_main','read_related_summary','read_source']);
@@ -44,7 +50,7 @@ async function fixture(kind:ResultKind,paragraph=tutorial,source:'manual'|'langc
   const ports:ControllerPorts={journal,gate,deadline,sources:[],context:async()=>{const context=buildContext({index:[],query:'AgentHubX classifier boundary',heldout:{urls:new Set(),note_paths:new Set()},preferences_hash:digest('preferences'),skill_commit:'a'.repeat(40),skill_hash:digest('unused classification skill'),prompt_hash:digest(Buffer.concat(Object.values(templates).map(text=>Buffer.from(text)))),prompt_templates:templates,model:'explicit-classification-replay',evidence_versions:[]});if(!await journal.load('contexts/'+context.context_id))await journal.commitMany({['contexts/'+context.context_id]:context},'generation_context_fixed');return context;},environment:async(_project,commit)=>({root:local,model:'explicit-classification-replay',executor,gate,deadline,skills:null,commit,read_snapshot_body:reference=>manager.readFile(journal.handle,reference.path),read_current_knowledge:async()=>[],gateway:new UrlGateway(async()=>{},async()=>[{address:'8.8.8.8',family:4}],async request=>{fetches.push(request.href);if(request.href!==url)throw new Error('forbidden_supplementary_fetch');return {status:200,headers:{'content-type':'text/html'},body:Buffer.from(html)};})}),prepareResources:async()=>{throw new Error('forbidden_upload');},verifySources:async()=>{throw new Error('unexpected_delivery');},seal:async()=>{throw new Error('forbidden_seal');},publish:async()=>{throw new Error('forbidden_publish');},reconcile:async project=>project};
   const controller=new ReadingController(ports);return {journal,manager,local,controller,run:()=>controller.run(parseDispatch({mode:'scheduled',submission_id:'unlabelled-url',input_urls:[url]}),'fixture-owner'),project:async()=>await journal.load<HostProject>(journal.keys('projects/')[0]!)};
  };
- return {root,url,session,calls,fetches,refusals,presented,cleanup:()=>rm(root,{recursive:true,force:true})};
+ return {root,url,store,session,calls,fetches,refusals,presented,setAdmission:(check:()=>Promise<void>)=>{admission=check;},cleanup:()=>rm(root,{recursive:true,force:true})};
 }
 it('a product-name mechanism tutorial and announcement take different persisted routes without a keyword exclusion rule',async()=>{
  const allowed=await fixture('allowed',tutorial),excluded=await fixture('excluded',announcement);try{
@@ -72,4 +78,14 @@ it.each(['langchain','claude'] as const)('%s official entry product announcement
 });
 it('pure marketing has a persisted exclusion reason and no note on the next physical run',async()=>{
  const f=await fixture('excluded',marketing);try{const first=await f.session(true);await first.run();const cold=await f.session();await cold.run();expect(f.calls).toEqual(['classify']);expect(cold.journal.handle.snapshot.manifest.files.some(file=>file.path.includes('/draft/'))).toBe(false);const reply=await cold.journal.load<Classification>('responses/'+cold.journal.keys('invocations/')[0]!.split('/')[1]);expect(reply?.reason_codes).toEqual(['marketing']);expect((await cold.project())?.state).toBe('skipped');}finally{await f.cleanup();}
+});
+it('capacity pause retains the actual candidate and protected evidence through GC/cold restore, then resumes the same classification after verified space returns',async()=>{
+ const f=await fixture('allowed');try{
+  let occupied=49_100_000_000;f.setAdmission(async()=>{const objects=await managedInventory([{store:f.store,prefix:'workspaces/'}],[{inventory:async()=>({complete:true,objects:[{bucket:'readonly-managed-images',key:'protected/image-version',version:'v1',size:occupied,created_at:'2026-10-01T00:00:00Z'}]})}]);try{assertCapacity(capacityView(objects,[]),1024,'generation');}catch(error){if(error instanceof AgentError&&error.code==='capacity')throw new Error('storage_capacity');throw error;}});
+  const first=await f.session(true),report=await first.run(),project=(await first.project())!;expect(project).toMatchObject({state:'deferred',resume_policy:'when_capacity_available',reason:'storage_capacity',generation_version:1});expect(report.outcome).toBe('deferred_work');expect(f.calls).toEqual([]);expect(first.journal.keys('invocations/')).toEqual([]);expect(project.snapshots).toHaveLength(1);expect(f.fetches).toEqual([f.url]);
+  const prefix=first.manager.prefix(first.journal.handle.workspace_id),protectedRevisions=new Set<string>();for(const object of await listAll(f.store,prefix+'commits/'))protectedRevisions.add(JSON.parse(Buffer.from(await f.store.read(object.key)).toString()).revision);
+  const gc=await collectGarbage(f.store,prefix,first.journal.handle,{protected_revisions:protectedRevisions,reference_knowledge_complete:true,now:'2027-10-14T00:00:00Z'});expect(gc.deleted).toEqual([]);
+  await rm(first.local,{recursive:true,force:true});const cold=await f.session();await cold.run();expect(f.calls).toEqual([]);expect((await cold.project())!.candidate.candidate_id).toBe(project.candidate.candidate_id);expect((await cold.project())!.classification?.attempts).toBe(1);expect(f.fetches).toEqual([f.url]);
+  occupied=48_000_000_000;const available=await f.session();await available.run();const resumed=(await available.project())!;expect(resumed.project_id).toBe(project.project_id);expect(resumed.generation_version).toBe(1);expect(resumed.context.context_id).toBe(project.context.context_id);expect(resumed.classification?.attempts).toBe(1);expect(f.calls).toEqual(['classify','select']);expect(f.fetches).toEqual([f.url]);expect(available.journal.keys('delivery-')).toEqual([]);
+ }finally{await f.cleanup();}
 });

@@ -1,5 +1,13 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: shared capacity and zero-selection reporting
+
+- Previous goal turn progressed through 99f8012/621b7a3 and passed Linux CI. This turn verifies more full local combinations without redefining live service/human acceptance.
+- Production and preview use actual separate FileStore workspace control ledgers with one global managedInventory/capacityView/reservation mutex. Readonly large image/version inventory is an explicit metadata fixture, not a real 49GB allocation. Either scope can win; the other cannot independently spend the same remaining capacity. Cross-handle writes fail, cold state preserves both scopes, verified missing-object release removes only its own reservation and lets the other unchanged request succeed.
+- Actual driver/StageExecutor/Controller pauses through capacity admission before any SDK intent; candidate and immutable main body remain committed. All committed revisions are protected during actual GC and zero bytes are deleted. Cold scheduling remains capacity-paused without a body refetch or classification allowance reset. After the readonly inventory reports freed space, a new physical run continues the same project/generation/context/pending classification, with one classification and value-stage reply. One-batch-per-physical-run remains intact.
+- Actual scheduled two-source adapters process valid empty RSS or all candidates skipped by a value replay. Source statuses succeed, run outcome is success_no_selection, no draft/empty PR/model invocation is produced, and cold next-round reporting remains consistent. Semantic value outcomes and remote inventory are explicit substitutes.
+- At 14:27 Asia/Shanghai, 84 files / 451 local tests passed; typecheck/build, 38 schemas, mapping and diff check passed. Four gated live tests skipped. C073/C077/C085 local gaps closed; audit 56 covered / 31 partial / 0 missing with 31 local requirements remaining. G1–G5 and all 87 complete-layer cases remain unpassed.
+
 ## 2026-10-14 Continuation: immutable intent races and unknown delivery maintenance
 
 - Evidence commit 99f8012 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38520789931). Public credential scans found no matches; the 305-file fingerprint matches current bytes.

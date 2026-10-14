@@ -432,7 +432,7 @@
     },
     {
       "id": "C073",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/operations/workflows.test.ts",
@@ -448,13 +448,14 @@
           "file": "agents/reading/evals/storage/usage-ledger.test.ts",
           "test_name": "FileStore restart preserves one query, deduplicates message replay, uses cumulative summary once and partitions run/day/project/scope",
           "proves": "冷恢复费用记录按scope/run/day/project分组，摘要不双计。"
+        },
+        {
+          "file": "agents/reading/evals/storage/shared-capacity-race.test.ts",
+          "test_name": "%s and the other scope compete under one capacity mutex; cold state and safe release never cross-write ledgers",
+          "proves": "两个实际production/preview FileStore Manager在同一物理bucket不同workspace中并发请求，通过统一互斥/managedInventory/capacityView/reserve读取全scope对象、图床历史fixture与对方预留。两个方向各只有一个成功，另一个capacity拒绝；cross-handle写拒绝，cold ledger各自保持，只有missing-object证据释放后另一方原请求可成功。mutex与图床库存为明确本地scope代理，非Actions/RAM/原生OSS。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺两个真实FileStore manager模拟preview/production同时申请的统一预留互斥及不交叉改控制状态回放；workflow静态group与纯费用汇总不能代替该竞争场景。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实共享库存与预留竞争下50GB合计边界。"
@@ -564,7 +565,7 @@
     },
     {
       "id": "C077",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/control-reserve.test.ts",
@@ -580,13 +581,14 @@
           "file": "agents/reading/evals/storage/workspace.test.ts",
           "test_name": "GC refuses to act with incomplete knowledge or missing protected revisions",
           "proves": "不完整引用/缺protected revision下delete次数0。"
+        },
+        {
+          "file": "agents/reading/evals/integration/classification-flow.test.ts",
+          "test_name": "capacity pause retains the actual candidate and protected evidence through GC/cold restore, then resumes the same classification after verified space returns",
+          "proves": "actual driver/executor/Controller/scoped Manager保存候选/body/pending输入后，真实capacityView+assertCapacity在admission拒绝无SDK intent；所有commit revisions保护下actual GC零删除，冷run继续storage_capacity且正文不重复取。readonly库存fixture释放空间后new physical host同Project/generation/context/原一次预留class次数恢复classify/select，无PR。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺所有对象均受保护导致GC无法释放、仍保留实际候选queue并报告storage_capacity，随后空间释放后恢复同项目的完整controller冷启动回放。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实共享容量低于/高于阈值的暂停恢复和保护对象零删除。"
@@ -799,7 +801,7 @@
     },
     {
       "id": "C085",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/storage/bootstrap.test.ts",
@@ -810,13 +812,14 @@
           "file": "agents/reading/evals/runtime/feed.test.ts",
           "test_name": "the existing two configured source IDs can parse RSS atomically with stable bookmarks; genuine empty feeds remain healthy",
           "proves": "明确空RSS被识别为success而非解析故障，不伪造候选。"
+        },
+        {
+          "file": "agents/reading/evals/integration/no-selection.test.ts",
+          "test_name": "scheduled two-source completion with %s candidates per source records zero selection and never creates an empty PR",
+          "proves": "actual两个SourceAdapter/controller/HostManager/FileStore分别有效空RSS与所有候选价值判断skip回放。各来源success、零新model/PR、success_no_selection RunReport真实持久且cold恢复/next scheduled一致；当前无可执行合格积压，非preview测试。价值判断为明确替身，不证明真实空日来源/模型。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺scheduled模式两来源完整空/全不合格且无合格积压的真实controller回放，确认零产出run记录、无空PR与正确success_no_selection；当前端到端仅preview excluded。"
-        },
         {
           "layer": "source_live",
           "requirement": "两真实来源无新增/无合格内容时区分健康为空与读取失败。"
