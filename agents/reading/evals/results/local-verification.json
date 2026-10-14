@@ -28,7 +28,11 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending_for_this_implementation"
+    "status": "passed",
+    "implementation_commit": "0ea5c1e60e4de8b3679cde109b581c1f5b36f8d2",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38508155509",
+    "environment": "Linux / Node 24.10.0",
+    "scope": "Local active-query clock/policy/ledger/cold restore only; native SDK and service/human G1-G5 remain unpassed."
   },
   "previous_ci": {
     "status": "passed",

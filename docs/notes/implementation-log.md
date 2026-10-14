@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: active query deadline and policy recovery
 
+- Repaired implementation 0ea5c1e pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38508155509). The failed 81a8992 result remains recorded separately. Complete 302-file fingerprint matches current bytes; public credential scans found no matches.
+
 - Linux CI for 81a8992 exposed a genuine late policy checkpoint race: cold restore could precede the last refresh write and receive checkpoint_conflict. The executor now joins already-started refresh tasks before returning. A deterministically blocked refresh test proves execute cannot return before the final writer finishes and a new host can restore/write; removing join reproduces failure. After repair at 11:47, all 435 local tests and required checks passed. The C037 operations audit, initially omitted from the implementation staging set, is included with the corrected complete-current fingerprint in this follow-up; no successful CI claim is made for 81a8992.
 
 - Previous goal turn made concrete progress through b56693a/525a65b and passed Linux CI. The full objective and external service/human gates remain unfulfilled.
