@@ -152,7 +152,7 @@
     },
     {
       "id": "C064",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/sources.test.ts",
@@ -168,13 +168,14 @@
           "file": "agents/reading/evals/delivery/publisher.test.ts",
           "test_name": "stops at every write boundary after current policy is revoked",
           "proves": "materialize后撤销只留下objects一次；下次Publisher仅返回policy_blocked，不创建分支/PR。"
+        },
+        {
+          "file": "agents/reading/evals/integration/active-query-recovery.test.ts",
+          "test_name": "active query refresh detects %s and cold recovery refuses a replacement even after permission returns",
+          "proves": "活动ModelAdapter已观察partial usage，在active_query_refresh实际计时器下触发pause/unavailable/semantic三分支。已提交刷新回执后signal aborted、unknown原因和账本；毁掉目录/new manager恢复，在恢复原许可后仍request_unknown拒新付费；每分支原query计数1。语义分支旧代码信号未中止已执行证实；SDK为明确替身。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "没有把active_query_refresh计时器触发的策略撤销跑到进行中ModelAdapter并断言abort、未知回执和冷恢复不重付；SIGTERM测试不能替代策略刷新场景。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK多步query刷新后取消/停止工具与provider实际回执行为。"

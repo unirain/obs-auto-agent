@@ -283,7 +283,7 @@ it("a replacement with unknown result creates a new barrier rather than inheriti
       f.gate,
       f.calls,
     );
-    await expect(executor.execute(f.input)).rejects.toThrow("transport_lost");
+    await expect(executor.execute(f.input)).rejects.toMatchObject({message:'request_unknown',cause:{message:'transport_lost'}});
     const next = await f.calls.find(
       "project:p1",
       f.input.task.input_hash,

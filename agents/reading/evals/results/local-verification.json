@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T03:21:13.498122Z",
-  "implementation_sha256": "406b416f9697a5d89c56292d0472570dee288923baa46c082bc1c41de116d33a",
-  "fingerprint_files": 301,
+  "recorded_at": "2026-10-14T03:39:34.165271Z",
+  "implementation_sha256": "f5c323740c044df01eb834dba308b70a235c7c8bc1105158c29b04ba66e834d3",
+  "fingerprint_files": 302,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 79,
-    "passed": 429,
+    "files": 80,
+    "passed": 434,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "b56693a4d83695c899a732da85acd8bead69163a",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38505877284",
     "environment": "Linux / Node 24.10.0",
     "scope": "Local admission/identity/delivery replay only; no real SDK/model/service/human G1-G5 proof."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "4b6ddd7bff4db1ae31842030fb425b306c6bc453",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38503701466",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Local source/cursor/incident recovery only; sources/selection/Issue API fixtures do not prove live G1-G5."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 39,
-    "partial": 47,
+    "covered": 41,
+    "partial": 45,
     "missing": 1,
-    "cases_with_local_remaining": 48
+    "cases_with_local_remaining": 46
   },
   "evaluation_scope": "Frozen corpus preparation/import/statistics only; no live model or human quality acceptance.",
   "actual_local_docker_fault": {
@@ -63,5 +59,6 @@
     "scope": "Fixed local isolated Docker fault script, source persistence and cold export only; not SDK/real drawing/article quality acceptance."
   },
   "source_collection_scope": "Actual local adapter/controller/journal/FileStore/cold restore/readonly monitor; semantic selection and Issue API are substitutes. No real sources, SDK or cloud service acceptance.",
-  "admission_and_intake_scope": "Actual local executor/gate/journal/FileStore/controller/delivery mapping; model and GitHub are explicit substitutes. No real paid SDK/service/human acceptance."
+  "admission_and_intake_scope": "Actual local executor/gate/journal/FileStore/controller/delivery mapping; model and GitHub are explicit substitutes. No real paid SDK/service/human acceptance.",
+  "active_query_scope": "Actual local executor/timers/journal/FileStore/cold restore; model and clock are substitutes. No native SDK/Actions/process stopping or paid service proof."
 }

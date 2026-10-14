@@ -1,6 +1,6 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 39、partial 47、missing 1，48 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 41、partial 45、missing 1，46 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
@@ -40,7 +40,7 @@
 | C034 未配置模型金额上限或价格未知 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C035 四十次工具调用后仍有必需工作，或补充材料超过八份 | partial | 把实际40工具边界及8材料边界各接到FileStore/controller冷恢复，断言已完成子任务/图源继续复用、每批计数按允许条件重置、累计计数不重置且剩余工作完成。 | sdk_live |
 | C036 跨天恢复持续无进展或已用完两轮修订的项目 | partial | 从真实driver产生research_stalled/quality_blocked，经controller保存manual；跨上海日期scheduled冷恢复验证同generation计数未重置且无query，只有显式人工新输入可恢复。 | sdk_live |
-| C037 剩余五分钟但 SDK 仍在执行 | partial | 用活动StageExecutor stream推进generation_deadline timer，核对先前已提交产物仍在、query中止后unknown账本冷恢复和新付费拒绝，补精确最后5分钟场景。 | production_smoke, sdk_live |
+| C037 剩余五分钟但 SDK 仍在执行 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | production_smoke, sdk_live |
 | C038 PR 创建成功但响应丢失 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C039 PR 已待审多日 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, production_smoke |
 | C040 用户关闭未合并 | partial | 增加关闭未合并事实经host reconcile后冷恢复的candidate/project状态与default知识索引断言，确保没有已入库条目且下一scheduled不重提。 | github_live |
@@ -67,7 +67,7 @@
 | C061 manifest 指向工作流文件或非法路径 | partial | 缺执行Actions交付校验入口的恶意manifest回放；已有直接validateDelivery拒绝不能独自证明独立job实际拒绝该输入。 | github_live |
 | C062 skill、样例等生成配置更新但旧项目尚未完成 | partial | 缺真实Git skill/正例/提示词更新后：旧活跃项目继续原bytes，新项目取新bytes，同时最新限制生效的完整bootstrap回放。 | sdk_live |
 | C063 用户新增排除主题或停用来源，旧项目正在积压 | partial | 缺已积压项目命中新主题排除/停用核心来源，冷恢复后同时断言research调用、image.create、Git写入均为0的组合测试。 | ram_live, sdk_live |
-| C064 本轮已启动后用户撤销许可 | partial | 没有把active_query_refresh计时器触发的策略撤销跑到进行中ModelAdapter并断言abort、未知回执和冷恢复不重付；SIGTERM测试不能替代策略刷新场景。 | github_live, image_live, sdk_live |
+| C064 本轮已启动后用户撤销许可 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, image_live, sdk_live |
 | C065 已持久化 publishing 意图后用户全局暂停 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
 | C066 最新策略读取失败或受限分类后语义排除仍未决 | partial | 缺真实driver连续两次返回content_eligibility=unresolved后的持久manual barrier、第三次恢复无模型/上传/发布，以及policy读失败对这些effects的组合断言。 | sdk_live |
 | C067 新限制命中已创建 PR 或之后解除限制 | partial | 缺先暂停活跃项目再解除相同限制、冷恢复原证据/skill/sample bytes与计数，并继续原阶段而不重做已完成阶段的完整回放。 | github_live, sdk_live |
@@ -99,3 +99,5 @@ C029 的可信人工接受入口已完成；真实补采覆盖验证入口仍待
 2026-10-14 续验：C017/C025/C027/C031 已补 controller、scoped FileStore 冷恢复及只读监控组合断言。C026 另补停用/未尝试来源的循环退出，发现并修复重复同一游标问题；其 PR/Actions 组合仍未完成。历史完整性没有可靠依据的列表成功仍不能关闭 coverage_gap。
 
 2026-10-14 续验：C006/C011/C013 补齐实际持久化分类准入、人工拒绝与重复提交的组合。预检后新增当前许可复核；已确认 PR 编号现在通过严格交付记录映射、控制器同步到候选与回执。Native SDK、OSS/RAM 与真实 PR 验收不由这些替身推断。
+
+2026-10-14 续验：C037/C064 使用活动 stream、真实执行器/计时器/持久化与 cold restore 验证55分钟截止、pause/unavailable/semantic刷新；clock和SDK为明确替身。语义刷新现在会中止仍获classify_only执行许可的旧语义请求；无终结回执的SDK异常统一返回request_unknown并保留cause，立即触发既有人工对账路由。Native SDK停止/Actions取消仍未证明。

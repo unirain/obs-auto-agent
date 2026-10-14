@@ -1,5 +1,14 @@
 # Reading Agent implementation log
 
+## 2026-10-14 Continuation: active query deadline and policy recovery
+
+- Previous goal turn made concrete progress through b56693a/525a65b and passed Linux CI. The full objective and external service/human gates remain unfulfilled.
+- Found a semantic refresh gap: classify_only can remain executable when the semantic policy changes, so checking only execution_permission let a stale classification query continue. Active refresh now compares its fixed semantic hash, aborts on drift/unavailable/denied policy, and ignores callbacks after the query stops. The new semantic regression was run without the fix and failed as expected.
+- Recheck generation deadline after the current policy checkpoint. A checkpoint that crosses the cutoff cannot create a new query intent. Nonterminal SDK errors now consistently expose request_unknown (with diagnostic cause); cutoff/policy/cancellation aborts have bounded reason codes. Existing unknown replacement and transport-loss tests now assert this contract plus the preserved original cause.
+- Actual RunDeadline/StageExecutor/ApplicationInvocationJournal/scoped FileStore tests run a blocking model replay after an observed partial message. Controlled clock reaches exactly 55 minutes from original start, leaving five minutes; abort occurs, prior committed evidence and 11 input/3 output tokens survive cold restoration, total cost stays unknown, and the same physical close period or a new host cannot start a second query.
+- An active refresh timer exercises pause, unreadable policy and semantic drift after a committed running message; each aborts, records unknown, and cold recovery still refuses a replacement after permission returns. Model and clock are explicit local substitutes; these do not prove native SDK/process/remote stopping or Actions timeout behavior.
+- Local checks at 11:38 Asia/Shanghai: 80 files / 434 tests, typecheck/build, 38 schemas, mapping and diff check passed; four gated live tests skipped. C037/C064 local requirements closed, audit 41 covered / 45 partial / 1 missing with 46 local follow-ups. G1–G5 and all 87 full-layer cases remain pending.
+
 ## 2026-10-14 Continuation: current admission policy and manual identity feedback
 
 - Implementation b56693a pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38505877284). Public credential scans found no matches, and the 301-file fingerprint matches current bytes.

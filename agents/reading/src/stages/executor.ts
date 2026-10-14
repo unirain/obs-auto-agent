@@ -28,13 +28,14 @@ export class StageExecutor {
     // longer current after that wait; persist the latest one before reserving a query.
     check=await this.gate.require(input.subject,input.task.capability,input.task.checkpoint);
     if(input.semantic_policy_hash&&check.semantic_policy_hash!==input.semantic_policy_hash)throw new Error('semantic_policy_changed');
+    input.deadline.requireStart();
     const invocation_id=`inv_${randomUUID()}`;
     await this.journal.prepare({schema_version:1,invocation_id,execution_scope:input.task.execution_scope,subject_id:input.subject.subject_ref,capability:input.task.capability,
       input_hash:expected,context_hash:input.task.context_id,policy_hash:check.policy_hash!,model:input.model,sdk_version:SDK_VERSION,status:'prepared',messages:[],
       usage:{input_tokens:0,output_tokens:0,cost_usd:null,cost_status:'unknown'},limits:{policy_check_ref:check.check_id,purpose:input.purpose??'stage',max_tools:limits.max_tools_per_batch,max_new_materials:limits.max_references_per_batch,max_output_tokens:input.max_output_tokens??8192,deadline:input.deadline.generation_deadline}});
     const cancellation=input.deadline.signal();let final:unknown;let terminal=false;let success=false;let stopped=false;let policyFailed=false;let observedSdkMessage=false;
     // The running SDK query is actively interrupted if latest trusted policy is revoked or becomes unreadable.
-    const refresh=setInterval(()=>{if(stopped)return;void this.gate.check(input.subject,input.task.capability,'active_query_refresh').then(current=>{if(current.execution_permission!=='allowed'){policyFailed=true;controller.abort('policy_revoked');}}).catch(()=>{policyFailed=true;controller.abort('policy_unavailable');});},limits.policy_refresh_seconds*1000);refresh.unref();
+    const refresh=setInterval(()=>{if(stopped)return;void this.gate.check(input.subject,input.task.capability,'active_query_refresh').then(current=>{if(stopped)return;if(current.execution_permission!=='allowed'||input.semantic_policy_hash&&current.semantic_policy_hash!==input.semantic_policy_hash){policyFailed=true;controller.abort('policy_revoked');}}).catch(()=>{if(stopped)return;policyFailed=true;controller.abort('policy_unavailable');});},limits.policy_refresh_seconds*1000);refresh.unref();
     const controller=new AbortController();cancellation.signal.addEventListener('abort',()=>controller.abort(cancellation.signal.reason),{once:true});if(cancellation.signal.aborted)controller.abort();
     try {
       for await(const message of this.model.stream({prompt:input.prompt,system_prompt:input.system_prompt,schema:input.schema,cwd:input.cwd,vault_root:path.join(input.cwd,'projects',input.task.project_id,'draft'),model:input.model,signal:controller.signal,tools:input.tools,max_turns:limits.max_tools_per_batch,max_output_tokens:input.max_output_tokens??8192,...(input.skills?{skills:input.skills}:{})})){
@@ -47,7 +48,7 @@ export class StageExecutor {
       await this.journal.finish(invocation_id,success?'succeeded':'failed');if(!success)throw new Error('model_failed_known');if(policyFailed)throw new Error('policy_blocked');return {invocation_id,result:final};
     }catch(error){const wasAborted=controller.signal.aborted;controller.abort();
       if(error instanceof QueryNotStartedError&&!observedSdkMessage){await this.journal.observe(invocation_id,{message_id:`not_started_${invocation_id}`,summary:true,usage:{input_tokens:0,output_tokens:0,cost_usd:0,cost_status:'known'}},{request_started:false,reason:error.reason});await this.journal.finish(invocation_id,'failed');throw error;}
-      if(!terminal){await this.journal.finish(invocation_id,'unknown');if(wasAborted&&input.deadline.abort_signal?.aborted)throw new Error('request_unknown:run_cancelled',{cause:error});}throw error;}
+      if(!terminal){await this.journal.finish(invocation_id,'unknown');const reason=wasAborted?(input.deadline.abort_signal?.aborted?'run_cancelled':policyFailed?'policy_revoked':'run_deadline'):null;throw new Error(reason?'request_unknown:'+reason:'request_unknown',{cause:error});}throw error;}
     finally{stopped=true;clearInterval(refresh);cancellation.close();}
   }
 }
