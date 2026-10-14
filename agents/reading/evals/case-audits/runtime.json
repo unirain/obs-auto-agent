@@ -60,7 +60,7 @@
     },
     {
       "id": "C061",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/delivery/publisher.test.ts",
@@ -71,13 +71,14 @@
           "file": "agents/reading/evals/operations/workflows.test.ts",
           "test_name": "preview only receives preview/model/read capability and validates before secret injection",
           "proves": "解析真实workflow并断言Validate scope先于Run isolated preview；未执行恶意交付manifest的独立Actions校验。"
+        },
+        {
+          "file": "agents/reading/evals/integration/fixed-policy-acceptance.test.ts",
+          "test_name": "actual Publisher rejects sealed malicious target %s before any Git write or delivery intent",
+          "proves": "实际可信Publisher（Actions host入口使用的模型独立校验）拒绝重算validated_hash后的workflow/traversal/hidden/backslash/symlink；真实FileStore revision/records不变、cold再次拒绝，Git/image/intent零；核对workflow实际调用可信host，真实Actions层仍缺。spec809未要求另一个独立job，旧audit该措辞过度解释。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺执行Actions交付校验入口的恶意manifest回放；已有直接validateDelivery拒绝不能独自证明独立job实际拒绝该输入。"
-        },
         {
           "layer": "github_live",
           "requirement": "隔离Actions运行传入workflow/非法路径交付manifest，确认无Git对象/分支/PR写入。"
@@ -86,7 +87,7 @@
     },
     {
       "id": "C062",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/context/context.test.ts",
@@ -102,13 +103,14 @@
           "file": "agents/reading/evals/integration/controller.test.ts",
           "test_name": "unavailable fixed runtime stops only its project and cold restart preserves the manual barrier",
           "proves": "环境port注入fixed_runtime_version_unavailable后仅该项目manual暂停；真实FileStore冷恢复保留原因/计数，其他项目达到preview_ready。"
+        },
+        {
+          "file": "agents/reading/evals/integration/fixed-policy-acceptance.test.ts",
+          "test_name": "real Git bootstrap keeps old skill, example and prompts through cold research while a new project gets new bytes and latest pause stops both",
+          "proves": "两个真实Git仓库skill/example/prompts更新；old cold research实际读取原skill/systemprompt/example bytes与hash；newproject绑定新commit/例子/prompt/context，latest Git pause对二者零query并保留两contexts。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺真实Git skill/正例/提示词更新后：旧活跃项目继续原bytes，新项目取新bytes，同时最新限制生效的完整bootstrap回放。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实SDK读取旧固定skill/提示词视图与新项目视图，验证没有默默替换。"
@@ -117,7 +119,7 @@
     },
     {
       "id": "C063",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -133,13 +135,14 @@
           "file": "agents/reading/evals/runtime/driver.test.ts",
           "test_name": "changed semantic rules archive a known old outcome, classify again, and only then resume research with the fixed generation",
           "proves": "semantic hash变化经过settlement并仅重新受限分类，allowed后才恢复research；并非排除结果/停用来源的完整交付阻断回放。"
+        },
+        {
+          "file": "agents/reading/evals/integration/fixed-policy-acceptance.test.ts",
+          "test_name": "cold backlog applies %s revocation before research and persists zero image/Git effects",
+          "proves": "实际driver/controller/FileStore积压cold主题变更只重classify并持久excluded；停用核心主来源无query；两分支research/image/Git零且下一cold仍零。semantic settlement为host fixture经真实Controller commit，无既有paid invocation；不冒充付费历史归档证据。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺已积压项目命中新主题排除/停用核心来源，冷恢复后同时断言research调用、image.create、Git写入均为0的组合测试。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实供应方验证撤销后没有新深入研究请求。"
@@ -219,7 +222,7 @@
     },
     {
       "id": "C066",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/policy/gate.test.ts",
@@ -235,13 +238,19 @@
           "file": "agents/reading/evals/runtime/driver.test.ts",
           "test_name": "unknown old calls survive changed semantics and block every next run without another model request",
           "proves": "跨两个恢复轮次request_unknown阻塞，保留旧语义绑定且模型调用不增加；此处测试的是unknown账本，不是unresolved内容分类。"
+        },
+        {
+          "file": "agents/reading/evals/integration/fixed-policy-acceptance.test.ts",
+          "test_name": "two unresolved driver classifications persist the manual barrier and a third cold run starts no model, image or Git effects",
+          "proves": "实际driver两unresolved查询持久manual/分类额度/counters；第三cold零query/image/Git；另一个冷backlog最新policy读取失败及下一cold都保留旧classification/counters但不回退许可，所有effects零。"
+        },
+        {
+          "file": "agents/reading/evals/integration/fixed-policy-acceptance.test.ts",
+          "test_name": "latest policy read failure on a cold selected backlog never falls back to its old classification or starts model, image or Git effects",
+          "proves": "不可读最新policy时保持旧classification/context/counters，禁止新query/image/Git及fallback；下一cold仍拒绝。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "缺真实driver连续两次返回content_eligibility=unresolved后的持久manual barrier、第三次恢复无模型/上传/发布，以及policy读失败对这些effects的组合断言。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实模型未决分类和策略读取失败时无隐式重试。"

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-14T07:56:52.632523Z",
+  "skill_commit": "38589ebab14db0156ae51d3d7c9fec90402fcaef",
+  "layer": "independent_instruction_dry_run",
+  "source": "synthetic_three_line_immutable_commit_fixture",
+  "read_files": [
+    ".agents/skills/obsidian-note/SKILL.md",
+    ".agents/skills/obsidian-note/references/diagram-playbook.md",
+    ".agents/skills/obsidian-note/references/reading-agent-cloud-contract.json"
+  ],
+  "actual_capabilities": [
+    "host_read_fixed_skill_files"
+  ],
+  "controlled_mcp_server": "unavailable",
+  "result": "writing_json_candidate_only",
+  "diagram": "inline_mermaid_source_only",
+  "model_claimed_completion": false,
+  "model_claimed_visual_success": false,
+  "model_claimed_sdk_receipts": false,
+  "sdk_execution": "not_exercised",
+  "image_pixels": "not_exercised",
+  "host_writes": "none",
+  "external_calls": "none",
+  "controller_validation": "not_exercised",
+  "g2": "not_passed",
+  "scope": "Independent agent turn only; coordinator persists this receipt afterward."
+}

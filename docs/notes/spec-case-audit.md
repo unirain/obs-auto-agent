@@ -1,10 +1,10 @@
 # 87 场景逐条证据审计
 
-2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 65、partial 22、missing 0，22 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
+2026-10-14。此表是具体断言范围审计，不是完整验收通过列表。87 个 full-layer 场景仍 pending；本地 covered 74、partial 13、missing 0，13 个场景仍有明确 local 组合/入口缺口。完整证据指针、test_name、proves 和分层 remaining 在 agents/reading/evals/case-audits/*.json；npm run coverage:spec 验证 ID/range、文件、真实测试标题及状态与残余层的一致性，不以测试文件存在推断场景通过。
 
 | 场景 | 本地范围 | 本地未证实要求 | 其他缺失层 |
 | --- | --- | --- | --- |
-| C001 合格文章有论文和代码 | partial | 补同一主文+论文+固定commit代码→证据→图片→最终审校→一个Fake PR的组合测试；现有各层fixture独立。 | github_live, human_quality, image_live, sdk_live |
+| C001 合格文章有论文和代码 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, human_quality, image_live, sdk_live |
 | C002 文章只有营销描述 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
 | C003 LangChain 或 Claude 入口出现产品发布公告 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live, source_live |
 | C004 技术教程提到产品名，但主体解释机制与取舍 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
@@ -13,21 +13,21 @@
 | C007 受限分类判为技术实践／产品发布／仍未决 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | human_quality, sdk_live |
 | C008 分类过程中尝试跟读论文、绘图、写笔记或发布 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C009 语义规则更新令旧分类失效 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, image_live, sdk_live |
-| C010 首次正式提交首批信源之外、早于七天窗口的公开 URL | partial | 补explicit published_at早于窗口且不属于首批域名的scheduled输入，种入订阅cursor并断言人工入队不改变它、进入正式选题。 | oss_live, sdk_live |
+| C010 首次正式提交首批信源之外、早于七天窗口的公开 URL | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, sdk_live |
 | C011 两次正式提交同一 URL，或提交回执响应丢失后重试 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, sdk_live |
-| C012 同一 URL 经人工和订阅发现，或跳转后确认同一文章 | partial | 补经过实际redirect读取的人工/订阅两候选归并，完整provenance与单Project/单Fake PR的冷恢复断言。 | github_live, source_live |
+| C012 同一 URL 经人工和订阅发现，或跳转后确认同一文章 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, source_live |
 | C013 人工提交命中禁用来源或全局暂停 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
 | C014 预览成功后使用 scheduled + input_urls 正式提交 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live, sdk_live |
 | C015 Claude 目录条目指向允许的外部官方正文域名 | partial | 补外部官方正文经Gate实际读取以及全部候选均来自card而非nav的断言。 | source_live |
 | C016 列表只有活动或无文字视频，或正文日期未知 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live, source_live |
 | C017 首次窗口内超过五十个条目 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, source_live |
-| C018 同轮已有三篇产出或已有十个待审 PR | partial | 需明确种入3本轮产物和10待审PR后仍执行新合格候选，分别证明time/capacity不足才让出；纯scheduler无数量参数不能代替该组合。 | github_live, sdk_live |
+| C018 同轮已有三篇产出或已有十个待审 PR | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, sdk_live |
 | C019 加载质量正例 | partial | 补多个相关笔记不同整理日期的明确排序、样例版本/date_basis持久化冷恢复及固定Git目录加载的组合断言；当前单笔记fallback不能证明近期优先。 | human_quality |
 | C020 历史正例来自本轮排除的内容或来源类型 | partial | 补含被排除内容/停用来源的历史质量正例，同时新候选为公告/禁用来源，断言只作写作参照且不改变分类或发现URL。 | human_quality, sdk_live |
 | C021 摘要不完整但全文有价值 | partial | 补摘要空/短但全文有机制和证据的候选，断言读主文后research而不是提前skip；prompt的unknown-not-absent文字不是测试。 | human_quality, sdk_live |
 | C022 多站转载同一文章 | partial | 补两个站已各建项目再读出相同body的controller组合，断言一个active owner/一次研究和Fake PR，loser保留解释并冷恢复。 | github_live, source_live |
 | C023 同主题文章有不同实验或相反结论 | partial | 尚缺不同实验/相反结论进入selection与research的成对fixture，验证后续知识增量不被主题相似过滤；身份不合并只是前置条件。 | human_quality, sdk_live |
-| C024 核心论文读取失败 | partial | 补核心论文HTTP/提取失败→持久gap+deferred→冷恢复的driver/Manager路径，断言无writing/PR及理由披露。 | sdk_live, source_live |
+| C024 核心论文读取失败 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live, source_live |
 | C025 单个信源失败 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, source_live |
 | C026 一个来源连续失败，另一个持续创建 PR，Actions 成功退出 | partial | 补A多轮fail+B真实host回放产PR+success Actions状态的组合，断言source_id+reason告警不被总成功抹除。 | github_live, oss_live, source_live |
 | C027 同一来源同一原因多轮失败，之后实际读取恢复 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live, source_live |
@@ -64,12 +64,12 @@
 | C058 仅有机器人分支／commit，尚无 PR | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, oss_live |
 | C059 未发布结果过期，来源未变／发生变化 | partial | 缺完整controller冷恢复回放：过期后真实verifySources返回变化，归档旧交付、建立g+1、完成重新研究/审校，并断言旧Git分支未写入。 | github_live |
 | C060 下载不完整或文件哈希不符 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live |
-| C061 manifest 指向工作流文件或非法路径 | partial | 缺执行Actions交付校验入口的恶意manifest回放；已有直接validateDelivery拒绝不能独自证明独立job实际拒绝该输入。 | github_live |
-| C062 skill、样例等生成配置更新但旧项目尚未完成 | partial | 缺真实Git skill/正例/提示词更新后：旧活跃项目继续原bytes，新项目取新bytes，同时最新限制生效的完整bootstrap回放。 | sdk_live |
-| C063 用户新增排除主题或停用来源，旧项目正在积压 | partial | 缺已积压项目命中新主题排除/停用核心来源，冷恢复后同时断言research调用、image.create、Git写入均为0的组合测试。 | ram_live, sdk_live |
+| C061 manifest 指向工作流文件或非法路径 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
+| C062 skill、样例等生成配置更新但旧项目尚未完成 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
+| C063 用户新增排除主题或停用来源，旧项目正在积压 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | ram_live, sdk_live |
 | C064 本轮已启动后用户撤销许可 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live, image_live, sdk_live |
 | C065 已持久化 publishing 意图后用户全局暂停 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | github_live |
-| C066 最新策略读取失败或受限分类后语义排除仍未决 | partial | 缺真实driver连续两次返回content_eligibility=unresolved后的持久manual barrier、第三次恢复无模型/上传/发布，以及policy读失败对这些effects的组合断言。 | sdk_live |
+| C066 最新策略读取失败或受限分类后语义排除仍未决 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | sdk_live |
 | C067 新限制命中已创建 PR 或之后解除限制 | partial | 缺先暂停活跃项目再解除相同限制、冷恢复原证据/skill/sample bytes与计数，并继续原阶段而不重做已完成阶段的完整回放。 | github_live, sdk_live |
 | C068 默认手动触发单 URL 试运行 | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live, sdk_live |
 | C069 预览把某 URL 判为 skip 或已完成，随后正式处理同 URL | covered | 当前审计未发现local断言缺口；仍不等同真实通过 | oss_live, ram_live |

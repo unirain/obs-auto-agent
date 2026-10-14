@@ -1,7 +1,7 @@
 {
-  "recorded_at": "2026-10-14T07:39:10.057926Z",
-  "implementation_sha256": "a9c3945cda857500b2d672cb84aeb17cf8a1bc5ced57e7a8003caa39a851468d",
-  "fingerprint_files": 315,
+  "recorded_at": "2026-10-14T08:04:54.058036Z",
+  "implementation_sha256": "84b42b7b856b5609671edecbc4bb3f2968867a8a624c13e8b39a7babeaf781aa",
+  "fingerprint_files": 319,
   "commands": {
     "npm run typecheck": "passed",
     "npm test": "passed",
@@ -12,8 +12,8 @@
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed"
   },
   "local_tests": {
-    "files": 89,
-    "passed": 480,
+    "files": 92,
+    "passed": 498,
     "failed": 0
   },
   "live_tests": {
@@ -28,18 +28,14 @@
   "scope": "Local executor/replay verification and complete current case-audit bytes only; native SDK, IAM, delivery and human gates unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending_for_this_implementation"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "006cb2ad7adb4cbaac1849bf178eb4e6b82d1c44",
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38529803273",
     "environment": "Linux / Node 24.10.0",
     "scope": "Frozen quality execution, version/holdout/unknown recovery and preview/factual/visual replay locally verified; native model/service/IAM/human gates remain unpassed."
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "6131326cc7608668f24765bef24c67351c8f5a70",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38525717503",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Known-secret persistence/materialization/delivery boundaries locally verified; unknown secret detection and native service/human gates remain unproved."
   },
   "schema_documents": {
     "count": 38,
@@ -50,10 +46,10 @@
     "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
   },
   "local_case_audit": {
-    "covered": 65,
-    "partial": 22,
+    "covered": 74,
+    "partial": 13,
     "missing": 0,
-    "cases_with_local_remaining": 22
+    "cases_with_local_remaining": 13
   },
   "evaluation_scope": "Actual host execution entry with immutable preview bindings, label-blind frozen primary sources and heldout filtering locally verified by model/transport replay. G1/published skill required for live CLI; no native model evaluation or human calibration executed. Frozen config also binds actual generation policy; exported run provenance includes real input/implementation commits and policy-check references.",
   "actual_local_docker_fault": {
@@ -77,5 +73,14 @@
   "capacity_scope": "Actual local Managers/reservations/inventory/driver/controller/cold restore and GC; mutex/large-image inventory/source transport/value model are explicit local substitutes, not real Actions/RAM/service/quality proof.",
   "restore_monitor_scope": "Actual local restore/controller/readonly HEAD/Watchdog with FileStore/API/source/value fixtures; not native OSS/RAM or platform-wide real failure proof.",
   "secret_scope": "Known host credentials/common forms and explicit paths only; actual local guards/restore/Publisher/image boundaries, not universal unknown-secret DLP or native service isolation.",
-  "quality_scope": "Actual Controller/driver/FileStore/review/report/ResourcePublisher/Publisher branches with model/HTTP/image/GitHub substitutes; core visual manual cold hold and two factual revisions verified. Native renderer/provider/platform/human layers remain unpassed."
+  "quality_scope": "Actual Controller/driver/FileStore/review/report/ResourcePublisher/Publisher branches with model/HTTP/image/GitHub substitutes; core visual manual cold hold and two factual revisions verified. Native renderer/provider/platform/human layers remain unpassed.",
+  "full_chain_scope": "Actual driver/controller/journal/FileStore/material registry/ResourcePublisher/seal/Publisher cold chain with explicit model/HTTP/GitHub/image substitutes; native PDF success, SDK/service/human quality remain unproved.",
+  "intake_scope": "Actual manual intake/redirect/source adapter/driver/Publisher/cold restore; historical projects/date/capacity are explicit fixtures. No live source/PR/SRAM/SDK proof.",
+  "fixed_policy_scope": "Actual Publisher effects and Git bootstrap/fixed bytes/current policy/FileStore cold recovery; semantic settlement/models/external adapters are explicit fixtures, not native service acceptance.",
+  "skill_target": {
+    "draft_pr": "https://github.com/unirain/obs-notes-hub/pull/35",
+    "head": "38589ebab14db0156ae51d3d7c9fec90402fcaef",
+    "default_branch_publication": "pending_human_review_merge",
+    "forward_evidence": "agents/reading/evals/runtime/evidence/cloud-skill-forward-20261014.json"
+  }
 }

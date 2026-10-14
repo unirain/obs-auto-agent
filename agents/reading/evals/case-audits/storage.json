@@ -7,7 +7,7 @@
   "cases": [
     {
       "id": "C001",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/driver.test.ts",
@@ -23,13 +23,14 @@
           "file": "agents/reading/evals/delivery/publisher.test.ts",
           "test_name": "does not write a branch until commit intent is committed",
           "proves": "给定人工构造的sealed fixture，持久意图失败后FakeGitHub无分支写；不是阅读产物到PR全链路。"
+        },
+        {
+          "file": "agents/reading/evals/integration/material-chain-acceptance.test.ts",
+          "test_name": "C001 one actual driver/controller chain binds the main article, full HTML paper and fixed code to checked image, final review and one Fake PR; cold runs reuse all facts",
+          "proves": "同一实际driver/controller/FileStore链注册主文/完整HTML论文/固定commit代码，四个可定位证据与材料closure；写作检查PNG、上传回填后独立review、actual seal/Publisher一个FakePR；cold完整五调用/资源/封存/交付读回，下轮query/HTTP/image/Git无新增。不是nativePDF成功解析/真实模型/服务/人验。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补同一主文+论文+固定commit代码→证据→图片→最终审校→一个Fake PR的组合测试；现有各层fixture独立。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实受限SDK读取/研究/写作/审校及论文代码工具调用。"
@@ -303,7 +304,7 @@
     },
     {
       "id": "C010",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/intake.test.ts",
@@ -314,13 +315,14 @@
           "file": "agents/reading/evals/integration/controller.test.ts",
           "test_name": "keeps publishing after an uncertain PR result and only reconciles on the next run",
           "proves": "production scheduled+input_urls经真实FileStore入队并走host发布；阶段/Publisher为ports替身。"
+        },
+        {
+          "file": "agents/reading/evals/integration/intake-identity-acceptance.test.ts",
+          "test_name": "dated manual input outside the first sources bypasses only the seven-day discovery window and reaches real production selection without moving subscription cursors",
+          "proves": "人工旧URL非首批域名，fixture明确HTML2020日期且host checkpoint已知published_at；实际intake/classify/select到正式selection，已有订阅page/offset/hash/window进度及cold回读不变。没有声称生产extractor自动回填日期。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补explicit published_at早于窗口且不属于首批域名的scheduled输入，种入订阅cursor并断言人工入队不改变它、进入正式选题。"
-        },
         {
           "layer": "oss_live",
           "requirement": "真实正式scope人工回执/候选原子提交及续跑。"
@@ -368,7 +370,7 @@
     },
     {
       "id": "C012",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/collect/intake.test.ts",
@@ -384,13 +386,14 @@
           "file": "agents/reading/evals/collect/intake.test.ts",
           "test_name": "normalization preserves business parameters; canonical requires verified content",
           "proves": "未核验跨站canonical被拒，业务version参数保留。"
+        },
+        {
+          "file": "agents/reading/evals/integration/intake-identity-acceptance.test.ts",
+          "test_name": "actual redirect then subscription discovery merges all provenance into one durable project and one FakePR across cold runs",
+          "proves": "实际302 manual→final主文、完整driver/seal/Publisher/FakePR；cold SourceAdapter发现final和tracking人工重放合并所有alias/content/provenance/submissions，单candidate/project/PR、五调用无新增，第三cold canonical intake已知PR。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补经过实际redirect读取的人工/订阅两候选归并，完整provenance与单Project/单Fake PR的冷恢复断言。"
-        },
         {
           "layer": "source_live",
           "requirement": "真实跳转/镜像正文身份核验。"
@@ -558,19 +561,20 @@
     },
     {
       "id": "C018",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/context/context.test.ts",
           "test_name": "overdue comes first then rotates sources, resumes before fresh, never caps at three/ten",
           "proves": "fairCandidates 15输入仅过滤一个不可执行，输出14；不是已产3篇或10PR的host运行。"
+        },
+        {
+          "file": "agents/reading/evals/integration/intake-identity-acceptance.test.ts",
+          "test_name": "three recorded outputs and ten pending FakePRs do not cap new work; only %s runtime admission governs it and cold continuation preserves the candidate",
+          "proves": "合法host fixture种入10待审FakePR和同run三output，新candidate实际四阶段/Publisher成功第11个PR；deadline与49.1GB容量分别无query/intent让出，解除后cold原candidate/project/gen/context完成一次，十旧PR与三产物保留。历史fixture不证明历史SDK/服务。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "需明确种入3本轮产物和10待审PR后仍执行新合格候选，分别证明time/capacity不足才让出；纯scheduler无数量参数不能代替该组合。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "实际剩余时间/容量内继续处理合格内容。"
@@ -729,7 +733,7 @@
     },
     {
       "id": "C024",
-      "local_status": "partial",
+      "local_status": "covered",
       "evidence": [
         {
           "file": "agents/reading/evals/runtime/tools.test.ts",
@@ -740,13 +744,14 @@
           "file": "agents/reading/evals/runtime/material-progress.test.ts",
           "test_name": "all actual paper/code links require registration or an explicit gap; model-fabricated access failure and unread code cannot count as read",
           "proves": "伪造失败或未读资料不能被标read，registered链接需要显式缺口。"
+        },
+        {
+          "file": "agents/reading/evals/integration/material-chain-acceptance.test.ts",
+          "test_name": "C024 %s persists the actual tool failure and core gap; cold research remains deferred with no writing, image upload or PR",
+          "proves": "实际UrlGateway 503和extractPdf截断拒绝两分支，material_failures/core gap/partial packet持久化；没有已读paper snapshot或evidence，答案unknown不伪称source_not_provided；冷研究重复实际失败，writing/review/upload/seal/PR为零。"
         }
       ],
       "remaining": [
-        {
-          "layer": "local",
-          "requirement": "补核心论文HTTP/提取失败→持久gap+deferred→冷恢复的driver/Manager路径，断言无writing/PR及理由披露。"
-        },
         {
           "layer": "sdk_live",
           "requirement": "真实模型不宣称已读失败论文。"
