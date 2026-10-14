@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: failed restore, policy suppression and platform outage
 
+- Evidence commit 3c7e932 pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38523997546). Public credential scans found no matches; the 309-file fingerprint including Vitest configuration matches current bytes.
+
 - Previous turn progressed through 310dba1/c03976f and passed Linux CI. This turn keeps all plan gates and remote/human evidence intact while closing three more actual local combinations.
 - Actual writer Manager.restore with explicit allow_initialize receives commit/manifest transient read, permission denial and byte corruption. Each stops with zero creates/deletes; a new client still reads original HEAD/source bytes and identical full commit key/hash sets. These service faults are local FileStore fixtures, not real OSS transport or RAM denials.
 - Existing source failure is followed by disabled/not_attempted/publish-only/another-source success/global pause. Actual controller/source adapter/FileStore/cold restore keeps prior events and active failure without a false recovered event. Readonly HEAD Watchdog leaves the Issue open and records policy suppression where appropriate; repeat polls do not spam. Shared collection policy now clones per fixture, avoiding unrelated test contamination.
