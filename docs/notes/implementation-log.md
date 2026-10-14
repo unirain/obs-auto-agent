@@ -2,6 +2,8 @@
 
 ## 2026-10-14 Continuation: trusted gap acceptance and render process recovery
 
+- Implementation 193a63a was pushed; [Linux Node 24 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38502049810). Public candidates had no locally available credential matches. The 296-file fingerprint was rechecked against committed current bytes.
+
 - Previous continuation made concrete progress: evaluation/case audits were committed as 6e00cfe and Linux Node 24 CI passed (Actions run 38428107840). The full goal remains active; G1–G5 and all 87 layered cases remain unpassed.
 - C029 now has an explicit trusted management CLI. Scope/source/gap identity, interval fingerprint, actor, reason and human evidence are required. Health/event/audit commit together; journal compares expected revision inside the queue. Cold replay of a lost management response adds no event, failed commits add neither fact, and intervening writes reject the stale request. Restore validates audit hash, scope and event closure. Current read recovery preserves accepted/other unresolved gaps. Actual backfill verification is still missing.
 - C050 has seven explicit initialization tests: NoSuchBucket at three boundaries, public-read/public-read-write and private-but-anonymous-readable configurations all refuse before writes and again after cold restart; the valid empty-private control creates exactly one zero commit. These are filesystem/service fault fixtures, not RAM or real OSS permission evidence.

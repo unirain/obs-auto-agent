@@ -28,7 +28,11 @@
   "scope": "Local contract/replay verification only; not live model, IAM, delivery or human quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending_for_this_implementation"
+    "status": "passed",
+    "implementation_commit": "193a63a2264db3a02e34480143ec93d036e74334",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38502049810",
+    "environment": "Linux / Node 24.10.0",
+    "scope": "Local cases and recovery contracts only; real Docker fault is separate local evidence, G1-G5 remain unpassed."
   },
   "previous_ci": {
     "status": "passed",
