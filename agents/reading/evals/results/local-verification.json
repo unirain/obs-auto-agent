@@ -1,16 +1,16 @@
 {
-  "recorded_at": "2026-10-15T05:53:38.323171+00:00",
+  "recorded_at": "2026-10-15T05:57:50.888907+00:00",
   "implementation_sha256": "143d946c24213a07949693437ec002445ffb23f321ca81b28d4564faebad3d3c",
   "fingerprint_files": 332,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "current local serial536/98 passed; default Linux four-worker CI pending",
+    "npm test": "default four-worker Linux CI536/98 passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
     "git diff --check": "passed",
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed",
-    "npm test -- --no-file-parallelism": "passed locally Node24.19.0"
+    "npm test -- --no-file-parallelism": "local Node24.19.0 full536/98 passed"
   },
   "local_tests": {
     "files": 98,
@@ -35,13 +35,20 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local536/98 and explicitly separate native OSS transport test; default Linux CI pending. No paid model or native RAM/delivery/human proof.",
+  "scope": "Local Node24 sequential full536/98 and default Linux Node24.10 four-worker CI plus a separately explicitly executed real OSS TLS loss/reconciliation probe. Native RAM/model/delivery/human gates remain unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending",
-    "implementation_commit": null,
+    "status": "passed",
+    "implementation_commit": "85d4f57f228d56ff4e2f016a688110f14b8d2915",
     "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Native transport host port plus local TLS replay; default full536 assertions"
+    "scope": "Native transport host port plus local TLS replay; default full536 assertions",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38689381026",
+    "tests": {
+      "files": 98,
+      "passed": 536,
+      "failed": 0,
+      "workers": 4
+    }
   },
   "previous_ci": {
     "status": "passed",
