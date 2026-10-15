@@ -1,20 +1,20 @@
 {
-  "recorded_at": "2026-10-15T06:21:24.843394+00:00",
-  "implementation_sha256": "b9ea8bbbdecff3266beafeeacb1c112f22b93a316d190cddbdbd0e69f97a3185",
-  "fingerprint_files": 334,
+  "recorded_at": "2026-10-15T06:43:42.999094+00:00",
+  "implementation_sha256": "e7c58d4b5c83ec6e96a81bbed0c5c260b6b11f3f83a9ebf72dea6be53d5c363c",
+  "fingerprint_files": 337,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "default four-worker Linux CI542/99 passed",
+    "npm test": "pending exact implementation default four-worker Linux CI",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
     "git diff --check": "passed",
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed",
-    "npm test -- --no-file-parallelism": "local Node24.19 full542/99 passed"
+    "npm test -- --no-file-parallelism": "local Node24.19 full558/102 passed"
   },
   "local_tests": {
-    "files": 99,
-    "passed": 542,
+    "files": 102,
+    "passed": 558,
     "failed": 0,
     "runtime": "Node24.19.0",
     "file_parallelism": false
@@ -35,9 +35,15 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local542/99 and default LinuxNode24.10 four-worker CI; readonly source preparation26/30, no labels/freeze/model/quality acceptance. Additional source redirect-byte total accounting gap remains local work.",
+  "scope": "Local558/102 sequential files; exact default LinuxNode24 four-worker CI pending. Project stage redirect/chunk accounting and cold recovery locally verified; no new native service/model/quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending",
+    "implementation_commit": null,
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "Redirect/chunk payload accounting and cold fixed-repository/tree recovery; expected558 assertions, no new live/model acceptance"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "eea734c285218066acceba92a3144ad69c746013",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -46,19 +52,6 @@
     "tests": {
       "files": 99,
       "passed": 542,
-      "failed": 0,
-      "workers": 4
-    }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "85d4f57f228d56ff4e2f016a688110f14b8d2915",
-    "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Native transport host port plus local TLS replay; default full536 assertions",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38689381026",
-    "tests": {
-      "files": 98,
-      "passed": 536,
       "failed": 0,
       "workers": 4
     }
@@ -167,8 +160,20 @@
   "additional_local_followups": [
     {
       "requirement": "spec635 total downloaded payloads",
-      "status": "pending",
-      "gap": "Intermediate3xx payloads are not currently charged by driver/browser; per-hop accounting and cold persistence required."
+      "status": "local_verified",
+      "evidence": [
+        "agents/reading/evals/integration/redirect-budget-acceptance.test.ts",
+        "agents/reading/evals/runtime/payload-stream.test.ts",
+        "agents/reading/evals/runtime/browser-payload-budget.test.ts",
+        "agents/reading/evals/integration/material-chain-acceptance.test.ts"
+      ],
+      "scope": "Stage main/reference/image/repository and browser payloads, including intermediate3xx and failed-stream bytes; native stream and browser process mocked. Host discovery/prepublication revalidation retain separate bounded host reads."
     }
-  ]
+  ],
+  "targeted_payload_tests": {
+    "new_assertions": 16,
+    "existing_direct_regression": 86,
+    "status": "passed",
+    "runtime": "Node24.19.0"
+  }
 }

@@ -13,30 +13,52 @@ export function isPublicAddress(raw:string):boolean {
   return false;
 }
 export type GatewayReply={status:number;headers:Record<string,string>;body:Uint8Array};
-export type GatewayTransport=(url:URL,address:DnsAddress,options:{max_bytes:number;timeout_ms:number;signal?:AbortSignal})=>Promise<GatewayReply>;
+/** Host-only admission and payload observation; never serialized into a model input. */
+export type GatewayDownloadBudget={begin():Promise<void>;consume(bytes:number):Promise<void>;remaining():number};
+export type GatewayTransport=(url:URL,address:DnsAddress,options:{max_bytes:number;timeout_ms:number;signal?:AbortSignal;on_body_bytes?:(bytes:number)=>Promise<void>})=>Promise<GatewayReply>;
 const nativeTransport:GatewayTransport=(url,address,options)=>new Promise((resolve,reject)=>{
+  let responseStream:import('node:http').IncomingMessage|undefined,finished=false,failure:unknown;
+  const pending=new Set<Promise<void>>();let deadlineTimer:ReturnType<typeof setTimeout>|undefined;
+  const drain=async()=>{while(pending.size)await Promise.allSettled([...pending]);};
+  const settle=()=>{if(finished)return;void drain().then(()=>{if(finished)return;if(failure){finished=true;clearTimeout(deadlineTimer);reject(failure);}});};
+  const fail=(error:unknown)=>{failure??=error;responseStream?.destroy();request.destroy();settle();};
   const request=(url.protocol==='https:'?httpsRequest:httpRequest)(url,{method:'GET',headers:{'User-Agent':'obs-reading-agent/1.0','Accept':'text/html,application/pdf,text/plain,application/json,image/png,image/jpeg,image/webp','Accept-Encoding':'identity'},
-    // DNS resolution is pinned to the exact address validated above; no second unchecked resolution.
+    // DNS is pinned. Each payload callback completes before resuming the response.
     lookup:(_host,lookupOptions,callback)=>{
-      // Node 24+ autoSelectFamily asks for the all-address callback shape. Both shapes still return only the vetted pinned address.
       if(lookupOptions.all)(callback as unknown as (error:null,addresses:DnsAddress[])=>void)(null,[address]);else callback(null,address.address,address.family);
     },signal:options.signal},response=>{
-    const headers:Record<string,string>={};for(const [key,value] of Object.entries(response.headers))if(value!==undefined)headers[key]=Array.isArray(value)?value.join(','):value;
-    const chunks:Buffer[]=[];let total=0;response.on('data',(chunk:Buffer)=>{total+=chunk.length;if(total>options.max_bytes){response.destroy(new Error('download_size_limit'));return;}chunks.push(chunk);});
-    response.on('error',reject);response.on('end',()=>resolve({status:response.statusCode??0,headers,body:Buffer.concat(chunks)}));
-  });request.on('error',reject);request.setTimeout(options.timeout_ms,()=>request.destroy(new Error('source_timeout')));request.end();
+    if(finished||failure){response.destroy();return;}responseStream=response;const headers:Record<string,string>={};for(const [key,value] of Object.entries(response.headers))if(value!==undefined)headers[key]=Array.isArray(value)?value.join(','):value;
+    const chunks:Buffer[]=[];let total=0;
+    response.on('data',(chunk:Buffer)=>{
+      if(finished)return;response.pause();total+=chunk.length;const observedTotal=total;
+      const task=(async()=>{await options.on_body_bytes?.(chunk.length);if(observedTotal>options.max_bytes)throw new Error('download_size_limit');chunks.push(chunk);})();
+      pending.add(task);void task.then(()=>{if(!failure)response.resume();},fail).finally(()=>pending.delete(task));
+    });
+    response.on('error',fail);response.on('aborted',()=>fail(new Error('truncated_download')));
+    response.on('end',()=>{void drain().then(()=>{if(finished)return;finished=true;clearTimeout(deadlineTimer);if(failure)reject(failure);else resolve({status:response.statusCode??0,headers,body:Buffer.concat(chunks)});});});
+  });request.on('error',fail);request.setTimeout(options.timeout_ms,()=>fail(new Error('source_timeout')));deadlineTimer=setTimeout(()=>fail(new Error('source_timeout')),options.timeout_ms);deadlineTimer.unref();request.end();
 });
 export class UrlGateway {
   constructor(private readonly authorize:(url:string)=>Promise<void>,private readonly resolve:(host:string)=>Promise<DnsAddress[]>=host=>lookup(host,{all:true}),private readonly transport:GatewayTransport=nativeTransport,
     private readonly config={max_bytes:10_000_000,timeout_ms:30_000,max_redirects:5}){}
-  async read(raw:string,options:{mime?:string[];deadline?:number;signal?:AbortSignal}={}):Promise<{url:string;mime:string;content_type:string;bytes:Uint8Array;hash:string;redirects:string[]}> {
-    let url=new URL(raw);const redirects:string[]=[];
+  async read(raw:string,options:{mime?:string[];deadline?:number;signal?:AbortSignal;download?:GatewayDownloadBudget}={}):Promise<{url:string;mime:string;content_type:string;bytes:Uint8Array;hash:string;redirects:string[]}> {
+    let url=new URL(raw),begun=false;const redirects:string[]=[];
+    const remaining=()=>{const value=options.download?.remaining()??this.config.max_bytes;if(!Number.isSafeInteger(value)||value<0)throw new Error('download_budget_invalid');return value;};
+    const requireStart=()=>{if(options.signal?.aborted)throw new Error('cancelled');if(Date.now()>=(options.deadline??Infinity))throw new Error('run_deadline');if(options.download&&remaining()===0)throw new Error('batch_yield');};
     for(let step=0;step<=this.config.max_redirects;step++) {
       if(!['https:','http:'].includes(url.protocol)||url.username||url.password||(url.port&&!['80','443'].includes(url.port)))throw new Error('url_protocol_or_credentials');
-      if(options.signal?.aborted)throw new Error('cancelled');const timeout=Math.min(this.config.timeout_ms,(options.deadline??Infinity)-Date.now());if(timeout<=0)throw new Error('run_deadline');
-      await this.authorize(url.href);const hostname=url.hostname.replace(/^\[|\]$/g,'');const addresses=isIP(hostname)?[{address:hostname,family:isIP(hostname)}]:await this.resolve(hostname);
-      if(!addresses.length||addresses.some(address=>!isPublicAddress(address.address)))throw new Error('private_or_metadata_address');
-      const response=await this.transport(url,addresses.find(address=>address.family===4)??addresses[0]!,{max_bytes:this.config.max_bytes,timeout_ms:timeout,...(options.signal?{signal:options.signal}:{})});
+      requireStart();await this.authorize(url.href);const hostname=url.hostname.replace(/^\[|\]$/g,'');const addresses=isIP(hostname)?[{address:hostname,family:isIP(hostname)}]:await this.resolve(hostname);
+      if(!addresses.length||addresses.some(address=>!isPublicAddress(address.address)))throw new Error('private_or_metadata_address');requireStart();
+      if(!begun){await options.download?.begin();begun=true;}requireStart();
+      let observed=0,observationError:unknown,accounting=Promise.resolve(),accepting=true;
+      const observe=(bytes:number)=>{if(!accepting)return Promise.reject(new Error('transport_observation_after_completion'));if(!Number.isSafeInteger(bytes)||bytes<0)return Promise.reject(new Error('download_bytes_invalid'));observed+=bytes;const work=accounting.then(()=>options.download?.consume(bytes));accounting=work.then(()=>{},error=>{observationError??=error;});return work;};
+      let response:GatewayReply|undefined,transportError:unknown;
+      try{response=await this.transport(url,addresses.find(address=>address.family===4)??addresses[0]!,{max_bytes:Math.min(this.config.max_bytes,remaining()),timeout_ms:Math.min(this.config.timeout_ms,(options.deadline??Infinity)-Date.now()),...(options.signal?{signal:options.signal}:{}),on_body_bytes:observe});}catch(error){transportError=error;}
+      accepting=false;await accounting;if(observationError)throw observationError;if(transportError)throw transportError;if(!response)throw new Error('source_response_missing');
+      // Existing complete-response transports need no streaming hook. Account their
+      // unreported body exactly once; streaming transports may only omit a suffix.
+      if(observed>response.body.length)throw new Error('transport_body_observation_mismatch');
+      if(observed<response.body.length)await options.download?.consume(response.body.length-observed);
       if(response.body.length>this.config.max_bytes)throw new Error('download_size_limit');
       if([301,302,303,307,308].includes(response.status)) {
         const location=response.headers.location;if(!location)throw new Error('redirect_without_location');redirects.push(url.href);url=new URL(location,url);continue;

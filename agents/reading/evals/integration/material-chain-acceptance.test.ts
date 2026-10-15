@@ -34,7 +34,7 @@ import {parseDispatch} from '../../src/config/dispatch.js';
 import {FakeGitHub} from '../delivery/helpers.js';
 import {policyFixture} from '../runtime/policy-fixtures.js';
 
-type Scenario = 'complete' | 'paper_http_failure' | 'paper_extraction_failure';
+type Scenario = 'pinned_tree_missing' | 'complete' | 'paper_http_failure' | 'paper_extraction_failure';
 type StoredDelivery = Omit<SealedDelivery, 'files'> & {
   files: (Omit<SealedDelivery['files'][number], 'content'> & {content_base64: string})[];
 };
@@ -89,6 +89,7 @@ async function fixture(scenario: Scenario) {
   const project: HostProject = {...newRuntimeProject(candidate, {project_id: candidate.project_id, execution_scope: 'production',
     workspace_id: workspace, context, now: now()}), generation_version: 1, resume_stage: null, resume_policy: 'automatic',
     reason: null, last_run_id: null, batch_id: 'material-batch', delivery_id: null, sources_verified_at: null};
+  if (scenario === 'pinned_tree_missing') project.repository_versions[repositoryUrl] = {owner: 'test', repository: 'reading-fixture', commit};
   const identity = emptyIdentity(); addCandidate(identity, candidate);
   await journal.commitMany({identity, [projectKey]: project, ['contexts/' + context.context_id]: context}, 'collection_committed');
   const png = await readFile('agents/reading/evals/runtime/evidence/linux-tools.png');
@@ -358,3 +359,26 @@ it.each(['paper_http_failure', 'paper_extraction_failure'] as const)('C024 %s pe
     expect(f.journal.keys('artifact-seals/')).toEqual([]);
   } finally {await f.cleanup();}
 }, 60_000);
+
+
+it('a cold restored fixed repository commit without its tree resumes listing before reading code, preserving the fixed commit', async () => {
+  const f = await fixture('pinned_tree_missing');
+  try {
+    await f.cold(0);
+    expect((await f.current())!.repository_versions[repositoryUrl]).toEqual({owner: 'test', repository: 'reading-fixture', commit});
+    expect((await f.current())!.repository_files[repositoryUrl]).toBeUndefined();
+    await f.run();
+    const project = (await f.current())!;
+    expect(project.state, project.reason ?? '').toBe('pr_open');
+    expect(project.repository_versions[repositoryUrl]).toEqual({owner: 'test', repository: 'reading-fixture', commit});
+    expect(project.repository_files[repositoryUrl]).toEqual(['src/journal.ts']);
+    expect(f.http.filter(url => url === treeUrl)).toHaveLength(1);
+    expect(f.http.indexOf(treeUrl)).toBeLessThan(f.http.indexOf(rawCodeUrl));
+    expect(f.http.some(url => url.includes('/commits/'))).toBe(false);
+    expect(f.remote.calls.filter(action => action === 'pr')).toHaveLength(1);
+    const http = [...f.http], queries = [...f.queries], counters = structuredClone(project.counters);
+    await f.cold(1); await f.run();
+    expect(f.http).toEqual(http); expect(f.queries).toEqual(queries);
+    expect((await f.current())!.counters).toEqual(counters);
+  } finally {await f.cleanup();}
+});
