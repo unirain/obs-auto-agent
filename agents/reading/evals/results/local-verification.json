@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-15T06:43:42.999094+00:00",
+  "recorded_at": "2026-10-15T06:48:25.222925+00:00",
   "implementation_sha256": "e7c58d4b5c83ec6e96a81bbed0c5c260b6b11f3f83a9ebf72dea6be53d5c363c",
   "fingerprint_files": 337,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "pending exact implementation default four-worker Linux CI",
+    "npm test": "default four-worker Linux CI558/102 passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -35,13 +35,20 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local558/102 sequential files; exact default LinuxNode24 four-worker CI pending. Project stage redirect/chunk accounting and cold recovery locally verified; no new native service/model/quality acceptance.",
+  "scope": "Local Node24.19 serial and default LinuxNode24.10 four-worker CI558/102 passed. Project stage redirect/chunk accounting and cold recovery locally verified; no new native service/model/quality acceptance.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending",
-    "implementation_commit": null,
+    "status": "passed",
+    "implementation_commit": "a4d19da2eb9b7d06397bf86df1b17b69fae9e9cb",
     "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Redirect/chunk payload accounting and cold fixed-repository/tree recovery; expected558 assertions, no new live/model acceptance"
+    "scope": "Project stage redirect/chunk payload accounting and cold pinned-repository/tree recovery; no new native/model acceptance",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38694162330",
+    "tests": {
+      "files": 102,
+      "passed": 558,
+      "failed": 0,
+      "workers": 4
+    }
   },
   "previous_ci": {
     "status": "passed",
@@ -175,5 +182,10 @@
     "existing_direct_regression": 86,
     "status": "passed",
     "runtime": "Node24.19.0"
+  },
+  "goal_status": {
+    "status": "blocked_external",
+    "reason": "User-confirmed restricted RAM identities remain unprepared; G1 blocks paid/live model integration. Later gates also require isolated GitHub/App/image identities, published skill and human quality labels.",
+    "complete": false
   }
 }
