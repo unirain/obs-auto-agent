@@ -19,7 +19,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | A3 | runtime | live_unverified | Manual URL and source collection |
 | A4 | runtime | local_verified | Context, examples, index and fair scheduling |
 | A5 | runtime | live_unverified | SDK execution and usage lifecycle |
-| A6 | runtime/root | live_unverified | Bounded reading, material closure, retrieved-note versions, semantic progress and Docker JS fallback locally verified; actual model/research evidence pending |
+| A6 | runtime/root | in_progress | Bounded reading, material closure, retrieved-note versions, semantic progress and Docker JS fallback locally verified; actual model/research evidence pending |
 | A7 | runtime/root | in_progress | Versioned cloud contract and independent image review locally verified; known writing/render/review continuation locally verified; original proposal 38589eb has Linux fixture evidence; updated draft PR #35 head f1053b4 awaits default-branch review/merge and live SDK/article quality |
 | A8 | runtime/root | live_unverified | Actual driver replay, independent manual barriers and source/policy recovery locally verified; five varied real previews pending |
 | A9 | runtime/root | live_unverified | Frozen host execute/merge/report implemented; whole-query known/unknown charges, split/scope aggregation and immutable cumulative snapshot reconciliation locally verified; 26 private primary bodies prepared; 4 unsupported video sources, all 30 human labels and live calibration still missing |
@@ -43,9 +43,9 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 ## Current verification
 
-- Targeted verification on actual Node v24.19.0: writing/render/review budget and cold failures 8/8; quality execute/merge/report 22/22. Typecheck/build, all 40 exported schema documents and spec mapping passed. All 536 tests / 98 files passed locally with sequential files on Node v24.19.0 and in default four-worker Linux Node24.10.0 CI. Two earlier local parallel I/O timeout attempts are retained in the evidence; no test assertion was removed.
+- Targeted verification on actual Node v24.19.0: writing/render/review budget and cold failures 8/8; quality execute/merge/report 22/22. Typecheck/build, all 40 exported schema documents and spec mapping passed. All 542 tests / 99 files passed locally with sequential files on Node v24.19.0 and in default four-worker Linux Node24.10.0 CI. Two earlier local parallel I/O timeout attempts are retained in the evidence; no test assertion was removed.
 - Current local case audit: 87 covered / 0 partial / 0 missing, with named assertions. All 87 full-layer cases remain pending / 0 complete; local coverage is not native service or human acceptance.
-- Fully verified implementation `85d4f57f228d56ff4e2f016a688110f14b8d2915` is pushed: [Linux Node24.10.0 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38689381026), including npm ci/typecheck/test/build/spec coverage. The 332-file implementation fingerprint matches current bytes. Sanitized evidence: agents/reading/evals/results/local-verification.json.
+- Fully verified implementation `eea734c285218066acceba92a3144ad69c746013` is pushed: [Linux Node24.10.0 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38691432367), including npm ci/typecheck/test/build/spec coverage. The 334-file implementation fingerprint matches current bytes. Sanitized evidence: agents/reading/evals/results/local-verification.json.
 - Production generation cron remains disabled. G0 permits local contracts/replays only; G1 awaits external RAM setup; G2–G5 stay pending.
 
 ## External resources and remaining acceptance
@@ -77,4 +77,8 @@ Read-only controlled gateway captured26 distinct primary bodies/331853 character
 
 Readonly target-library main was resolved to dc56cd67ee538759759ab28c02ac45ab504191e2.16 committed notes were scanned;2 candidate URLs have observed note matches, including the holdout associated with 261013-构建有效的Agent自动化.md. Those paths were added to the private annotation copy without clearing existing paths. Alias/note completeness still requires human review; draft skill PR35 remains open/unmerged.
 
-A9 audit also found two required reliability counters absent from quality reports. The quality worker implemented frozen-bound report evidence for lost candidates and source failures misreported as empty, reusing duplicate PR metrics; targeted28 quality tests passed. Full current regression/CI for that change is still in progress. Source completeness remains unknown, so lost_candidates total is not zero or complete.
+A9 audit also found two required reliability counters absent from quality reports. The quality worker implemented frozen-bound report evidence for lost candidates and source failures misreported as empty, reusing duplicate PR metrics; targeted28 quality tests passed. Full current local542/99 and LinuxNode24.10 four-worker CI38691432367 passed for implementationeea734c. Source completeness remains unknown, so lost_candidates total is not zero or complete.
+
+## Additional local requirement identified
+
+Readonly source accounting audit found that UrlGateway follows3xx responses but driver/browser only charge the final response payload against max_download_bytes. Intermediate redirect payloads are currently omitted from total accounting. This is a plan/spec total-download invariant gap, separate from the87 named case assertions; their covered status does not prove this edge. Must fix per-hop payload charging/bounded fetch and cold persistent counters without double-counting final bytes or changing logical resource-count semantics. It remains local work, so the full goal is not at an external-only impasse despite missing RAM.

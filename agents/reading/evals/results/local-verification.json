@@ -1,25 +1,23 @@
 {
-  "recorded_at": "2026-10-15T06:14:46.958144+00:00",
+  "recorded_at": "2026-10-15T06:21:24.843394+00:00",
   "implementation_sha256": "b9ea8bbbdecff3266beafeeacb1c112f22b93a316d190cddbdbd0e69f97a3185",
   "fingerprint_files": 334,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "current full regression pending; quality targeted28 passed",
+    "npm test": "default four-worker Linux CI542/99 passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
     "git diff --check": "passed",
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed",
-    "npm test -- --no-file-parallelism": "local Node24.19.0 full536/98 passed"
+    "npm test -- --no-file-parallelism": "local Node24.19 full542/99 passed"
   },
   "local_tests": {
     "files": 99,
-    "passed": null,
-    "failed": null,
+    "passed": 542,
+    "failed": 0,
     "runtime": "Node24.19.0",
-    "file_parallelism": false,
-    "status": "full_running",
-    "targeted_quality_passed": 28
+    "file_parallelism": false
   },
   "live_tests": {
     "default_command": {
@@ -37,13 +35,20 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local Node24 sequential full536/98 and default Linux Node24.10 four-worker CI plus a separately explicitly executed real OSS TLS loss/reconciliation probe. Native RAM/model/delivery/human gates remain unpassed.",
+  "scope": "Local542/99 and default LinuxNode24.10 four-worker CI; readonly source preparation26/30, no labels/freeze/model/quality acceptance. Additional source redirect-byte total accounting gap remains local work.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending",
-    "implementation_commit": null,
+    "status": "passed",
+    "implementation_commit": "eea734c285218066acceba92a3144ad69c746013",
     "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Frozen-bound reliability reporting; full542 assertions expected, no new native/model acceptance"
+    "scope": "Frozen-bound reliability reporting; full542 assertions expected, no new native/model acceptance",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38691432367",
+    "tests": {
+      "files": 99,
+      "passed": 542,
+      "failed": 0,
+      "workers": 4
+    }
   },
   "previous_ci": {
     "status": "passed",
@@ -158,5 +163,12 @@
     "corpus_frozen": false,
     "note_lookup_commit": "dc56cd67ee538759759ab28c02ac45ab504191e2",
     "note_matches": 2
-  }
+  },
+  "additional_local_followups": [
+    {
+      "requirement": "spec635 total downloaded payloads",
+      "status": "pending",
+      "gap": "Intermediate3xx payloads are not currently charged by driver/browser; per-hop accounting and cold persistence required."
+    }
+  ]
 }
