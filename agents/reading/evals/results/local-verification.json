@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-15T05:57:50.888907+00:00",
-  "implementation_sha256": "143d946c24213a07949693437ec002445ffb23f321ca81b28d4564faebad3d3c",
-  "fingerprint_files": 332,
+  "recorded_at": "2026-10-15T06:14:46.958144+00:00",
+  "implementation_sha256": "b9ea8bbbdecff3266beafeeacb1c112f22b93a316d190cddbdbd0e69f97a3185",
+  "fingerprint_files": 334,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "default four-worker Linux CI536/98 passed",
+    "npm test": "current full regression pending; quality targeted28 passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -13,11 +13,13 @@
     "npm test -- --no-file-parallelism": "local Node24.19.0 full536/98 passed"
   },
   "local_tests": {
-    "files": 98,
-    "passed": 536,
-    "failed": 0,
+    "files": 99,
+    "passed": null,
+    "failed": null,
     "runtime": "Node24.19.0",
-    "file_parallelism": false
+    "file_parallelism": false,
+    "status": "full_running",
+    "targeted_quality_passed": 28
   },
   "live_tests": {
     "default_command": {
@@ -38,6 +40,12 @@
   "scope": "Local Node24 sequential full536/98 and default Linux Node24.10 four-worker CI plus a separately explicitly executed real OSS TLS loss/reconciliation probe. Native RAM/model/delivery/human gates remain unpassed.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending",
+    "implementation_commit": null,
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "Frozen-bound reliability reporting; full542 assertions expected, no new native/model acceptance"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "85d4f57f228d56ff4e2f016a688110f14b8d2915",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -46,19 +54,6 @@
     "tests": {
       "files": 98,
       "passed": 536,
-      "failed": 0,
-      "workers": 4
-    }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "2a3755ca47d41e31abfc5da9eeb9024eb95bd00e",
-    "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "All535 local assertions; native service and human gates remain unpassed.",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38549166391",
-    "tests": {
-      "files": 97,
-      "passed": 535,
       "failed": 0,
       "workers": 4
     }
@@ -111,7 +106,7 @@
   },
   "remaining_case_scope": "Actual checked-source writing-budget Controller/FileStore/native fixture cold chain and unknown/consumption/crash/stall/revision/review barriers locally targeted verified; no real drawing/model/service/human quality proof.",
   "history_scope": "Read-only committed source/run evidence binding and current adapter unsupported-history diagnostics; no verified-fill capability or exhaustive history claim. Boolean fill rejected, explicit acceptance atomic, legacy immutable facts retained. Fixed journal revision is not a remote HEAD freshness claim.",
-  "current_changes_scope": "Native OSS transport gap closed; actual constrained RAM identities confirmed unprepared by user; G1 incomplete and G2-G5 unpassed.",
+  "current_changes_scope": "Quality reliability report fills explicit required counters with bounded evidence and unknowns; private source preparation26/30 with human labels0, 4unsupported video sources.",
   "local_parallel_attempts": [
     {
       "passed": 534,
@@ -125,25 +120,25 @@
     }
   ],
   "previous_full_verification": {
-    "recorded_at": "2026-10-14T10:27:52.802193+00:00",
-    "implementation_sha256": "0e6b24427bec8c6e778da9b291448bd27f2901b623aae7b897dd8aa89fc6b817",
-    "fingerprint_files": 328,
+    "recorded_at": "2026-10-15T05:57:50.888907+00:00",
+    "implementation_sha256": "143d946c24213a07949693437ec002445ffb23f321ca81b28d4564faebad3d3c",
+    "fingerprint_files": 332,
     "local_tests": {
-      "files": 97,
-      "passed": 535,
+      "files": 98,
+      "passed": 536,
       "failed": 0,
       "runtime": "Node24.19.0",
       "file_parallelism": false
     },
     "ci": {
       "status": "passed",
-      "implementation_commit": "2a3755ca47d41e31abfc5da9eeb9024eb95bd00e",
+      "implementation_commit": "85d4f57f228d56ff4e2f016a688110f14b8d2915",
       "environment": "Linux / Node24.10.0 / four workers",
-      "scope": "All535 local assertions; native service and human gates remain unpassed.",
-      "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38549166391",
+      "scope": "Native transport host port plus local TLS replay; default full536 assertions",
+      "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38689381026",
       "tests": {
-        "files": 97,
-        "passed": 535,
+        "files": 98,
+        "passed": 536,
         "failed": 0,
         "workers": 4
       }
@@ -153,5 +148,15 @@
     "status": "passed",
     "evidence": "agents/reading/evals/storage/fixtures/oss-transport-evidence.json",
     "scope": "Native TLS loss before SDK success, one PUT, real unknown, exact immutable readback and fresh-client cold restore. No restricted IAM/model/delivery proof."
+  },
+  "quality_preparation": {
+    "evidence": "agents/reading/evals/results/quality-source-preparation.json",
+    "prepared_primary_bodies": 26,
+    "prepared_holdout_bodies": 9,
+    "unprepared_sources": 4,
+    "human_labels": 0,
+    "corpus_frozen": false,
+    "note_lookup_commit": "dc56cd67ee538759759ab28c02ac45ab504191e2",
+    "note_matches": 2
   }
 }

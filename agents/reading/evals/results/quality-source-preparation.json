@@ -1,0 +1,470 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-15T06:00:58.599Z",
+  "input_sha256": "bb3bed3a07b8851ede3f159cd7d0f3bc1c4478c8d987a9776eca32e7fb499400",
+  "captured": 26,
+  "unprepared": 4,
+  "labels_changed": false,
+  "corpus_frozen": false,
+  "source_completeness": "awaiting_human_review",
+  "note_exclusions": "observed_committed_note_URL_matches_only; human_review_required",
+  "downloaded_bytes": 11268939,
+  "receipts": [
+    {
+      "sample_id": "159c1db9c1130325ff1dce90fa3d9d5b9154b0f399fa92b246f07ee7fd592ed9",
+      "url": "https://www.langchain.com/blog/slack-sdk-managed-deep-agents",
+      "status": "prepared",
+      "hash": "b834577eeb7e44c98477e57531cc4b97a9809cd705033e115434414a2a4629d6",
+      "characters": 7642,
+      "method": "http",
+      "raw_response_sha256": "ce66b55bebfa99da564ad0c87cbeab6e1e92f03d99822170f8401c134e4391ef",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:38.776Z"
+    },
+    {
+      "sample_id": "715fac53ff26781b579f5e2ba7d27a6039439693fae713e4fedc8a3027faf71d",
+      "url": "https://www.langchain.com/blog/how-snyk-turned-an-internal-support-agent-into-a-customer-feature",
+      "status": "prepared",
+      "hash": "d8167776d0128c060324989f785e98a059b1c1d067923403b1cc1cd30d67ac30",
+      "characters": 10460,
+      "method": "http",
+      "raw_response_sha256": "415345d6fbc476c4b7c3d64e4045ea15fa8d57a9ab9ecb5574a6e191c0eb0d72",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:39.185Z"
+    },
+    {
+      "sample_id": "c5ac5b6aad591d4aeaa51fc60234867d65157ef6587521669557af50e3dbb531",
+      "url": "https://www.langchain.com/blog/agents-that-can-pay-with-stripe-link",
+      "status": "prepared",
+      "hash": "556b6065f77d885ce497f8b58041c0b3c43fe37503669ec8a98410ebfaa6418e",
+      "characters": 8604,
+      "method": "http",
+      "raw_response_sha256": "d2db057465c5bb7e853ed0fb9946f0f11b747cf4f42d145e95db2f7135abee66",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:39.570Z"
+    },
+    {
+      "sample_id": "d89ca29fbd41ee94ea5cfbf4e3a895e0a9aebfbb33d7bd1658f5d4f1e63858b8",
+      "url": "https://www.langchain.com/blog/revamping-skills-in-deep-agents",
+      "status": "prepared",
+      "hash": "a8af5019db31a8a88f8c35e364b881d6af47d1981586a60a26c10ab5672c356a",
+      "characters": 9163,
+      "method": "http",
+      "raw_response_sha256": "e03f2c0e4edcc9647c717792ac1286e6fa508ce814a362e6c2210175a51fd6d0",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:40.052Z"
+    },
+    {
+      "sample_id": "553466e25356a7bd6911f53af192e59c4f3bed98cd5f53b01b8dbc2fcf37d064",
+      "url": "https://www.langchain.com/blog/managed-deep-agents-schedules-per-run-configuration-slack",
+      "status": "prepared",
+      "hash": "65f2059fdb26c83c8000d1c23bc0faeb855c231137e2ac715a605c692c8ac4dd",
+      "characters": 7102,
+      "method": "http",
+      "raw_response_sha256": "cf43d08aaaccfb489d2d4d726d7826a0350c41ac8143917d5678a823c3f6888c",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:40.385Z"
+    },
+    {
+      "sample_id": "378de5b0a4ef1ffb1912cd87b42c4aca432b75ec64f187bb859abb1fc10dcf35",
+      "url": "https://www.langchain.com/blog/how-to-build-a-model-router-in-the-harness",
+      "status": "prepared",
+      "hash": "8886306fc8b324bd454cbaa9472fb84adac8f71558fcb57d13390a320d4019f1",
+      "characters": 14640,
+      "method": "http",
+      "raw_response_sha256": "725bb919ce6ec6c50aefdb9eb80fa758f365424043c8f7edcee3906de92bfef7",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:40.746Z"
+    },
+    {
+      "sample_id": "86cb38b172aa57682d8429bb402259f8718b1062e9f1a5fc9a1cdce43d14067b",
+      "url": "https://www.langchain.com/blog/building-prod-with-jev-and-langgraph",
+      "status": "prepared",
+      "hash": "daaf7769248e3a7b2ca4f9149f9f540d0bbe9f7efa1052d1a2052c79def5f887",
+      "characters": 10854,
+      "method": "http",
+      "raw_response_sha256": "2319b73779f631d70510c361638fb069234ee211cbfa1ad78e1c3630de45a7ae",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:41.097Z"
+    },
+    {
+      "sample_id": "e16684fdeb0697948a5eda071f974636bc85d3b1c7b02bce4e3fb0406845fe2f",
+      "url": "https://www.langchain.com/blog/langsmith-engine-agents-fine-tuning-trajectories",
+      "status": "prepared",
+      "hash": "d4d5fc4bde81d20d8c25bd63fb881d6ab53f5a4142b2b4f3e7a830bbbb50cdc2",
+      "characters": 9620,
+      "method": "http",
+      "raw_response_sha256": "f615b67bfc0dcda11dfb7b5f588c89486e8b2069cf991d275a036ca26a92cf08",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:41.420Z"
+    },
+    {
+      "sample_id": "27dad38353ccb73ad7f790bf02f95c87c9a5ebaa345b3c02f1cbe17b782841b9",
+      "url": "https://www.langchain.com/blog/langsmith-engine-v2-redteam",
+      "status": "prepared",
+      "hash": "eabfa1e5634be6ce6a71e42d322c91c8a141fe8fb48868694949f3dba1859b1e",
+      "characters": 6897,
+      "method": "http",
+      "raw_response_sha256": "28559de3b809a33c32a91e305b5468e436c4840f5d53449c39e3447f867ff9e3",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:41.746Z"
+    },
+    {
+      "sample_id": "ae0a400c8192a30448ad3703928c45a7f3f8548336be09138cdbe585a775d438",
+      "url": "https://www.langchain.com/blog/langsmith-managed-deep-agents-whats-new",
+      "status": "prepared",
+      "hash": "146657732a12389f00ce85eaf5d86272086159f9f9f53942ee4bcc9430495772",
+      "characters": 12251,
+      "method": "http",
+      "raw_response_sha256": "f025eb69dd8e54e340bfdbcb5ca8fb2c51dc544b0fb08594e893ef52afd11f41",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:42.098Z"
+    },
+    {
+      "sample_id": "b60131f089d9948998c041eaa06844d73b1a4b4864c112b11c5d1e618a8267dd",
+      "url": "https://www.langchain.com/blog/langsmith-trajectories-tracing",
+      "status": "prepared",
+      "hash": "7d70642252dd9c786037777615f7a41ff6675dabd51ab3bc47425fa5416cd908",
+      "characters": 7464,
+      "method": "http",
+      "raw_response_sha256": "17594d94f1541d642e6e509dd158686d2a0c994081d03fc5f4e2e139826ce99e",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:42.433Z"
+    },
+    {
+      "sample_id": "43f618bcad02931aaa715c5d5e126412f198d514ab90d05c40849e1575f7d6d5",
+      "url": "https://www.langchain.com/blog/langsmith-fine-tuning",
+      "status": "prepared",
+      "hash": "42a36faf0f56ffc78bf9786fa010e366c168a4d09f22b2df9c547a7c51d8da2f",
+      "characters": 10722,
+      "method": "http",
+      "raw_response_sha256": "812919943f276a7f33113f3748d15c8ddfa7ddb57c692afcb6fa0b6130508473",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:42.755Z"
+    },
+    {
+      "sample_id": "8574e9b0b2d28510b8852d2aae53cad89d79df356ed588377e7e165f7e1efb9b",
+      "url": "https://www.langchain.com/blog/langsmith-custom-apps",
+      "status": "prepared",
+      "hash": "2f06ebd96b87f57401858800d4ff83c8e74f925dbcf962af765f0634d8caa146",
+      "characters": 7441,
+      "method": "http",
+      "raw_response_sha256": "4a2ad9caacdda7c3ff811e62837772e0b91184c015cc2bcd2543c520cff723a9",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:43.067Z"
+    },
+    {
+      "sample_id": "8a5ec485806b5d053a4c11c0f8fc13c9d2c4a4fe353f1966842a77a9bbef0c26",
+      "url": "https://www.langchain.com/blog/reliability-healthcare-ai-langsmith-use-cases",
+      "status": "prepared",
+      "hash": "122fec1864f68b01f7648845d7e4a946328abc366d158b0e08d0e75a5f28ee2f",
+      "characters": 13427,
+      "method": "http",
+      "raw_response_sha256": "fb152994293af8320bc6eddf6f0d2abc6b3d2566f59688d1c7f4c6cdbd8386a5",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:43.397Z"
+    },
+    {
+      "sample_id": "4c4569a7037ff789cb2b8471d3fea4582b51db2ccf4a2890505bf1ccedea75dc",
+      "url": "https://www.langchain.com/blog/jev-is-now-available-in-langsmith-evals",
+      "status": "prepared",
+      "hash": "8f2ab0f3b249283dffbd1d3b03f9675fb412365d4743948f25f694a590d445c9",
+      "characters": 10393,
+      "method": "http",
+      "raw_response_sha256": "22fa48df8b3b629be729ef2605b5abe05ac1115cb5bfb44c653134d55b26a88c",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:43.722Z"
+    },
+    {
+      "sample_id": "49491069707aafe8da99e0ff81f543a234ce71c953ec13da1d0e0254c80749f2",
+      "url": "https://claude.dev/blog/how-we-made-claude-ai-faster/",
+      "status": "unprepared",
+      "reason": "unsupported_format:video"
+    },
+    {
+      "sample_id": "29741e0c3c539d6a2765be1ab7e205f95aabac61e4b216d8a90d7c04f4b049e9",
+      "url": "https://claude.com/resources/articles/how-healthcare-organizations-use-claude-tag",
+      "status": "prepared",
+      "hash": "8b5201517ffd15b47dc619665e63e65b8379643be59a601d9e2c6238fc1a76e6",
+      "characters": 11013,
+      "method": "http",
+      "raw_response_sha256": "bc4466db0204d869f8b3bfda675eac1bb1171db8861e2dd65f157be15ef29c3e",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:46.874Z"
+    },
+    {
+      "sample_id": "95a2094aeeaf3ba5e299ad93621857ddbde99f3101ae472b9635380c65829523",
+      "url": "https://claude.com/resources/articles/the-ai-native-sdlc-playbook",
+      "status": "prepared",
+      "hash": "b8ad79460e4c6da2cecf4c7e29f37ba38b7881a84267f359b627a67d6b6be5cc",
+      "characters": 69927,
+      "method": "http",
+      "raw_response_sha256": "aa098451366d189eb995d8f49c3061ad96ea88a67cb61f07d95e7a6d9a1f9fc6",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:48.131Z"
+    },
+    {
+      "sample_id": "39586be2f1fcf023e1f932b6a9f894c90ae7ed109a20d26a75e01d2c18ebfa3f",
+      "url": "https://claude.com/resources/articles/claude-code-guide-for-startups",
+      "status": "prepared",
+      "hash": "d66309f58ce2e58b0d861100f302b17d621810f12657e1fe5ff6f7f3f03259da",
+      "characters": 29920,
+      "method": "http",
+      "raw_response_sha256": "8a4d69d6e99be1dc854d1da3c6e40d0e070b59e7ca5e31f58acdcf90f9f0f98f",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:48.887Z"
+    },
+    {
+      "sample_id": "58ec2d8d3340d2d53c9a1f5aaf56eaacb45ca74096825694ab816a8c07e7b80e",
+      "url": "https://www.youtube.com/watch?v=FoteuzPpx7E",
+      "status": "unprepared",
+      "reason": "unsupported_format:video"
+    },
+    {
+      "sample_id": "f797f66218e7b83b4ab194ef57ef94ba0bcbfb83d94a3a3d3d4fa0be0bb4ca3c",
+      "url": "https://www.youtube.com/watch?v=Ov-B6K1EsaI",
+      "status": "unprepared",
+      "reason": "unsupported_format:video"
+    },
+    {
+      "sample_id": "2eea8542a0bf0fd1619f4a1ebe66940bd6727169b1e4b938304501b472cd6a95",
+      "url": "https://claude.com/resources/articles/dashboards-and-motion",
+      "status": "prepared",
+      "hash": "c422b72f76c1d5ac85927d5e523964bfb6e619283cf9586e28684759f1cd2f0c",
+      "characters": 6384,
+      "method": "http",
+      "raw_response_sha256": "0f9e43da74569a7a0b8fe1ad150cc0ed3c9b23a8bb48f64bd05c2fa4b2714dfe",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:52.755Z"
+    },
+    {
+      "sample_id": "cdb1d51fae0431106fedcd9b04b5f3c39e2b73ba97f1a80fa573c763d8f96f73",
+      "url": "https://www.anthropic.com/claude-haiku-5-5",
+      "status": "prepared",
+      "hash": "6dddf2cc76523c084bdf8cb2ffe420e1390f8f08eee3607e722e58429dbba615",
+      "characters": 10729,
+      "method": "http",
+      "raw_response_sha256": "c97bc8feca20459df76bb8b22e77d9fe1168b6ef75239a0cf4ede0a078407014",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:54.084Z"
+    },
+    {
+      "sample_id": "c115ce57a51e58c9dac68cb3becde7f154f940411cc2ccdd7c79b8830c4366b9",
+      "url": "https://claude.com/resources/articles/claude-now-works-in-google-docs-sheets-and-slides",
+      "status": "prepared",
+      "hash": "115b6a97348146860b80fac7e488ccbc7cd6f156d4f11b865e2991ebd86b884e",
+      "characters": 4914,
+      "method": "http",
+      "raw_response_sha256": "a7a34529eceec1bf93af76e5eddb774511bc9d67d54c4d3021d3b1c545162584",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:54.463Z"
+    },
+    {
+      "sample_id": "2bd8707fdab8226a9f675f85f9755994f2b63d5ba4355bb897dec2473e579ae5",
+      "url": "https://www.anthropic.com/news/cyber-verification-program",
+      "status": "prepared",
+      "hash": "3ba34056d7f77910539222674915a53c9ab337ea75613e93f4a39c105775e171",
+      "characters": 10050,
+      "method": "http",
+      "raw_response_sha256": "cc60b56892af7fe8e191d5bd38f8ca942daace3a967a777f51d9516f97e11804",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:54.908Z"
+    },
+    {
+      "sample_id": "432ca7e4813c468a8bc3403ce03034b2dad7adfc9ef3c30e37908fd0b4fd453c",
+      "url": "https://www.youtube.com/watch?v=bVXiNb9RyyI",
+      "status": "unprepared",
+      "reason": "unsupported_format:video"
+    },
+    {
+      "sample_id": "bded8ab9ae7c95b440d5860b1ae9e68eeb8576807fe75c72079c578e752d7b7d",
+      "url": "https://claude.com/resources/articles/claude-code-mods",
+      "status": "prepared",
+      "hash": "3a367b40db320bfa99cfd177fd7bd1c3ccd9dc7aa6b9a7b3314cbf324735c12c",
+      "characters": 5235,
+      "method": "http",
+      "raw_response_sha256": "a1e5a23c4f6e7d9fc88966afe76b225d6985dc3612b5897ac6516f86c24f40bb",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:56.628Z"
+    },
+    {
+      "sample_id": "7261e794218dcc9b096c65493244ea88ea4695fa315cdb4086b32915994058ff",
+      "url": "https://claude.dev/blog/building-effective-agent-automations/",
+      "status": "prepared",
+      "hash": "8e0698fee16d526a99cbd03820c5eba9e79d5504f4f50764fb8bda353c012b5d",
+      "characters": 16123,
+      "method": "http",
+      "raw_response_sha256": "590e826d426d5f64d5b1043363dbd3b0102c30ea4a000353cbc20a3b9c6664c7",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:57.483Z"
+    },
+    {
+      "sample_id": "41523d6dfd8f516c044d08fb7ef192fc990e27ed52f43cbb3612d7524ecd719b",
+      "url": "https://claude.com/resources/guides/the-ai-investment-firm",
+      "status": "prepared",
+      "hash": "d667e54b5682f3d76e0d7ffd09de3330ce3280fabdf56de0aab73d46d4fe77a5",
+      "characters": 1274,
+      "method": "http",
+      "raw_response_sha256": "08d9dd8cbdd424bb226f60bc8ba9a5d8e5bab15151ca62e577c3564eb480b6d8",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:58.042Z"
+    },
+    {
+      "sample_id": "757c4a0eaeb2d4a7c40675170f7324d5a0fc093318f30379691b7dde40c0f5cf",
+      "url": "https://claude.dev/blog/automating-eval-design-and-hillclimbing/",
+      "status": "prepared",
+      "hash": "f8745fbc5e74add8e7275dafa5ffba43a298418794e3bc9b0b4c85a1701b44e8",
+      "characters": 19616,
+      "method": "http",
+      "raw_response_sha256": "f81c5448ad4c9c03f40df1d13eded5da600bfd00fd4bf77e959c10b692f3e7e0",
+      "redirects": [],
+      "retrieved_at": "2026-10-15T06:00:58.528Z"
+    }
+  ],
+  "scope": "Read-only primary-source preparation; no model execution, labels, freeze, publication or quality acceptance. All body completeness awaits human review.",
+  "body_snapshot_document_sha256": "554d6f9cd962d27bca34b59f76a8944519b7cf2f15998a202b780239dbbe92b7",
+  "prepared_holdout": 9,
+  "human_label_count": 0,
+  "private_files": {
+    "samples": ".reading-local/quality-corpus-20261015/samples.for-human-labeling.json",
+    "snapshots": ".reading-local/quality-corpus-20261015/snapshots.json",
+    "note_exclusions": ".reading-local/quality-corpus-20261015/note-exclusions.json"
+  },
+  "note_exclusion_lookup": {
+    "schema_version": 1,
+    "notes_repository": "unirain/obs-notes-hub",
+    "default_branch": "main",
+    "commit": "dc56cd67ee538759759ab28c02ac45ab504191e2",
+    "files_scanned": 16,
+    "files_unread": [],
+    "method": "committed_note_HTTP_URL_matches_with_observed_primary_aliases",
+    "completeness": "awaiting_human_alias_and_note_review",
+    "matches": [
+      {
+        "sample_id": "159c1db9c1130325ff1dce90fa3d9d5b9154b0f399fa92b246f07ee7fd592ed9",
+        "note_paths": []
+      },
+      {
+        "sample_id": "715fac53ff26781b579f5e2ba7d27a6039439693fae713e4fedc8a3027faf71d",
+        "note_paths": []
+      },
+      {
+        "sample_id": "c5ac5b6aad591d4aeaa51fc60234867d65157ef6587521669557af50e3dbb531",
+        "note_paths": []
+      },
+      {
+        "sample_id": "d89ca29fbd41ee94ea5cfbf4e3a895e0a9aebfbb33d7bd1658f5d4f1e63858b8",
+        "note_paths": []
+      },
+      {
+        "sample_id": "553466e25356a7bd6911f53af192e59c4f3bed98cd5f53b01b8dbc2fcf37d064",
+        "note_paths": []
+      },
+      {
+        "sample_id": "378de5b0a4ef1ffb1912cd87b42c4aca432b75ec64f187bb859abb1fc10dcf35",
+        "note_paths": []
+      },
+      {
+        "sample_id": "86cb38b172aa57682d8429bb402259f8718b1062e9f1a5fc9a1cdce43d14067b",
+        "note_paths": []
+      },
+      {
+        "sample_id": "e16684fdeb0697948a5eda071f974636bc85d3b1c7b02bce4e3fb0406845fe2f",
+        "note_paths": []
+      },
+      {
+        "sample_id": "27dad38353ccb73ad7f790bf02f95c87c9a5ebaa345b3c02f1cbe17b782841b9",
+        "note_paths": []
+      },
+      {
+        "sample_id": "ae0a400c8192a30448ad3703928c45a7f3f8548336be09138cdbe585a775d438",
+        "note_paths": []
+      },
+      {
+        "sample_id": "b60131f089d9948998c041eaa06844d73b1a4b4864c112b11c5d1e618a8267dd",
+        "note_paths": []
+      },
+      {
+        "sample_id": "43f618bcad02931aaa715c5d5e126412f198d514ab90d05c40849e1575f7d6d5",
+        "note_paths": []
+      },
+      {
+        "sample_id": "8574e9b0b2d28510b8852d2aae53cad89d79df356ed588377e7e165f7e1efb9b",
+        "note_paths": []
+      },
+      {
+        "sample_id": "8a5ec485806b5d053a4c11c0f8fc13c9d2c4a4fe353f1966842a77a9bbef0c26",
+        "note_paths": []
+      },
+      {
+        "sample_id": "4c4569a7037ff789cb2b8471d3fea4582b51db2ccf4a2890505bf1ccedea75dc",
+        "note_paths": []
+      },
+      {
+        "sample_id": "49491069707aafe8da99e0ff81f543a234ce71c953ec13da1d0e0254c80749f2",
+        "note_paths": []
+      },
+      {
+        "sample_id": "29741e0c3c539d6a2765be1ab7e205f95aabac61e4b216d8a90d7c04f4b049e9",
+        "note_paths": []
+      },
+      {
+        "sample_id": "95a2094aeeaf3ba5e299ad93621857ddbde99f3101ae472b9635380c65829523",
+        "note_paths": [
+          "Organize Notes By AI/261012-AI原生SDLC实践手册.md"
+        ]
+      },
+      {
+        "sample_id": "39586be2f1fcf023e1f932b6a9f894c90ae7ed109a20d26a75e01d2c18ebfa3f",
+        "note_paths": []
+      },
+      {
+        "sample_id": "58ec2d8d3340d2d53c9a1f5aaf56eaacb45ca74096825694ab816a8c07e7b80e",
+        "note_paths": []
+      },
+      {
+        "sample_id": "f797f66218e7b83b4ab194ef57ef94ba0bcbfb83d94a3a3d3d4fa0be0bb4ca3c",
+        "note_paths": []
+      },
+      {
+        "sample_id": "2eea8542a0bf0fd1619f4a1ebe66940bd6727169b1e4b938304501b472cd6a95",
+        "note_paths": []
+      },
+      {
+        "sample_id": "cdb1d51fae0431106fedcd9b04b5f3c39e2b73ba97f1a80fa573c763d8f96f73",
+        "note_paths": []
+      },
+      {
+        "sample_id": "c115ce57a51e58c9dac68cb3becde7f154f940411cc2ccdd7c79b8830c4366b9",
+        "note_paths": []
+      },
+      {
+        "sample_id": "2bd8707fdab8226a9f675f85f9755994f2b63d5ba4355bb897dec2473e579ae5",
+        "note_paths": []
+      },
+      {
+        "sample_id": "432ca7e4813c468a8bc3403ce03034b2dad7adfc9ef3c30e37908fd0b4fd453c",
+        "note_paths": []
+      },
+      {
+        "sample_id": "bded8ab9ae7c95b440d5860b1ae9e68eeb8576807fe75c72079c578e752d7b7d",
+        "note_paths": []
+      },
+      {
+        "sample_id": "7261e794218dcc9b096c65493244ea88ea4695fa315cdb4086b32915994058ff",
+        "note_paths": [
+          "Organize Notes By AI/261013-构建有效的Agent自动化.md"
+        ]
+      },
+      {
+        "sample_id": "41523d6dfd8f516c044d08fb7ef192fc990e27ed52f43cbb3612d7524ecd719b",
+        "note_paths": []
+      },
+      {
+        "sample_id": "757c4a0eaeb2d4a7c40675170f7324d5a0fc093318f30379691b7dde40c0f5cf",
+        "note_paths": []
+      }
+    ]
+  },
+  "downloaded_bytes_basis": "final_HTTP_response_payloads; redirect_payload_bytes_not_measured"
+}

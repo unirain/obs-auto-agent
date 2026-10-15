@@ -22,7 +22,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | A6 | runtime/root | live_unverified | Bounded reading, material closure, retrieved-note versions, semantic progress and Docker JS fallback locally verified; actual model/research evidence pending |
 | A7 | runtime/root | in_progress | Versioned cloud contract and independent image review locally verified; known writing/render/review continuation locally verified; original proposal 38589eb has Linux fixture evidence; updated draft PR #35 head f1053b4 awaits default-branch review/merge and live SDK/article quality |
 | A8 | runtime/root | live_unverified | Actual driver replay, independent manual barriers and source/policy recovery locally verified; five varied real previews pending |
-| A9 | runtime/root | live_unverified | Frozen host execute/merge/report implemented; whole-query known/unknown charges, split/scope aggregation and immutable cumulative snapshot reconciliation locally verified; 30 human labels/fixed bodies and live model calibration still missing |
+| A9 | runtime/root | live_unverified | Frozen host execute/merge/report implemented; whole-query known/unknown charges, split/scope aggregation and immutable cumulative snapshot reconciliation locally verified; 26 private primary bodies prepared; 4 unsupported video sources, all 30 human labels and live calibration still missing |
 | O1 | operations | live_unverified | Trusted deployments and permissions |
 | O2 | operations | live_unverified | Immutable resource upload |
 | O3 | operations | live_unverified | Publisher and reconciliation |
@@ -57,7 +57,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | Restricted credentials | No preview/test workspace/image/capacity/monitor/App test identities currently injected | Scope-bound RAM identities, GitHub App and image upload/delete/read identities from setup runbook |
 | Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | Live SDK only after complete G1; isolation/recovery and five varied previews |
 | Notes skills | [Draft PR #35](https://github.com/unirain/obs-notes-hub/pull/35), current head f1053b4829747667a5263a4a77a0d7bb092252da | Human review/merge and pin actual published default-branch commit; a draft head is not publication |
-| Quality corpus | 30 candidates / 10 holdout; labels and frozen body hashes missing | Human labels/body versions, real evaluation, calibration and quality confirmation |
+| Quality corpus | 30 candidates / 10 holdout; 26 private bodies (9 holdout) prepared with SHA256; 4 video bodies unavailable and all labels unset | 4 accessible bodies or explicit new candidate choices, human labels/note exclusions, real evaluation/calibration and quality confirmation |
 | Delivery/operations | Local adapters and cold fault replay | Native isolated image/PR reconciliation, sources/monitoring/Actions/cancellation, capacity and production manual smoke |
 
 No cloud resources have been created to obtain passing tests. No paid model generation, real article PR/image delivery, production deployment or cron activation has been performed.
@@ -70,3 +70,11 @@ Setup: docs/runbooks/test-environment-setup.md. Quality workflow: docs/runbooks/
 - One commit PUT; authenticated TLS OSS200/request-id received, 309 bytes suppressed before HTTP parser, zero response events; actual SDK returned unknown. Manager read back the exact fixed commit twice, retained consecutive commits0/1 and cold-restored original records/artifact/revision via a fresh non-instrumented client. No adapter post-success throw.
 - Source/SDK/Node hashes and sanitized evidence: agents/reading/evals/storage/fixtures/oss-transport-evidence.json. Restricted RAM was confirmed unprepared today; no IAM resource was created or production enabled.
 - Targeted transport/storage tests13/13 and complete local Node24 sequential regression536/98 passed, together with typecheck/build/40 schemas/spec mapping. Exact implementation85d4f57 passed Linux Node24.10.0 four-worker CI38689381026 with the same536/98 assertions. Default live selection skips5 tests; the native transport probe was separately explicitly executed.
+
+## 2026-10-15 Quality input preparation
+
+Read-only controlled gateway captured26 distinct primary bodies/331853 characters from30 existing candidates, including9 of10 holdout bodies (11,268,939 final-response payload bytes). The other4 are reported unsupported_format:video; no fabricated body or automatic candidate replacement. All30 human labels remainnull and no corpus was frozen. Private editable sample file: `.reading-local/quality-corpus-20261015/samples.for-human-labeling.json`; snapshots and readable individual bodies are adjacent. Sanitized receipt: agents/reading/evals/results/quality-source-preparation.json.
+
+Readonly target-library main was resolved to dc56cd67ee538759759ab28c02ac45ab504191e2.16 committed notes were scanned;2 candidate URLs have observed note matches, including the holdout associated with 261013-构建有效的Agent自动化.md. Those paths were added to the private annotation copy without clearing existing paths. Alias/note completeness still requires human review; draft skill PR35 remains open/unmerged.
+
+A9 audit also found two required reliability counters absent from quality reports. The quality worker implemented frozen-bound report evidence for lost candidates and source failures misreported as empty, reusing duplicate PR metrics; targeted28 quality tests passed. Full current regression/CI for that change is still in progress. Source completeness remains unknown, so lost_candidates total is not zero or complete.

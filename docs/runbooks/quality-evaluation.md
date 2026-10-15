@@ -77,3 +77,31 @@ npx tsx agents/reading/evals/quality/run.ts merge --frozen /protected/frozen.jso
 新输出样本包含 `execution_scope`、`known_cost_usd`、`known_duration_ms`。同一样本里有已定价 query 和未知 query 时，已定价部分进入 known 下界，`cost_usd` 仍为 null；没有任何费用观测时 known 也是 null。存在缺最终报告的尝试时，总耗时为 null，其他完整尝试的耗时仍保留。确实观测到零费用可以记录零。这些费用来自整个 query 的汇总，绝不再叠加其 step usage。
 
 最终报告明示 scope，提供 `by_scope` 和 `by_split` 消耗及样本数；主选题评分仍针对留出集，开发集另列。`qualified_outputs` 单列每篇人工确认合格产物的费用与耗时，下界和未知分别保留；每合格产物的摊销费用／耗时包含未合格、失败和零产出的消耗，总值未知时摊销总值也未知。旧人工文件没有 scope 或下界时保留 unknown，不能推断它属于 preview。完整执行 case 的失败和版本事实随 report 输出保留。上述流程仍不证明真实模型质量或通过 G4/G5。
+
+## 可靠性指标的证据输入
+
+`report` 现在总会输出 `reliability`，包括重复 PR、丢失候选和来源失败误报无新内容。没有已核验输入时，count 保持 null，不能从没有日志推断零。可通过 `--reliability /protected/reliability.json` 提供同一 frozen hash 绑定的版本 1 证据：
+
+```json
+{
+  "schema_version": 1,
+  "frozen_hash": "实际冻结文件的 frozen_hash",
+  "expected_run_ids": null,
+  "run_reports": [],
+  "expected_delivery_ids": null,
+  "deliveries": [],
+  "observed_lost_candidates": []
+}
+```
+
+run_reports 必须是从持久 workspace 核验得到的完整 RunReport，deliveries 为核验过的完整 DeliveryRecord。输入接受现有严格 parser，不能传模型摘要、仅日志片段或“已经通过”的布尔值。expected IDs 来自本次明确要审计的受信记录清单；这些数组界定测量范围，不证明整个来源历史或整个仓库已覆盖。缺 ID、无记录、未完成的远端 PR 事实都保留 unknown。输入也只在本地校验，不会访问 OSS/GitHub 或核实操作者是否伪造文件。
+
+来源误报只对提供的 production scheduled 采集报告作可复核比较：某 source_results.status 为 failed，而该报告 outcome 却是 success_no_selection，记录 run/source/reason 实例。完整给定报告集才输出该范围的 count；缺报告或缺采集来源结果时总数仍 null，已观察实例单列。正常 partial 即使另一来源创建 PR，也不算“误报无新内容”。该检查不能发现从未进入受信 RunReport 的 HTTP/解析错误，不能冒充全平台无漏报证明。
+
+重复 PR 按已确认 PR URL 和 project 身份去重，复用运营指标的定义；同一 PR 在多个 delivery 回执出现不会双计。完整给定 delivery 集且所有 PR 事实已确认时才给该范围的总数；未决写入、尚无已确认 PR 或清单不完整时仍保留未知。
+
+当前两个来源适配器没有历史完整性契约，所以 lost_candidates.count **始终 null**，reason 为 source_completeness_unverified。若人工确实核验某个冻结样本丢失，可在 observed_lost_candidates 列出 `{ "sample_id": "实际冻结样本ID", "evidence_reference": "非秘密核验记录位置" }`；这只增加已知实例下界，不授权声称来源完整，也不能用空数组声称丢失零个。程序不会自动猜测丢失候选或补采完整性。结果附证据记录 SHA-256 与审计范围，仍需真实验收和用户确认。
+
+```sh
+npx tsx agents/reading/evals/quality/run.ts report --input /protected/measured.json --frozen /protected/frozen.json --reliability /protected/reliability.json --output /protected/report-with-reliability.json
+```
