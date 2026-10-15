@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-15T05:48:35.041Z",
+  "sdk": "ali-oss@6.23.0",
+  "urllib": "2.44.1",
+  "node": "24.19.0",
+  "code_bindings": {
+    "adapter_sha256": "c50672398f297b1712a03c294162cb19a6b586bf0824cba7ac1cc53094a62fe0",
+    "agent_sha256": "8cf7f5c2ce369f9c0c87c597f81a4ca295178db488cb7d621f149248cc629d70",
+    "probe_sha256": "fac6e2155ca7e53b56c23b25fe1fd660554587d17fc32364791a2b2c59f7c5b7",
+    "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+    "urllib_sha256": "ffe444c4f588e2b98bfcfbcd02f84c443f2109a40b337cf42f78a177e105e7af",
+    "node_binary_sha256": "3c9448363b9976bf3d9e8f4d320397975800131b42c7b1be342dadc05871dd25"
+  },
+  "bucket": "obs-agent",
+  "region": "oss-cn-beijing",
+  "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+  "isolated_prefix": "reading-agent-tests/523fac0d-c29c-4cbe-b0c7-ddfdd4254350/",
+  "configuration": {
+    "private": true,
+    "versioning": "never",
+    "lifecycle_safe": true
+  },
+  "local_intent_revision": "d9724d47-5cb6-45e2-b6f9-6e7047f940b6",
+  "trace": {
+    "schema_version": 1,
+    "target_put_requests": 1,
+    "response_events": 0,
+    "suppressed_bytes": 309,
+    "remote_status": 200,
+    "request_id_sha256": "662421495645032e538032f237ab01f56cd5ab0bab68afc631d162a488fb4e6c",
+    "tls_authorized": true,
+    "socket_destroyed": true
+  },
+  "native_failure": "unknown",
+  "put_attempts": 1,
+  "manager_readbacks": 2,
+  "commit_sha256": "7d827e13109e91f5d39658837ccdf3d4a47a711a7ad3cbbe0fbcb8c22114516e",
+  "sequence": "00000000000000000001",
+  "immutable_commit_count": 2,
+  "cold_recovery": "passed",
+  "ram_isolation": "live_unverified_separate_identities_required",
+  "gate_g1": "incomplete",
+  "scope": "Actual native OSS SDK/TLS/immutable Manager/cold restore with a host-only socket fault; not a RAM denial or paid SDK/model test.",
+  "prior_fixture_attempt": {
+    "isolated_prefix": "reading-agent-tests/58c4ff20-b7ed-4397-a987-80bcb380f591/",
+    "status": "failed_before_fault",
+    "reason": "probe artifact path outside persistence allowlist",
+    "readonly_reconciled": "only initial commit0 and manifest exist; no retry or deletion of that chain"
+  }
+}

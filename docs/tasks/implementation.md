@@ -1,6 +1,6 @@
 # Reading Agent implementation tasks
 
-Updated: 2026-10-14. Objective: implement and verify all five plans without narrowing live validation requirements.
+Updated: 2026-10-15. Objective: implement and verify all five plans without narrowing live validation requirements.
 
 Statuses: pending, in_progress, implemented, local_verified, live_unverified, blocked_external, complete. A work package is complete only when its required evidence exists. Gate evidence is tracked separately.
 
@@ -35,7 +35,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | Gate | Status | Required evidence |
 | --- | --- | --- |
 | G0 | complete | Exact core DTO/UTC boundaries, shared states, 40 schema definitions and complete cross-module cold-recovery fixture locally verified; audit in docs/notes/g0-contract-audit.md |
-| G1 | pending | Local persistence faults plus live OSS/RAM verification |
+| G1 | blocked_external | Native OSS transport loss/cold reconciliation passed; user-confirmed restricted RAM identities unprepared |
 | G2 | pending | Live SDK isolation, five varied previews and recovery |
 | G3 | pending | Isolated GitHub/image delivery and fault reconciliation |
 | G4 | pending | Real sources, monitoring, capacity and human quality calibration |
@@ -46,14 +46,14 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 - Targeted verification on actual Node v24.19.0: writing/render/review budget and cold failures 8/8; quality execute/merge/report 22/22. Typecheck/build, all 40 exported schema documents and spec mapping passed. All 535 tests / 97 files passed locally with sequential files on Node v24.19.0 and in default four-worker Linux Node24.10.0 CI. Two earlier local parallel I/O timeout attempts are retained in the evidence; no test assertion was removed.
 - Current local case audit: 87 covered / 0 partial / 0 missing, with named assertions. All 87 full-layer cases remain pending / 0 complete; local coverage is not native service or human acceptance.
 - Fully verified implementation `2a3755ca47d41e31abfc5da9eeb9024eb95bd00e` is pushed: [Linux Node24.10.0 CI passed](https://github.com/unirain/obs-auto-agent/actions/runs/38549166391), including npm ci/typecheck/test/build/spec coverage. The 328-file implementation fingerprint matches current bytes. Sanitized evidence: agents/reading/evals/results/local-verification.json.
-- Production generation cron remains disabled. G0 permits local contracts/replays only; G1–G5 stay pending.
+- Production generation cron remains disabled. G0 permits local contracts/replays only; G1 awaits external RAM setup; G2–G5 stay pending.
 
 ## External resources and remaining acceptance
 
 | Item | Current evidence | Still required |
 | --- | --- | --- |
 | Implementation repository | unirain/obs-auto-agent, default master, Apache License preserved | Separate isolated delivery test repository/App |
-| Private OSS | Existing obs-agent, Beijing; native private/never-versioned/no-overwrite/pagination/chain probe passed | Actual transport-level response loss and restricted RAM allow/deny; broad test AK is not IAM proof |
+| Private OSS | Existing obs-agent, Beijing; native private/never-versioned/no-overwrite/pagination/chain probe passed | Native TLS transport loss now passed (2026-10-15); restricted RAM allow/deny still required. Broad test AK is not IAM proof |
 | Restricted credentials | No preview/test workspace/image/capacity/monitor/App test identities currently injected | Scope-bound RAM identities, GitHub App and image upload/delete/read identities from setup runbook |
 | Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | Live SDK only after complete G1; isolation/recovery and five varied previews |
 | Notes skills | [Draft PR #35](https://github.com/unirain/obs-notes-hub/pull/35), current head f1053b4829747667a5263a4a77a0d7bb092252da | Human review/merge and pin actual published default-branch commit; a draft head is not publication |
@@ -63,3 +63,10 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 No cloud resources have been created to obtain passing tests. No paid model generation, real article PR/image delivery, production deployment or cron activation has been performed.
 
 Setup: docs/runbooks/test-environment-setup.md. Quality workflow: docs/runbooks/quality-evaluation.md. Specific assertions and missing layers: docs/notes/spec-case-audit.md and agents/reading/evals/case-audits/. Decisions, historical implementation evidence and blockers: docs/notes/implementation-log.md; prior task snapshots are preserved in Git history.
+
+## 2026-10-15 OSS transport evidence
+
+- Actual ali-oss6.23.0/urllib2.44.1 on Node24.19.0, existing private obs-agent (Beijing), isolated prefix 523fac0d-c29c-4cbe-b0c7-ddfdd4254350. A durable local intent checkpoint preceded cloud writes.
+- One commit PUT; authenticated TLS OSS200/request-id received, 309 bytes suppressed before HTTP parser, zero response events; actual SDK returned unknown. Manager read back the exact fixed commit twice, retained consecutive commits0/1 and cold-restored original records/artifact/revision via a fresh non-instrumented client. No adapter post-success throw.
+- Source/SDK/Node hashes and sanitized evidence: agents/reading/evals/storage/fixtures/oss-transport-evidence.json. Restricted RAM was confirmed unprepared today; no IAM resource was created or production enabled.
+- Targeted transport/storage tests13/13 and complete local Node24 sequential regression536/98 passed, together with typecheck/build/40 schemas/spec mapping. Default four-worker Linux CI for these changes remains pending; earlier535-test CI above belongs to implementation2a3755c. Default live selection skips5 tests; the native transport probe was separately explicitly executed.

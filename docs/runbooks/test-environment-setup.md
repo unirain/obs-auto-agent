@@ -140,3 +140,13 @@ ListObjects 使用 bucket Resource 并通过 `oss:Prefix` 条件限制目录；G
 `test-image-gc.json` 仅允许指定测试图片前缀的 GetObject/DeleteObject/DeleteObjectVersion 和必要元数据/版本清单读取；明确不允许上传，不允许私有 workspace 删除。给独立 RAM 用户/角色绑定该策略，Secret **`TEST_IMAGE_GC_CREDENTIALS`**；正式后续另建身份并使用 **`READING_IMAGE_GC_CREDENTIALS`**。不要把 `OSS_TEST_IMAGE_CREDENTIALS` 或当前基础探针 key 自动当清理身份。
 
 确认专用前缀、唯一 writer 与版本状态后，在共享 writer 互斥下使用可信 `maintenance` 入口。无引用证明、无归属、仍在 HEAD/活跃/待审/已合并/unknown 路径上的图片不会删除。实际允许/拒绝和 DELETE 回读需在隔离对象验证；这些 JSON 模板与本地测试不证明 RAM 已配置。
+
+## Native transport-loss probe (G1)
+
+`agents/reading/evals/storage/oss-transport-probe.ts` is a host-only diagnostic, requiring Node24, existing isolated bucket opt-in `OSS_LIVE_TEST_ALLOWED=isolated-existing-bucket`, `OSS_TEST_BUCKET/REGION/ENDPOINT` and credentials loaded by the existing host loader. Run with DEBUG/NODE_DEBUG disabled. It creates an immutable local intent in ignored `.reading-local/oss-transport/` before test object writes. No bucket or RAM resources are created. The same probe is included in the gated OSS live test file.
+
+```sh
+npx tsx agents/reading/evals/storage/oss-transport-probe.ts
+```
+
+A successful report must show one target PUT, authenticated OSS200/request-id hash, zero HTTP response events, an actual SDK unknown error, exact fixed-key Manager reconciliation and fresh-client cold restore of commits0/1 plus artifact bytes. Skipping,403, pre-request errors or a post-success adapter throw do not pass this case. Raw headers/keys are not logged; reports bind source/SDK/Node hashes. The 2026-10-15 actual evidence is in `evals/storage/fixtures/oss-transport-evidence.json`. This test used the existing setup credential, so it proves transport behavior only; restricted RAM permission cases remain unverified and G1 remains blocked until those identities are configured.

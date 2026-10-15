@@ -1,4 +1,5 @@
 import OSS from "ali-oss";
+import type { Agent as HttpsAgent } from "node:https";
 import {
   AgentError,
   type ObjectStore,
@@ -20,6 +21,8 @@ export interface OssStoreOptions {
 type VersioningClient = OSS & {
   getBucketVersioning(bucket: string): Promise<{ versionStatus?: string }>;
 };
+/** Trusted host transport injection; never deserialize this from deployment/source/model input. */
+export interface OssHostTransport { https_agent: HttpsAgent }
 export function classifyOssError(error: unknown): AgentError {
   const e = (error && typeof error === "object" ? error : {}) as {
     code?: string;
@@ -41,7 +44,7 @@ export class OssObjectStore implements ObjectStore {
   readonly bucket: string;
   private readonly client: VersioningClient;
   private readonly endpoint: string;
-  constructor(private readonly options: OssStoreOptions) {
+  constructor(private readonly options: OssStoreOptions, transport?: OssHostTransport) {
     this.bucket = options.bucket;
     this.endpoint = options.endpoint.startsWith("https://")
       ? options.endpoint
@@ -63,7 +66,9 @@ export class OssObjectStore implements ObjectStore {
         "configuration",
         "Native public OSS HTTPS endpoint required",
       );
-    this.client = new OSS({
+    // ali-oss 6.23.0 lib/client.js and common/utils/createRequest.js consume
+    // httpsAgent; its installed @types omit that supported host option.
+    const sdkOptions: OSS.Options & { httpsAgent?: HttpsAgent; retryMax: 0; enableProxy: false } = {
       bucket: options.bucket,
       region: options.region,
       endpoint: this.endpoint,
@@ -72,7 +77,11 @@ export class OssObjectStore implements ObjectStore {
       ...(options.stsToken ? { stsToken: options.stsToken } : {}),
       timeout: options.timeout_ms ?? 30000,
       secure: true,
-    }) as VersioningClient;
+      retryMax: 0,
+      enableProxy: false,
+      ...(transport ? { httpsAgent: transport.https_agent } : {}),
+    };
+    this.client = new OSS(sdkOptions) as VersioningClient;
   }
   private guard(key: string): void {
     if (

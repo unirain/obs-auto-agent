@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-14T10:27:52.802193+00:00",
-  "implementation_sha256": "0e6b24427bec8c6e778da9b291448bd27f2901b623aae7b897dd8aa89fc6b817",
-  "fingerprint_files": 328,
+  "recorded_at": "2026-10-15T05:53:38.323171+00:00",
+  "implementation_sha256": "143d946c24213a07949693437ec002445ffb23f321ca81b28d4564faebad3d3c",
+  "fingerprint_files": 332,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "passed in default four-worker Linux CI; local serial all535 assertions passed",
+    "npm test": "current local serial536/98 passed; default Linux four-worker CI pending",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -13,24 +13,37 @@
     "npm test -- --no-file-parallelism": "passed locally Node24.19.0"
   },
   "local_tests": {
-    "files": 97,
-    "passed": 535,
+    "files": 98,
+    "passed": 536,
     "failed": 0,
     "runtime": "Node24.19.0",
     "file_parallelism": false
   },
   "live_tests": {
-    "executed": 0,
-    "skipped": 4
+    "default_command": {
+      "executed": 0,
+      "skipped": 5
+    },
+    "separate_native_oss_transport": {
+      "executed": 1,
+      "status": "passed",
+      "evidence": "agents/reading/evals/storage/fixtures/oss-transport-evidence.json"
+    }
   },
   "spec_cases": {
     "mapped": 87,
     "complete": 0,
     "pending": 87
   },
-  "scope": "Actual local Node24.19.0 serial full assertion suite and default Linux Node24.10.0 four-worker CI; no new native OSS/RAM/SDK/delivery/human evidence.",
+  "scope": "Local536/98 and explicitly separate native OSS transport test; default Linux CI pending. No paid model or native RAM/delivery/human proof.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending",
+    "implementation_commit": null,
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "Native transport host port plus local TLS replay; default full536 assertions"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "2a3755ca47d41e31abfc5da9eeb9024eb95bd00e",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -42,13 +55,6 @@
       "failed": 0,
       "workers": 4
     }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "5dd37e571045311d9b790c443679a87570b2e777",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38542003642",
-    "environment": "Linux / Node 24.10.0",
-    "scope": "Mirror/knowledge/history diagnostics and remaining-case replay verified locally; C035 writing/render budget chain and native SDK/service/human gates remain incomplete."
   },
   "schema_documents": {
     "count": 40,
@@ -98,7 +104,7 @@
   },
   "remaining_case_scope": "Actual checked-source writing-budget Controller/FileStore/native fixture cold chain and unknown/consumption/crash/stall/revision/review barriers locally targeted verified; no real drawing/model/service/human quality proof.",
   "history_scope": "Read-only committed source/run evidence binding and current adapter unsupported-history diagnostics; no verified-fill capability or exhaustive history claim. Boolean fill rejected, explicit acceptance atomic, legacy immutable facts retained. Fixed journal revision is not a remote HEAD freshness claim.",
-  "current_changes_scope": "Known writing/review atomic continuation and frozen ledger aggregation verified locally and by default Linux CI; native service/human gates unpassed.",
+  "current_changes_scope": "Native OSS transport gap closed; actual constrained RAM identities confirmed unprepared by user; G1 incomplete and G2-G5 unpassed.",
   "local_parallel_attempts": [
     {
       "passed": 534,
@@ -112,20 +118,33 @@
     }
   ],
   "previous_full_verification": {
-    "recorded_at": "2026-10-14T09:23:02.199253Z",
-    "implementation_sha256": "1ede29050666325936fb1827b9f5abe6938acf509338956c827b7ee6d218eae5",
-    "fingerprint_files": 322,
+    "recorded_at": "2026-10-14T10:27:52.802193+00:00",
+    "implementation_sha256": "0e6b24427bec8c6e778da9b291448bd27f2901b623aae7b897dd8aa89fc6b817",
+    "fingerprint_files": 328,
     "local_tests": {
-      "files": 95,
-      "passed": 519,
-      "failed": 0
+      "files": 97,
+      "passed": 535,
+      "failed": 0,
+      "runtime": "Node24.19.0",
+      "file_parallelism": false
     },
     "ci": {
       "status": "passed",
-      "implementation_commit": "5dd37e571045311d9b790c443679a87570b2e777",
-      "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38542003642",
-      "environment": "Linux / Node 24.10.0",
-      "scope": "Mirror/knowledge/history diagnostics and remaining-case replay verified locally; C035 writing/render budget chain and native SDK/service/human gates remain incomplete."
+      "implementation_commit": "2a3755ca47d41e31abfc5da9eeb9024eb95bd00e",
+      "environment": "Linux / Node24.10.0 / four workers",
+      "scope": "All535 local assertions; native service and human gates remain unpassed.",
+      "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38549166391",
+      "tests": {
+        "files": 97,
+        "passed": 535,
+        "failed": 0,
+        "workers": 4
+      }
     }
+  },
+  "actual_native_oss_transport": {
+    "status": "passed",
+    "evidence": "agents/reading/evals/storage/fixtures/oss-transport-evidence.json",
+    "scope": "Native TLS loss before SDK success, one PUT, real unknown, exact immutable readback and fresh-client cold restore. No restricted IAM/model/delivery proof."
   }
 }
