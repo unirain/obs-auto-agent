@@ -185,7 +185,7 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "All6 RAM users supplied. Preview/integration/watchdog scopes passed; capacity workspace and image private-boundary subset checks passed. Actual image bucket/public URL, complete managed capacity bindings and image upload/GC permissions remain unverified. G1 is incomplete; paid models remain disabled.",
+    "reason": "All6 RAM credentials and real image bucket/public URL supplied. Preview/integration/watchdog scopes pass; all3 image/capacity identities receive native403 on required image GetBucketAcl. Effective image authorization/capacity is unresolved; G1 incomplete and paid models remain disabled.",
     "complete": false
   },
   "actual_native_preview_ram": {
@@ -219,6 +219,18 @@
     "credentials_prepared": 4,
     "successful_remote_writes": 0,
     "evidence": "agents/reading/evals/results/ram-readonly-image-boundary-verification.json",
+    "g1": "incomplete"
+  },
+  "actual_native_image_target_preflight": {
+    "status": "blocked_external",
+    "observed_at": "2026-10-19",
+    "bucket": "osb-reading-public-imgs",
+    "region": "oss-cn-beijing",
+    "required_metadata_requests": 3,
+    "native_403": 3,
+    "remote_writes": 0,
+    "image_upload_gc": "not_attempted",
+    "evidence": "agents/reading/evals/results/ram-image-target-preflight.json",
     "g1": "incomplete"
   }
 }

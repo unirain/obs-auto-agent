@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T09:35:20.181Z",
+  "bucket": "osb-reading-public-imgs",
+  "region": "oss-cn-beijing",
+  "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+  "public_url": "https://osb-reading-public-imgs.oss-cn-beijing.aliyuncs.com",
+  "prefix": "reading-agent/integration/",
+  "node": "24.19.0",
+  "sdk": "ali-oss@6.23.0",
+  "probe_sha256": "5ef7c592730e26ad40262f82bf77570f461383192dc1c1db718b6a5c22122eaa",
+  "checks": [
+    {
+      "principal": "images",
+      "operation": "GetBucketAcl",
+      "status": 403,
+      "outcome": "denied",
+      "code": "AccessDenied",
+      "request_id_sha256": "63a6f7ba4c6165edb420cb6367fa6da4fa5e122d85b1f148d758953fe3accb42"
+    },
+    {
+      "principal": "capacity",
+      "operation": "GetBucketAcl",
+      "status": 403,
+      "outcome": "denied",
+      "code": "AccessDenied",
+      "request_id_sha256": "934356bf8e8df55c87bcb13dd391fb9bd2151035e0d2a61b0de4d865e902e4ee"
+    },
+    {
+      "principal": "image-gc",
+      "operation": "GetBucketAcl",
+      "status": 403,
+      "outcome": "denied",
+      "code": "AccessDenied",
+      "request_id_sha256": "3d5cda664627e91cf7ffb83f7694e10be101e7f738cfe615e74e5eb93efa464e"
+    }
+  ],
+  "remote_write_attempts": 0,
+  "bucket_configuration_changes": 0,
+  "status": "blocked_external",
+  "image_versioning": "unknown",
+  "anonymous_readability": "unverified",
+  "image_upload": "not_attempted",
+  "image_gc": "not_attempted",
+  "capacity_inventory": "unverified",
+  "reason": "All3 restricted identities receive native403 for required GetBucketAcl on the supplied real image bucket; actual effective policy cause not inspected",
+  "g1": "incomplete",
+  "prepared_policy_documents": [
+    {
+      "name": "test-image",
+      "sha256": "1a555a4cc57259d9e4852d428deb32121467b402b67a81bc64b38aed92c22328"
+    },
+    {
+      "name": "test-image-gc",
+      "sha256": "f7d8fea96ce4ed92aec11247521c10fdc12025a4966c86324e3cbb0e7b82f014"
+    },
+    {
+      "name": "capacity-readonly",
+      "sha256": "4e6c02c13e33a1b540e6b7a7e5409a52d7043adb6a1e3cb300d502b4d8f5bc30"
+    }
+  ]
+}
