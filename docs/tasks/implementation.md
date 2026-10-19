@@ -8,7 +8,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | --- | --- | --- | --- |
 | S1 | storage/root | local_verified | TypeScript foundation and shared contracts |
 | S2 | storage | local_verified | Fault-injectable persistent object store |
-| S3 | storage | live_unverified | OSS adapter and live contract tests |
+| S3 | storage/root | live_unverified | Native core/transport/RAM G1 evidence accepted; further SDK timeout/cancellation coverage must remain explicitly reported |
 | S4 | storage | local_verified | Immutable commits, initialization and recovery |
 | S5 | storage | local_verified | Scope/file views/sealing |
 | S6 | storage | local_verified | Invocation journal and counters |
@@ -27,7 +27,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | O2 | operations | live_unverified | Immutable resource upload |
 | O3 | operations | live_unverified | Publisher and reconciliation |
 | O4 | operations/root | live_unverified | Expiry, source-generation routing, reclassification-before-upload and exact primary-source dedup locally verified; real withdrawal/recovery pending |
-| O5 | operations/root | live_unverified | Four-mode wiring, shared mutex guard, daily logical runs, SIGINT/SIGTERM SDK stop and trusted G1 evidence locally verified; actual reading Actions/concurrency/cancellation pending |
+| O5 | operations/root | live_unverified | Actual default-branch preview reached committed source fetching; G1/environment/read identity verified. Native tool archive/fresh Docker roundtrip passed; actual article/project-context recovery and cancellation acceptance remain pending |
 | O6 | operations | live_unverified | Watchdog, incident events and Issue dedup |
 | O7 | operations/root | blocked_external | Isolated live delivery fault tests |
 | O8 | operations/root | implemented | Deployment, pause and recovery runbooks |
@@ -43,10 +43,11 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 ## Current verification
 
-- Actual Node v24.19.0: all558 tests/102 files passed locally with sequential files;16 new payload/cold-recovery assertions and86 existing direct regressions passed. Typecheck/build, all40 exported schema documents, spec mapping and diff check passed. Native stream events and browser processes in the new tests are mocked; no live service inference.
-- Current local case audit: 87 covered / 0 partial / 0 missing, with named assertions. All 87 full-layer cases remain pending / 0 complete; local coverage is not native service or human acceptance.
-- Implementationa4d19da2eb9b7d06397bf86df1b17b69fae9e9cb is pushed; exact [LinuxNode24.10 four-worker CI38694162330](https://github.com/unirain/obs-auto-agent/actions/runs/38694162330) passed npm ci/typecheck/test/build/spec mapping,558tests/102files. Current337-file fingerprint matches scoped evidence: agents/reading/evals/results/local-verification.json.
-- Production generation cron remains disabled. G0/G1 are complete; G2–G5 remain pending. G1 permits isolated live preview admission only after its separate fixed-skill/runtime preconditions; no paid model has run.
+- Current implementation `d0ffe1db03f69b83019c9dc14c7021d6db8d06ea`: [Linux Node24.10 four-worker CI39244416943](https://github.com/unirain/obs-auto-agent/actions/runs/39244416943) passed npm ci/typecheck/test/build/spec mapping, **602tests/104files**. Local Node24.19 targeted58/5files, typecheck/build,40schema checks and diff check passed. Two earlier full local failures and their repairs are retained below; they are not reported as successful full local runs.
+- Current341-file fingerprint `9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49`; scoped evidence: agents/reading/evals/results/local-verification.json.
+- Local case audit:87 covered/0partial/0missing, with named assertions. All87full-layer cases remain pending/0complete; local coverage is not native service or human acceptance.
+- G0/G1 complete; G2 in_progress, G3–G5 pending. Real preview39240721564 reached committed source fetching but stopped source_timeout with0SDK invocations. Its fixed runtime is unavailable; state and counters are preserved. Native GitHub tool-archive upload and fresh-runner exact Docker restore passed in two separate empty previews, not a successful article/project-context/SDK preview.
+- Production cron remains disabled. No paid model query, actual article PR or human-quality acceptance has occurred.
 
 ## External resources and remaining acceptance
 
@@ -55,7 +56,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | Implementation repository | unirain/obs-auto-agent, default master, Apache License preserved | Separate isolated delivery test repository/App |
 | Private OSS | Existing obs-agent/Beijing; native core/transport and restricted RAM scopes passed; G1 complete | Further G2–G5 integration and production acceptance remain required; no broad AK is used as IAM proof |
 | Restricted credentials | All6 users supplied; native workspace/watchdog/image upload/GC and declared capacity scopes verified; G1 complete | GitHub App, production permission checks, sole-writer confirmation and full maintenance acceptance remain required |
-| Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | Live SDK only after complete G1; isolation/recovery and five varied previews |
+| Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | G1 admission complete; actual SDK isolation/recovery and five varied previews still pending |
 | Notes skills | [Merged PR #35](https://github.com/unirain/obs-notes-hub/pull/35), actual published default commit de6cba6c9408ac532e5929282b3f14fc35a07f14; fixed bundle/Linux check passed | Actual model skill activation, real article and image quality |
 | Quality corpus | 30 candidates / 10 holdout; 26 private bodies (9 holdout) prepared with SHA256; 4 video bodies unavailable and all labels unset | 4 accessible bodies or explicit new candidate choices, human labels/note exclusions, real evaluation/calibration and quality confirmation |
 | Delivery/operations | Local adapters and cold fault replay | Native isolated image/PR reconciliation, sources/monitoring/Actions/cancellation, capacity and production manual smoke |
@@ -198,3 +199,13 @@ Targeted3files45tests passed on Node24.19.0. Full typecheck/test/build/spec cove
 The first full local regression attempt retained600/601 assertions with one workflow condition assertion failing; restored the explicit publish-only condition and added the archive-before-host boundary assertion. The second full four-worker attempt retained601/602 assertions, with only the existing newly added cold repository/tree persistent-I/O case hitting the global15-second test timeout. Its sibling material-chain cases already use60seconds; aligned this case with that same fixture budget and documented the module boundary. This changes no product deadline or assertion. Targeted replay and full LinuxCI remain pending; no failed run is being reported green.
 
 Node24.19.0 final targeted58/58 in5files passed, including the entire material-chain file and workflow boundaries. Typecheck/build,40exported schema checks and87case mappings passed. Current341-file implementation fingerprint9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49. Full Linux602-assertion CI and native artifact roundtrip remain pending before any successful live-runtime claim.
+
+Exact implementationd0ffe1db03f69b83019c9dc14c7021d6db8d06ea passed LinuxNode24.10 four-worker CI39244416943:602tests/104files, npm ci/typecheck/test/build/spec mapping. Current341-file fingerprint9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49. Native empty-preview archive producer run39244436141 is in progress; it cannot count as article/SDK/quality acceptance. No production cron change.
+
+## 2026-10-19 Native tool-image archive and fresh-runner restore passed
+
+At exact implementationd0ffe1db03f69b83019c9dc14c7021d6db8d06ea, source-free producer39244436141 succeeded and uploaded artifact12183680585 before the host ran. GitHub ZIP digest32f73b31db631121adb43bf3cabda3c4b73626fba6f64d9f9013c358cfc56eb7,814728840bytes. A distinct fresh runner39245305923 downloaded that artifact, verified provenance/ZIP digest/schema1/tar bytes and hashes, loaded exact imagesha256:fdc1374bb1c910f61322454e3f9e44c30a05e470f9e927c83abb78e734719496, and inspected actual tool manifestba67c847284ce0ef2c38defd78940abd0273ac3ebe83c3989360a4efa0518fe3 plus worker/lock. Restore returned restored; Build/Prepare/Upload steps were skipped, consumer artifacts0. Both workflows succeeded. Native receipt: agents/reading/evals/results/cloud-tool-image-cache.json.
+
+Readonly validated OSS cold snapshots progressed sequence2 to4 and preserved both actual run reports, each success_no_selection; projects0, SDK invocations0. These are native OCI/GitHub/OSS technical roundtrip facts, not successful fixed article-context recovery or model/quality evidence. Negative artifact paths remain local tests.90day retention is bounded. Original source-failed article sequence14/revision50b05407-0a65-43fa-a28d-46fb81acdd9d still binds its unavailable old image; no alias/rebuild/substitution/new namespace for that same article was made, no counters or records were discarded.
+
+Prepared and schema-validated a protected host new_generation draft with exact original revision, failure evidence reference, changed operator guidance and explicit refresh_runtime=true; not applied. Applying that changed operator input requires user confirmation and an actual trusted writer context. It must archive the prior generation and retain prior invocation/charge facts. G1 complete, G2 in_progress, G3–G5/human quality pending; production cron disabled, no paid model call.

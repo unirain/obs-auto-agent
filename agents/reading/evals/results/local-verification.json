@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-19T11:24:25.689712+00:00",
+  "recorded_at": "2026-10-19T11:39:26.619144+00:00",
   "implementation_sha256": "9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49",
   "fingerprint_files": 341,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "full local601/602; one15s persistent-I/O fixture timeout, scoped60s repair then targeted58/58 passed; full LinuxCI pending",
+    "npm test": "LinuxCI602/104 passed; local attempts and targeted58 repair evidence retained separately",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -28,6 +28,13 @@
       "executed": 1,
       "status": "passed",
       "evidence": "agents/reading/evals/storage/fixtures/oss-transport-evidence.json"
+    },
+    "separate_native_tool_image_archive": {
+      "executed": 2,
+      "status": "passed",
+      "sdk_invocations": 0,
+      "evidence": "agents/reading/evals/results/cloud-tool-image-cache.json",
+      "scope": "source-free producer and fresh consumer; no actual project-context resume/SDK quality claim"
     }
   },
   "spec_cases": {
@@ -35,12 +42,20 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Source timeout accounting fix and exact preview tool artifact preservation; targeted58/typecheck/build/schema40/spec mapping passed. Native GitHub cache/Docker and new full LinuxCI pending; original actual preview has0 invocations and unavailable fixed tool image.",
+  "scope": "Current341-file fingerprint9ac2aa42 has targeted58/typecheck/build/schema40/spec mapping plus exact602/104 four-worker LinuxCI passed. Native GitHub OCI archive/fresh Docker restore passed in2 source-free previews with0SDK invocations. Original article runtime remains unavailable; real article/SDK/quality acceptance remains pending.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
-    "status": "pending",
+    "status": "passed",
+    "implementation_commit": "d0ffe1db03f69b83019c9dc14c7021d6db8d06ea",
     "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Current runtime fixes and exact preview tool image retention; expected602 assertions"
+    "scope": "Source active-network timeout and exact preview runtime artifact preservation; package install, typecheck/test/build/spec mapping",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39244416943",
+    "tests": {
+      "files": 104,
+      "passed": 602,
+      "failed": 0,
+      "workers": 4
+    }
   },
   "previous_ci": {
     "status": "passed",

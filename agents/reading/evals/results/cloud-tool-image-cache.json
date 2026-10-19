@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-19T11:39:26.619144+00:00",
+  "status": "passed",
+  "scope": "native tool-image archive roundtrip across independent fresh GitHub runners; not project/SDK/quality acceptance",
+  "implementation_commit": "d0ffe1db03f69b83019c9dc14c7021d6db8d06ea",
+  "producer": {
+    "run_id": 39244436141,
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39244436141",
+    "status": "success",
+    "archive_uploaded_before_host": true
+  },
+  "consumer": {
+    "run_id": 39245305923,
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39245305923",
+    "status": "success",
+    "restore_status": "restored",
+    "build": "skipped",
+    "prepare": "skipped",
+    "upload": "skipped",
+    "new_artifacts": 0
+  },
+  "artifact": {
+    "artifact_id": 12183680585,
+    "artifact_name": "reading-tools-v1-51b37702b7780669f24bcadc33de914e4692ce33feb866d2baa608a1e8f98897-fdc1374bb1c910f61322454e3f9e44c30a05e470f9e927c83abb78e734719496",
+    "artifact_digest": "sha256:32f73b31db631121adb43bf3cabda3c4b73626fba6f64d9f9013c358cfc56eb7",
+    "artifact_size_in_bytes": 814728840
+  },
+  "runtime": {
+    "image_id": "sha256:fdc1374bb1c910f61322454e3f9e44c30a05e470f9e927c83abb78e734719496",
+    "manifest_hash": "ba67c847284ce0ef2c38defd78940abd0273ac3ebe83c3989360a4efa0518fe3",
+    "artifact_name": "reading-tools-v1-51b37702b7780669f24bcadc33de914e4692ce33feb866d2baa608a1e8f98897-fdc1374bb1c910f61322454e3f9e44c30a05e470f9e927c83abb78e734719496",
+    "build_fingerprint": "51b37702b7780669f24bcadc33de914e4692ce33feb866d2baa608a1e8f98897"
+  },
+  "assertions": {
+    "default_branch_manual_provenance": "passed",
+    "native_github_zip_digest": "passed",
+    "archive_schema_size_sha256": "passed",
+    "native_docker_load_exact_image": "passed",
+    "actual_tool_manifest_worker_lock": "passed",
+    "cold_consumer_skips_build_and_upload": "passed",
+    "validated_oss_chain_preserves_both_run_reports": "passed",
+    "no_projects_or_sdk_invocations": "passed"
+  },
+  "snapshots": [
+    {
+      "phase": "prepare",
+      "sequence": "00000000000000000002",
+      "revision": "5ec3ea57-6159-49da-a604-27ea06b128c7",
+      "projects": 0,
+      "sdk_invocations": 0
+    },
+    {
+      "phase": "restore",
+      "sequence": "00000000000000000004",
+      "revision": "4d902114-7829-4fba-bfd7-1cc3f8ada0a4",
+      "projects": 0,
+      "sdk_invocations": 0
+    }
+  ],
+  "retention_days": 90,
+  "limits": [
+    "Source-free diagnostics only; no fixed article project was resumed",
+    "Negative artifact/security cases are local tests, not native negative probes",
+    "Original article runtime was not archived and remains unavailable; no substitution was made",
+    "G2 article/SDK/skill/quality acceptance remains incomplete"
+  ],
+  "production_cron_enabled": false
+}

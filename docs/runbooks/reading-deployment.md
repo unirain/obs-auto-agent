@@ -44,4 +44,4 @@ preview 在读取已验证 OSS 提交链后，从非终态项目取得固定镜�
 
 新上下文可以构建镜像；在任何生成调用前，必须将 `image.tar` 和 schema1 `manifest.json` 保存到 Actions artifact。当前保留期90天，受仓库限制；它不保证永久可恢复。固定镜像未归档、已过期或无法下载时停止，错误为 `fixed_tools_image_archive_unavailable`。不要重建后替换固定版本、重置 namespace 或丢弃费用记录。管理新生成版本须遵循 [reading-recovery.md](reading-recovery.md) 的 `new_generation` 契约：实际改变操作员输入、归档旧版本，明确 `refresh_runtime`，保留历史调用与费用。
 
-该缓存目前只接入 preview，原生 GitHub artifact/Docker 往返验收仍待云端验证；本地 archive/mock 测试不代表真实冷恢复已通过。
+该缓存目前只接入 preview。原生 GitHub artifact 上传及全新 runner 的 Docker 下载/校验/精确加载已通过，证据见 `agents/reading/evals/results/cloud-tool-image-cache.json`；两轮均为无文章输入的技术验证，不能视为实际文章固定上下文恢复、SDK 或质量验收。
