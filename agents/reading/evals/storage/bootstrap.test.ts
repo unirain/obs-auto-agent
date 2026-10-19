@@ -465,8 +465,11 @@ it("real SDK adapter composition binds trusted DeepSeek provider and endpoint an
   });
   expect(app.journal.keys("invocations/")).toHaveLength(0);
 });
-it("job clock includes startup time; an already expired original job cannot begin generation", async () => {
+it.each(["explicit start", "trusted Actions origin"] as const)("job clock includes startup time (%s); an expired original job cannot begin generation", async source => {
   const f = await fixture();
+  const expired = Date.now() - 61 * 60_000;
+  const root = join(f.root, "expired");
+  let queries = 0;
   await expect(
     buildApplication({
       deployment: f.deployment,
@@ -478,15 +481,28 @@ it("job clock includes startup time; an already expired original job cannot begi
         submission_id: null,
       },
       local: true,
-      local_root: join(f.root, "expired"),
+      local_root: root,
       notes_repository: f.notes,
       policy_source: f.policy,
       model_adapter: {
         async *stream() {
+          queries++;
           throw new Error("unexpected_query");
         },
       },
-      started_at: Date.now() - 61 * 60_000,
+      // Own the fixture environment: a real workflow also injects its job clock.
+      env: source === "trusted Actions origin" ? { READING_JOB_STARTED_AT: String(expired) } : {},
+      started_at: source === "trusted Actions origin" ? Date.now() : expired,
     }),
   ).rejects.toThrow("run_deadline");
+  expect(queries).toBe(0);
+  const cold = new ImmutableWorkspaceManager({
+    store: new FileObjectStore(join(root, "object-store")),
+    scope: "preview",
+    local_root: join(root, "cold"),
+    verify_preflight: false,
+  });
+  const restored = await cold.restore("obs-notes-hub/reading-preview/expired");
+  expect(restored.snapshot.sequence).toBe("00000000000000000000");
+  expect(Object.keys(restored.records).filter(key => key.startsWith("invocations/"))).toEqual([]);
 });

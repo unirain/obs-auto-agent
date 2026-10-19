@@ -1,23 +1,23 @@
 {
   "recorded_at": "2026-10-19T09:53:33.911Z",
-  "implementation_sha256": "e7c58d4b5c83ec6e96a81bbed0c5c260b6b11f3f83a9ebf72dea6be53d5c363c",
+  "implementation_sha256": "963610bd7040eed86afc9cc26c18ee3ba823bf8f52f4ca93c5040c445d8fa091",
   "fingerprint_files": 337,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "default four-worker Linux CI558/102 passed",
+    "npm test": "new559 full CI/workflow pending; injected-clock targeted bootstrap8 passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
     "git diff --check": "passed",
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed",
-    "npm test -- --no-file-parallelism": "local Node24.19 full558/102 passed"
+    "npm test -- --no-file-parallelism": "prior558 baseline only; no new full sequential run"
   },
   "local_tests": {
-    "files": 102,
-    "passed": 558,
+    "files": 1,
+    "passed": 8,
     "failed": 0,
     "runtime": "Node24.19.0",
-    "file_parallelism": false
+    "scope": "Targeted bootstrap file with injected parent Actions clock; full559 regression pending"
   },
   "live_tests": {
     "default_command": {
@@ -35,9 +35,16 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Full558/102 local/Linux regression remains the2026-10-15 unchanged-source baseline.2026-10-19 native G1 completed; current typecheck/build/schema40/spec mapping and15 targeted consumer tests passed. G2-G5/model/human quality not complete.",
+  "scope": "Current test/AGENTS fingerprint963610b has targeted8/typecheck/build/schema40/spec mapping passed; full559 CI and repaired real workflow pending. Product runtime unchanged, G1 remains complete. Prior cloud run failed before any SDK/model request.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "pending",
+    "implementation_commit": null,
+    "environment": "Linux / Node24.10.0 / four workers",
+    "expected_tests": 559,
+    "scope": "Fixture-owned clock environment and trusted Actions-origin precedence; production runtime unchanged"
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "a4d19da2eb9b7d06397bf86df1b17b69fae9e9cb",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -46,19 +53,6 @@
     "tests": {
       "files": 102,
       "passed": 558,
-      "failed": 0,
-      "workers": 4
-    }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "eea734c285218066acceba92a3144ad69c746013",
-    "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Frozen-bound reliability reporting; full542 assertions expected, no new native/model acceptance",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38691432367",
-    "tests": {
-      "files": 99,
-      "passed": 542,
       "failed": 0,
       "workers": 4
     }
@@ -315,5 +309,31 @@
     "g2": "in_progress",
     "model_query_started": false,
     "evidence": "agents/reading/evals/results/cloud-preview-admission.json"
+  },
+  "cloud_preview_first_attempt": {
+    "status": "failed_before_model",
+    "run_id": 39239390372,
+    "tests_passed": 557,
+    "tests_failed": 1,
+    "cause": "bootstrap clock fixture inherited Actions job origin",
+    "sdk_queries": 0,
+    "native_workspace_objects": 0,
+    "zero_commit": "not_found",
+    "evidence": "agents/reading/evals/results/cloud-preview-startup-failure.json"
+  },
+  "latest_clock_fix": {
+    "status": "local_verified_ci_pending",
+    "bootstrap_tests": 8,
+    "parent_job_clock": "injected fresh for reproduction",
+    "production_clock_changed": false,
+    "full_suite_expected": 559
+  },
+  "previous_implementation_sha256": "e7c58d4b5c83ec6e96a81bbed0c5c260b6b11f3f83a9ebf72dea6be53d5c363c",
+  "last_full_local_tests": {
+    "files": 102,
+    "passed": 558,
+    "failed": 0,
+    "runtime": "Node24.19.0",
+    "file_parallelism": false
   }
 }

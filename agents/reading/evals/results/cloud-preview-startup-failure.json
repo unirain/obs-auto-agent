@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T10:51:02.040Z",
+  "run_id": 39239390372,
+  "preview_id": "g2-router-55a7ff0c-27c6-4e5f-8866-c818d654706b",
+  "namespace": "reading/preview/obs-notes-hub/reading-preview/g2-router-55a7ff0c-27c6-4e5f-8866-c818d654706b/",
+  "objects": 0,
+  "zero_commit": "not_found",
+  "workflow_failure_phase": "unit tests before G1 check/notes checkout/tool build/Run isolated preview",
+  "query_state": "not_started",
+  "sdk_queries": 0,
+  "remote_project_writes": "none_observed",
+  "automatic_query_retry": false,
+  "run_url": "https://github.com/unirain/obs-auto-agent/actions/runs/39239390372",
+  "failed_test": "job clock includes startup time; an already expired original job cannot begin generation",
+  "tests": {
+    "passed": 557,
+    "failed": 1,
+    "files": 102
+  },
+  "cause": "Fixture omitted env and inherited fresh READING_JOB_STARTED_AT from actual Actions, overriding its expired started_at option",
+  "repair": "Give both clock scenarios explicit fixture-owned env; add trusted Actions origin vs fresh caller-start case, zero-query assertion and real FileStore cold-state assertions",
+  "production_runtime_changed": false,
+  "g2": "in_progress_no_model_attempt"
+}
