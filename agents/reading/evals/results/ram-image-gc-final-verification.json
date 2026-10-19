@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "actor": "trusted_local_diagnostic",
+  "operator_change": "User screenshot showed ReadingTestImages and ReadingTestImageGC both attached to GC user; user confirmed removing ReadingTestImages",
+  "key": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+  "version": null,
+  "probe_sha256": "64ea6da4dda8a27b0ac7087e044dc10e35d996847b667306755cdad6e276754e",
+  "gc_adapter_sha256": "087aca40ac3ae8289938b5b57fbf1a25a40ed4c6e6c31f3745b25cf7c9cafa19",
+  "prior_report_sha256": "896da4875e79e63fc48e34285266ba9cb0a460c026c55f64312ce18e1d51af49",
+  "node": "24.19.0",
+  "sdk": "ali-oss@6.23.0",
+  "checks": [
+    {
+      "name": "fixed_bucket_configuration_unchanged",
+      "target": "osb-reading-public-imgs",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "same_canary_exact_hash_readback",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "fresh_gc_inventory_before_delete",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_adapter_delete_exact_existing_canary",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_adapter_deleted_version_absent",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "native_get_deleted_key404",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": 404,
+      "status": 404,
+      "code": "NoSuchKey",
+      "outcome": "passed"
+    },
+    {
+      "name": "anonymous_deleted_key404",
+      "target": "https://osb-reading-public-imgs.oss-cn-beijing.aliyuncs.com/reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "fresh_gc_inventory_after_delete",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_outside_prefix_delete_still403",
+      "target": "reading-agent/denied-ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/never-created",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_private_workspace_delete_still403",
+      "target": "reading/integration/obs-notes-hub/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/blobs/never-created",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "outcome": "passed"
+    },
+    {
+      "name": "full_declared_capacity_after_delete",
+      "target": "four managed bindings",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "outcome": "passed"
+    }
+  ],
+  "deleteTrace": [
+    {
+      "key": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "status": 204,
+      "request_id_sha256": "c65f52ee1490052d8826e3552bcfc734aad651f66b2f5b934d02d181438a7788"
+    },
+    {
+      "key": "reading-agent/denied-ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/never-created",
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "f7bf9fe75ee1fe75b1d9422882f86584bdef1266eefadbf2df8a852352abc826"
+    }
+  ],
+  "uploads": 0,
+  "automatic_retries": 0,
+  "status": "passed",
+  "scope": "Exact diagnostic canary cleanup after operator RAM policy fix, not full maintenance or remote-reference acceptance",
+  "anonymous_deleted_status": 404,
+  "capacity_after": {
+    "complete_for_declared_bindings": true,
+    "object_count": 12,
+    "reservation_count": 0,
+    "occupied_bytes": 4924,
+    "reserved_bytes": 0,
+    "shared_limit_bytes": 50000000000,
+    "canary_versions": 0,
+    "observed_occupied_delta": 68
+  },
+  "deleted_exact_canary": true,
+  "native_delete_attempts_for_canary_after_policy_fix": 1,
+  "real_commit_delete_attempts": 0,
+  "observed_at": "2026-10-19T09:53:33.911Z",
+  "g1_permission_layer": "passed",
+  "full_maintenance_acceptance": "not_exercised"
+}

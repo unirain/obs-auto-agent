@@ -88,6 +88,8 @@ ListObjects 使用 bucket Resource 并通过 `oss:Prefix` 条件限制目录；G
 
 注意当前协议将控制记录与证据存为内容哈希 blobs，RAM 静态 prefix 不能按“文件角色”区分这些 hashes。容量和 watchdog 宿主只读经过 HEAD manifest 确认的控制 blobs，不读取无关证据；这些身份的密钥不得注入模型或工具容器。若要求 IAM 层也无法读其他 blob，需要根据已验证 manifest 签发只含精确控制 blob keys 的动态 STS 权限；不能把静态模板宣称为已经实现这种更细粒度隔离。
 
+图片上传用户只绑定 `ReadingTestImages`，图片清理用户只绑定 `ReadingTestImageGC`。不要把两份策略同时绑定给清理用户：上传策略显式拒绝 Delete，优先于清理策略的 Allow；也检查用户组继承权限。2026-10-19 实测曾因此得到 `AccountLevelIdentityBasedPolicy / ExplicitDeny / oss:DeleteObject`，解除清理用户上的上传策略后，同一测试图删除与404读回均通过。
+
 每个 OSS Secret 保存 JSON：
 
 ```json

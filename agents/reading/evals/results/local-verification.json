@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-15T06:48:25.222925+00:00",
+  "recorded_at": "2026-10-19T09:53:33.911Z",
   "implementation_sha256": "e7c58d4b5c83ec6e96a81bbed0c5c260b6b11f3f83a9ebf72dea6be53d5c363c",
   "fingerprint_files": 337,
   "commands": {
@@ -35,7 +35,7 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Local Node24.19 serial and default LinuxNode24.10 four-worker CI558/102 passed. Project stage redirect/chunk accounting and cold recovery locally verified; no new native service/model/quality acceptance.",
+  "scope": "Full558/102 local/Linux regression remains the2026-10-15 unchanged-source baseline.2026-10-19 native G1 completed; current typecheck/build/schema40/spec mapping and15 targeted consumer tests passed. G2-G5/model/human quality not complete.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
     "status": "passed",
@@ -69,7 +69,9 @@
   },
   "contract_gate": {
     "G0": "complete",
-    "scope": "Exact local contracts and replay only; G1-G5 remain unpassed"
+    "scope": "G0 local contracts and G1 source-bound native persistence/permissions complete; G2-G5 remain pending",
+    "G1": "complete",
+    "g1_evidence": "agents/reading/evals/results/g1-evidence.json"
   },
   "local_case_audit": {
     "covered": 87,
@@ -185,8 +187,10 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "Workspace/watchdog, image upload/anonymous hash/no-overwrite and real capacity broker over four declared bindings pass. GC identity Delete is rejected by AccountLevelIdentityBasedPolicy ExplicitDeny; fixed canary remains for operator permission repair. G1 incomplete; paid models disabled.",
-    "complete": false
+    "reason": "The original restricted-RAM/G1 blocker is resolved: G1 complete. Overall objective remains incomplete; actual G2 previews next require a published default-branch skill commit (PR35 still draft/open); G3-G5 resources and human quality remain pending.",
+    "complete": false,
+    "g1_blocker_resolved": true,
+    "next_gate": "G2"
   },
   "actual_native_preview_ram": {
     "status": "passed",
@@ -246,5 +250,47 @@
     "same_canary_readback": "present_unchanged",
     "evidence": "agents/reading/evals/results/ram-image-upload-capacity-verification.json",
     "g1": "incomplete"
+  },
+  "actual_native_gc_final": {
+    "status": "passed",
+    "observed_at": "2026-10-19T09:53:33.911Z",
+    "checks": 11,
+    "exact_canary_delete_status": 204,
+    "native_absent_status": 404,
+    "anonymous_absent_status": 404,
+    "fresh_inventory_absence": true,
+    "capacity_after": {
+      "complete_for_declared_bindings": true,
+      "object_count": 12,
+      "reservation_count": 0,
+      "occupied_bytes": 4924,
+      "reserved_bytes": 0,
+      "shared_limit_bytes": 50000000000,
+      "canary_versions": 0,
+      "observed_occupied_delta": 68
+    },
+    "uploads": 0,
+    "evidence": "agents/reading/evals/results/ram-image-gc-final-verification.json"
+  },
+  "g1_admission": {
+    "status": "complete",
+    "required_assertions": 10,
+    "host_guard": "passed",
+    "sha256": "13fe85cf2e451984f3a3d265d9575770aab608a103846ee54b022fd1b846a7e2",
+    "evidence": "agents/reading/evals/results/g1-evidence.json",
+    "paid_model_executed": false
+  },
+  "latest_targeted_validation": {
+    "runtime": "Node24.19.0",
+    "test_files": 2,
+    "tests": 15,
+    "status": "passed",
+    "commands": [
+      "npm run typecheck",
+      "npm run build",
+      "npx tsx agents/reading/evals/generate-schemas.ts --check",
+      "npm run coverage:spec",
+      "npx vitest run agents/reading/evals/operations/workflows.test.ts agents/reading/evals/storage/bootstrap.test.ts"
+    ]
   }
 }

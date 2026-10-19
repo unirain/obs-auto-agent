@@ -1,6 +1,6 @@
 # Reading Agent implementation tasks
 
-Updated: 2026-10-15. Objective: implement and verify all five plans without narrowing live validation requirements.
+Updated: 2026-10-19. Objective: implement and verify all five plans without narrowing live validation requirements.
 
 Statuses: pending, in_progress, implemented, local_verified, live_unverified, blocked_external, complete. A work package is complete only when its required evidence exists. Gate evidence is tracked separately.
 
@@ -35,7 +35,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | Gate | Status | Required evidence |
 | --- | --- | --- |
 | G0 | complete | Exact core DTO/UTC boundaries, shared states, 40 schema definitions and complete cross-module cold-recovery fixture locally verified; audit in docs/notes/g0-contract-audit.md |
-| G1 | blocked_external | Workspace/watchdog and real image upload/public-read/declared capacity passed; GC Delete is403 AccountLevelIdentityBasedPolicy ExplicitDeny. Fixed canary retained for permission repair |
+| G1 | complete | All10 required native persistence/RAM assertions mapped and accepted by host assertG1Evidence; same-canary GC204/404/inventory/capacity confirmation passed |
 | G2 | pending | Live SDK isolation, five varied previews and recovery |
 | G3 | pending | Isolated GitHub/image delivery and fault reconciliation |
 | G4 | pending | Real sources, monitoring, capacity and human quality calibration |
@@ -46,15 +46,15 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 - Actual Node v24.19.0: all558 tests/102 files passed locally with sequential files;16 new payload/cold-recovery assertions and86 existing direct regressions passed. Typecheck/build, all40 exported schema documents, spec mapping and diff check passed. Native stream events and browser processes in the new tests are mocked; no live service inference.
 - Current local case audit: 87 covered / 0 partial / 0 missing, with named assertions. All 87 full-layer cases remain pending / 0 complete; local coverage is not native service or human acceptance.
 - Implementationa4d19da2eb9b7d06397bf86df1b17b69fae9e9cb is pushed; exact [LinuxNode24.10 four-worker CI38694162330](https://github.com/unirain/obs-auto-agent/actions/runs/38694162330) passed npm ci/typecheck/test/build/spec mapping,558tests/102files. Current337-file fingerprint matches scoped evidence: agents/reading/evals/results/local-verification.json.
-- Production generation cron remains disabled. G0 permits local contracts/replays only; G1 awaits external RAM setup; G2–G5 stay pending.
+- Production generation cron remains disabled. G0/G1 are complete; G2–G5 remain pending. G1 permits isolated live preview admission only after its separate fixed-skill/runtime preconditions; no paid model has run.
 
 ## External resources and remaining acceptance
 
 | Item | Current evidence | Still required |
 | --- | --- | --- |
 | Implementation repository | unirain/obs-auto-agent, default master, Apache License preserved | Separate isolated delivery test repository/App |
-| Private OSS | Existing obs-agent, Beijing; native private/never-versioned/no-overwrite/pagination/chain probe passed | Native TLS transport loss now passed (2026-10-15); restricted RAM allow/deny still required. Broad test AK is not IAM proof |
-| Restricted credentials | All6 users supplied; workspace/watchdog/image upload/public-read/declared capacity verified | Resolve conflicting GC identity ExplicitDeny, then delete/readback same canary; GitHub App and sole-writer confirmation still required |
+| Private OSS | Existing obs-agent/Beijing; native core/transport and restricted RAM scopes passed; G1 complete | Further G2–G5 integration and production acceptance remain required; no broad AK is used as IAM proof |
+| Restricted credentials | All6 users supplied; native workspace/watchdog/image upload/GC and declared capacity scopes verified; G1 complete | GitHub App, production permission checks, sole-writer confirmation and full maintenance acceptance remain required |
 | Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | Live SDK only after complete G1; isolation/recovery and five varied previews |
 | Notes skills | [Draft PR #35](https://github.com/unirain/obs-notes-hub/pull/35), current head f1053b4829747667a5263a4a77a0d7bb092252da | Human review/merge and pin actual published default-branch commit; a draft head is not publication |
 | Quality corpus | 30 candidates / 10 holdout; 26 private bodies (9 holdout) prepared with SHA256; 4 video bodies unavailable and all labels unset | 4 accessible bodies or explicit new candidate choices, human labels/note exclusions, real evaluation/calibration and quality confirmation |
@@ -89,7 +89,7 @@ Host-only download budget ports now checkpoint logical fetch admission before HT
 
 Added actual Controller/FileStore cold tests for redirect totals, exhaustion/overrun, failed stream before model admission, unknown-query usage with no automatic replay, and repository recovery after a fixed commit checkpoint without its tree. Source discovery and host prepublication source verification retain their separate bounded host read paths; this change covers project stage downloads. Full local558/102 and typecheck/build/schema40/spec mapping passed; exact LinuxNode24.10 four-worker CI38694162330 passed the same558/102 assertions. RAM remains user-confirmed unprepared; no new question, IAM resource creation or paid call was made.
 
-## Current goal status: blocked_external
+## 2026-10-15 Goal blocker snapshot (historical)
 
 The same restricted-RAM prerequisite was absent across the native transport, quality preparation and current payload-fix turns. Concrete local work from those turns is committed and verified; the next integration gate requires externally prepared identities. G1 stays blocked_external, G2–G5 pending, and the overall objective remains incomplete. Resume G1 after the operator prepares the scoped identities in docs/runbooks/test-environment-setup.md section4 (and the separate deletion identity in section9). Do not reuse the broad AK as permission evidence, create cloud resources, run paid models or enable cron to bypass this blocker. Later isolated delivery resources, published skill and human quality inputs remain required.
 
@@ -136,3 +136,13 @@ After the operator updated3 policies, all3 image-related GetBucketAcl requests r
 GC adapter initially returned classified permission without HTTP fields, which the private helper conservatively labelled unknown. Kept that original immutable observation. Reconciled the same fixed key/hash by GET200, then committed an audit before one native diagnostic retry of the definitively permission-classified failure (SDK retries0; no new upload/key). Raw service response was403/AccessDenied, EC0003-00000201, PolicyType AccountLevelIdentityBasedPolicy, NoPermissionType ExplicitDeny, AuthAction oss:DeleteObject. GET after rejection remained200/exact hash. The denied policy name was not exposed; no claim about which attached policy caused it. Exact upload and GC credentials match their creation exports and all6 keys are distinct.
 
 Fixed canary remains at the key in the receipt, intentionally retained pending operator permission repair; do not rerun upload or invent absence. Next action: inspect reading-test-image-gc direct and inherited policies, preserve the dedicated GC policy, remove conflicting uploader/capacity Deny grants as appropriate, and verify the current GC document. Continue cleanup on this exact existing canary after repair. Native receipt: agents/reading/evals/results/ram-image-upload-capacity-verification.json, with separate reconciliation audit. Post-delete404 and post-delete capacity observations remain unexecuted; full maintenance/remote-reference/G3 semantics are not certified. G1 remains incomplete/blocked_external for GC identity; no paid model or production cron was enabled. No application source changed.
+
+## 2026-10-19 Same-canary cleanup passed; G1 complete
+
+User screenshot confirmed reading-test-image-gc had both ReadingTestImages (explicit Delete deny) and ReadingTestImageGC. User removed the upload policy. Continued the exact existing canary, never uploaded another image:11/11 native/adapter checks passed. Fresh exact-hash GET and version inventory preceded one deletion through the actual OSSImageGCStore; captured native204. Exact-version adapter readback=null, native GET404, anonymous HTTPS404, fresh version inventory absence and actual capacityBroker absence all confirmed deletion. Out-of-prefix and private-workspace Delete remained native403 after the policy change. Declared capacity now12objects/4924occupied bytes/0reservations, exactly68bytes lower; four bindings retain one shared50,000,000,000-byte limit. No protocol commit deletion, SDK automatic retry, paid model, cloud resource creation or production activation. Native receipt: agents/reading/evals/results/ram-image-gc-final-verification.json. Original failure/reconciliation receipts remain unchanged.
+
+G1's10 named required assertions are now individually mapped to source receipts in agents/reading/evals/results/g1-evidence.json: immutable race, no-overwrite, authenticated native transport loss/reconciliation, complete pagination, private anonymous deny, never-versioned workspace, preview production-write denial, commit-prefix deletion denial, monitor readonly and constrained image GC deletion. The aggregate composes separately source-bound environments rather than claiming all native probes ran on one binary. Existing baseline real OSS evidence and fresh RAM receipts together resolve the historical permission blockers. The actual assertG1Evidence guard accepted the local host copy and its trusted SHA25613fe85cf2e451984f3a3d265d9575770aab608a103846ee54b022fd1b846a7e2. This completes G1 only; all25 packages, G2–G5, actual SDK/quality and full Publisher/maintenance acceptance remain in scope.
+
+ActualNode24.19.0 typecheck/build/schema40/spec mapping passed; G1-consuming storage bootstrap/workflow regressions15/15 passed in2files. No application source changed; prior full558/102 LinuxCI remains the implementation baseline, not a new full-suite run. Private host image binding now records delete_verified=true, while sole_writer_verified remainsfalse pending operator confirmation; no image maintenance capability is implied by a permission probe.
+
+Readonly current skill PR35 remains OPEN/isDraft=true, headf1053b4829747667a5263a4a77a0d7bb092252da, base main. A draft head is not a published skill version; human review/merge is the next fixed-skill prerequisite for actual G2 previews. No paid query was started after G1 completion and no human quality label was manufactured.

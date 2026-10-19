@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "gate": "G1",
+  "status": "complete",
+  "isolated_resources": true,
+  "sdk": "ali-oss@6.23.0",
+  "observed_at": "2026-10-19T09:53:33.911Z",
+  "workspace_bucket": "obs-agent",
+  "region": "oss-cn-beijing",
+  "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+  "assertions": {
+    "immutable_race": "passed",
+    "forbid_overwrite": "passed",
+    "response_loss_transport": "passed",
+    "complete_pagination": "passed",
+    "private_anonymous_deny": "passed",
+    "versioning_never": "passed",
+    "preview_ram_write_deny": "passed",
+    "commit_ram_delete_deny": "passed",
+    "monitor_read_only": "passed",
+    "gc_constrained_delete": "passed"
+  },
+  "assertion_evidence": {
+    "immutable_race": {
+      "source": "core",
+      "assertion": "two-client immutable race: one success, one conflict"
+    },
+    "forbid_overwrite": {
+      "source": "core",
+      "assertion": "forbid-overwrite behavioral contract"
+    },
+    "response_loss_transport": {
+      "source": "transport",
+      "assertion": "one PUT; authenticated TLS200 suppressed before parser; actual unknown; exact Manager reconciliation and cold restore"
+    },
+    "complete_pagination": {
+      "source": "core",
+      "assertion": "complete multi-page native ListObjectsV2"
+    },
+    "private_anonymous_deny": {
+      "source": "core",
+      "assertion": "anonymous existing object denied with HTTP403"
+    },
+    "versioning_never": {
+      "source": "integration",
+      "assertion": "private_never_versioned_preflight"
+    },
+    "preview_ram_write_deny": {
+      "source": "preview",
+      "assertion": "production_put_denied"
+    },
+    "commit_ram_delete_deny": {
+      "source": "preview",
+      "assertion": "preview_delete_commit_key_denied",
+      "safety": "Nonexistent isolated commit-key canary; no protocol commit deletion"
+    },
+    "monitor_read_only": {
+      "source": "readonly",
+      "assertion": "reading-test-watchdog all14 checks, readonly cold restore and real write/delete403"
+    },
+    "gc_constrained_delete": {
+      "source": "gc_final",
+      "assertions": [
+        "gc_adapter_delete_exact_existing_canary",
+        "native_get_deleted_key404",
+        "gc_outside_prefix_delete_still403",
+        "gc_private_workspace_delete_still403"
+      ],
+      "native_canary_delete_status": 204
+    }
+  },
+  "sources": {
+    "core": {
+      "path": "agents/reading/evals/storage/fixtures/oss-live-evidence.json",
+      "sha256": "477682b189e028fafecd32a314e9c821877d79ab310513b2d6e907ede22fc156",
+      "observed_at": "2026-10-13T08:33:41.512Z"
+    },
+    "transport": {
+      "path": "agents/reading/evals/storage/fixtures/oss-transport-evidence.json",
+      "sha256": "2bbf98c2b161f97e9a6254ce1f5d9cff0441aa71dcaa73c57d4672106c408239",
+      "observed_at": "2026-10-15T05:48:35.041Z"
+    },
+    "preview": {
+      "path": "agents/reading/evals/results/ram-preview-verification.json",
+      "sha256": "851bdb4f3471b455187f10c3657ecc9781ea10e3a0bd1f5fbf9f6c9e70ab88e9",
+      "observed_at": "2026-10-19T09:16:00.369Z"
+    },
+    "integration": {
+      "path": "agents/reading/evals/results/ram-integration-verification.json",
+      "sha256": "6d64a6603fcb6192e6267216912d6f20a27c5720e021dac80b8cd1ec5bcea043",
+      "observed_at": "2026-10-19T09:22:15.649Z"
+    },
+    "readonly": {
+      "path": "agents/reading/evals/results/ram-readonly-image-boundary-verification.json",
+      "sha256": "f00ec59712298c9b94ced41538533c630f778540371c3d37304b1d65152ea561",
+      "observed_at": "2026-10-19T09:31:43.389Z"
+    },
+    "image_capacity": {
+      "path": "agents/reading/evals/results/ram-image-upload-capacity-verification.json",
+      "sha256": "d5f03c48f5ffbc66aa158c4e1087f71cdddeaae4ff021b8e6f7eedd1774d95bf",
+      "observed_at": "2026-10-19T09:43:09.707Z"
+    },
+    "gc_final": {
+      "path": "agents/reading/evals/results/ram-image-gc-final-verification.json",
+      "sha256": "9b7e76120dc837c9c1325a0dcee4097ab966841431fb398b54a4868d4650c957",
+      "observed_at": "2026-10-19T09:53:33.911Z"
+    }
+  },
+  "local_protocol_baseline": {
+    "implementation_commit": "a4d19da2eb9b7d06397bf86df1b17b69fae9e9cb",
+    "fingerprint": "e7c58d4b5c83ec6e96a81bbed0c5c260b6b11f3f83a9ebf72dea6be53d5c363c",
+    "ci": "https://github.com/unirain/obs-auto-agent/actions/runs/38694162330",
+    "tests": 558,
+    "test_files": 102
+  },
+  "scope": "Composes source-bound historical native OSS core/transport and fresh restricted RAM/GC evidence; environments are recorded separately per source. No claim all probes reran on one binary. G1 only; G2-G5, real model/quality, full Publisher/maintenance and production activation remain pending.",
+  "historical_pending_annotations": "Prior receipts retain their then-unverified RAM and failed-delete observations; later source receipts resolve those items without rewriting immutable facts."
+}
