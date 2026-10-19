@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T10:39:11.052Z",
+  "status": "configured_not_dispatched",
+  "read_identity": {
+    "schema_version": 1,
+    "observed_at": "2026-10-19T10:34:46.389Z",
+    "probe_sha256": "5f738cd1a1bac6718e8a38c2f0dd48880546e8311d5bd4a0f0c5cd3c9480fcce",
+    "token_type": "fine-grained prefix observed; value withheld",
+    "repositories": [
+      "unirain/obs-auto-agent",
+      "unirain/obs-notes-hub"
+    ],
+    "checks": [
+      {
+        "name": "unirain/obs-auto-agent_metadata",
+        "path": "/repos/unirain/obs-auto-agent",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "bf731ba4ed6492bfb7ec63e31e0ca471dc3445a7e060afcfad75279a00e41c0f",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-auto-agent_default_commit",
+        "path": "/repos/unirain/obs-auto-agent/commits/master",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "c96e014e1f5dd42da6cd238842432a25387d01865c5aaa88cd89fc6ab8f06739",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-auto-agent_open_prs",
+        "path": "/repos/unirain/obs-auto-agent/pulls?state=open&per_page=1",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "2374b570a7e068929c0105ce9f1e386b275e0e4be8615f0c53e276607fcea00e",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-auto-agent_actions_read",
+        "path": "/repos/unirain/obs-auto-agent/actions/runs?per_page=1",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "a3930ab3d5f5ab9207e69a63e66a86fba143ca7f93bccc683fd6c3d1070f7f77",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-auto-agent_write_denied",
+        "path": "/repos/unirain/obs-auto-agent/git/blobs",
+        "method": "POST",
+        "expected": 403,
+        "status": 403,
+        "request_id_sha256": "dc832ebea47ef4f2a974abb90b5485f7bdcf8605dcd6323d8f3ac96ddc9c5db6",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-notes-hub_metadata",
+        "path": "/repos/unirain/obs-notes-hub",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "3f6bc0da23a547161483248fccd2da1f9f77e064563b4eda941cc47329b2842f",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-notes-hub_default_commit",
+        "path": "/repos/unirain/obs-notes-hub/commits/main",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "3c24c0db9bb97b16e9c3f71f2153d178827566f95a320911c702f05786b5d485",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-notes-hub_open_prs",
+        "path": "/repos/unirain/obs-notes-hub/pulls?state=open&per_page=1",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "1872c5c8692aaeaa0055f68730396b59de764badc9f6555830d2dfd04796d120",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-notes-hub_actions_read",
+        "path": "/repos/unirain/obs-notes-hub/actions/runs?per_page=1",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "3bef34e817f6655b52b28b80246e1125ac65b68a57fd5f4d686627a6df241fdb",
+        "outcome": "passed"
+      },
+      {
+        "name": "unirain/obs-notes-hub_write_denied",
+        "path": "/repos/unirain/obs-notes-hub/git/blobs",
+        "method": "POST",
+        "expected": 403,
+        "status": 403,
+        "request_id_sha256": "e049de6a5cfe13dec90e16fb22eb4d99e10cffb3beb76c242253e9a3b002ee25",
+        "outcome": "passed"
+      },
+      {
+        "name": "published_skill_contract_read",
+        "path": "/repos/unirain/obs-notes-hub/contents/.agents/skills/obsidian-note/references/reading-agent-cloud-contract.json?ref=de6cba6c9408ac532e5929282b3f14fc35a07f14",
+        "method": "GET",
+        "expected": 200,
+        "status": 200,
+        "request_id_sha256": "934e5923fa7611cd1d28ab020290ed2a7f479e638a8ab84b4462b442032c50c4",
+        "outcome": "passed"
+      }
+    ],
+    "status": "passed",
+    "remote_objects_created": 0,
+    "negative_probe_safety": "POST git/blobs sends {} without required content; no blob or branch can be created even if permissions are broader. Expected native403;422 or any other result remains unverified.",
+    "observed_repositories": [
+      {
+        "repository": "unirain/obs-auto-agent",
+        "default_branch": "master",
+        "default_commit": "5c13c3add0f7c2b9f5a2108cdc98538a12c39daf",
+        "private": false
+      },
+      {
+        "repository": "unirain/obs-notes-hub",
+        "default_branch": "main",
+        "default_commit": "de6cba6c9408ac532e5929282b3f14fc35a07f14",
+        "private": true
+      }
+    ]
+  },
+  "cloud_environment": {
+    "schema_version": 1,
+    "observed_at": "2026-10-19T10:39:11.052Z",
+    "repository": "unirain/obs-auto-agent",
+    "environment": "reading-preview",
+    "probe_sha256": "94ddfda5dac26502a37933b2e848bc28797811e19014dabf38efcca566125254",
+    "status": "configured",
+    "steps": [
+      {
+        "name": "create_isolated_environment",
+        "target": "reading-preview",
+        "outcome": "accepted"
+      },
+      {
+        "name": "restrict_to_default_branch",
+        "target": "reading-preview/master",
+        "outcome": "accepted"
+      },
+      {
+        "name": "set_environment_secret",
+        "target": "OSS_PREVIEW_CREDENTIALS",
+        "outcome": "accepted"
+      },
+      {
+        "name": "set_environment_secret",
+        "target": "READING_CAPACITY_VIEW_CREDENTIALS",
+        "outcome": "accepted"
+      },
+      {
+        "name": "set_environment_secret",
+        "target": "DEEPSEEK_API_KEY",
+        "outcome": "accepted"
+      },
+      {
+        "name": "set_environment_secret",
+        "target": "READING_REPOSITORY_READ_TOKEN",
+        "outcome": "accepted"
+      },
+      {
+        "name": "set_environment_variable",
+        "target": "READING_G1_EVIDENCE_PATH",
+        "outcome": "accepted"
+      },
+      {
+        "name": "set_environment_variable",
+        "target": "READING_G1_EVIDENCE_SHA256",
+        "outcome": "accepted"
+      }
+    ],
+    "secret_values_disclosed": false,
+    "production_config_changed": false,
+    "model_query_started": false,
+    "default_branch": "master",
+    "secret_names": [
+      "DEEPSEEK_API_KEY",
+      "OSS_PREVIEW_CREDENTIALS",
+      "READING_CAPACITY_VIEW_CREDENTIALS",
+      "READING_REPOSITORY_READ_TOKEN"
+    ],
+    "variable_names": [
+      "READING_G1_EVIDENCE_PATH",
+      "READING_G1_EVIDENCE_SHA256"
+    ],
+    "branch_policy": [
+      {
+        "name": "master",
+        "type": "branch"
+      }
+    ]
+  },
+  "g1": "complete",
+  "g2": "in_progress",
+  "model_query_started": false,
+  "scope": "Credential/native scope verification and trusted preview repository configuration only; no actual SDK/article quality acceptance yet"
+}

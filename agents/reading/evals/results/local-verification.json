@@ -187,7 +187,7 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "G1 complete and notes skill PR35 published at default main de6cba6 with exact-contract/Linux fixture checks. Actual cloud preview next requires a dedicated readonly GitHub credential for the private notes repository and reading-preview Environment setup; no paid query has run.",
+    "reason": "G1 complete, merged fixed skill verified, dedicated readonly GitHub identity verified and reading-preview Environment configured. Manual live preview admission is ready; actual SDK/article quality and G3-G5 remain incomplete.",
     "complete": false,
     "g1_blocker_resolved": true,
     "next_gate": "G2"
@@ -302,5 +302,18 @@
     "model_query": "not_exercised",
     "evidence": "agents/reading/evals/results/published-skill-verification.json",
     "g2": "pending_readonly_cloud_identity"
+  },
+  "cloud_preview_admission": {
+    "status": "configured_not_dispatched",
+    "observed_at": "2026-10-19T10:39:11.052Z",
+    "readonly_checks": 11,
+    "native_write_denials": 2,
+    "environment": "reading-preview",
+    "default_branch_only": "master",
+    "secret_count": 4,
+    "g1": "complete",
+    "g2": "in_progress",
+    "model_query_started": false,
+    "evidence": "agents/reading/evals/results/cloud-preview-admission.json"
   }
 }
