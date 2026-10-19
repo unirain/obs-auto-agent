@@ -39,7 +39,7 @@ Path('/absolute/protected/path/test-github-app.json').write_text(json.dumps({
 
 给该 JSON 文件限制仅当前用户可读，添加到 GitHub `reading-integration` Environment 的 Secret **`TEST_GITHUB_APP`**。本地测试则把 JSON 内容通过受保护环境注入同名变量；运行器负责生成 installation token，不需要手工保存长期 token。
 
-测试 watchdog 使用独立身份：可另建仅 **Issues: Read and write** 的 App，也只安装到同一测试仓库，Secret 名为 **`TEST_WATCHDOG_GITHUB_TOKEN`**（支持 token 或相同 App JSON 格式）。实现仓库的策略和 Actions 使用另一个只读 token：**`READING_REPOSITORY_READ_TOKEN`**，需要实现仓库 Contents/Actions read，以及 notes skill checkout 的 Contents read；若两仓库不在同一权限范围，应按用途分别准备身份。正式 watchdog 后续可用实现仓库工作流自带 `GITHUB_TOKEN`（Contents/Actions read、Issues write），不会将其用于测试仓库写入。
+测试 watchdog 使用独立身份：可另建仅 **Issues: Read and write** 的 App，也只安装到同一测试仓库，Secret 名为 **`TEST_WATCHDOG_GITHUB_TOKEN`**（支持 token 或相同 App JSON 格式）。实现仓库的策略和 Actions 使用另一个只读 token：**`READING_REPOSITORY_READ_TOKEN`**，需要实现仓库 Contents/Actions read，以及 notes skill checkout 的 Contents read 和实际待审 PR 检索所需的 Pull requests read；若两仓库不在同一权限范围，应按用途分别准备身份。正式 watchdog 后续可用实现仓库工作流自带 `GITHUB_TOKEN`（Contents/Actions read、Issues write），不会将其用于测试仓库写入。
 
 ## 3. 给图床一个测试前缀
 
@@ -152,3 +152,9 @@ npx tsx agents/reading/evals/storage/oss-transport-probe.ts
 ```
 
 A successful report must show one target PUT, authenticated OSS200/request-id hash, zero HTTP response events, an actual SDK unknown error, exact fixed-key Manager reconciliation and fresh-client cold restore of commits0/1 plus artifact bytes. Skipping,403, pre-request errors or a post-success adapter throw do not pass this case. Raw headers/keys are not logged; reports bind source/SDK/Node hashes. The 2026-10-15 actual evidence is in `evals/storage/fixtures/oss-transport-evidence.json`. This test used the existing setup credential, so it proves transport behavior only; restricted RAM permission cases remain unverified and G1 remains blocked until those identities are configured.
+
+## G2 云端预览的 GitHub 只读凭据
+
+笔记库是私有仓库。为 `READING_REPOSITORY_READ_TOKEN` 创建专用 fine-grained PAT，Resource owner 为 unirain，Only select repositories 仅选择 obs-auto-agent 与 obs-notes-hub。Repository permissions：Contents、Pull requests、Actions 都选 Read-only，Metadata 自动只读。不要使用可推送笔记库的维护者身份替代 preview 读取身份。官方创建方式和预填参数见 [GitHub PAT 文档](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)。
+
+令牌只保存到受保护的本机文件或 reading-preview Environment Secret，不发聊天、不提交 Git。云端还需 OSS_PREVIEW_CREDENTIALS、带完整bindings的 READING_CAPACITY_VIEW_CREDENTIALS、DEEPSEEK_API_KEY，以及可信 G1 路径/哈希变量；所有写入权限仍限定 preview 私有前缀。共享 writer 声明只能由实际 Actions concurrency 运行提供，不能在本机伪造以绕过准入。

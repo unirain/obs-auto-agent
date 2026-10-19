@@ -187,7 +187,7 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "The original restricted-RAM/G1 blocker is resolved: G1 complete. Overall objective remains incomplete; actual G2 previews next require a published default-branch skill commit (PR35 still draft/open); G3-G5 resources and human quality remain pending.",
+    "reason": "G1 complete and notes skill PR35 published at default main de6cba6 with exact-contract/Linux fixture checks. Actual cloud preview next requires a dedicated readonly GitHub credential for the private notes repository and reading-preview Environment setup; no paid query has run.",
     "complete": false,
     "g1_blocker_resolved": true,
     "next_gate": "G2"
@@ -292,5 +292,15 @@
       "npm run coverage:spec",
       "npx vitest run agents/reading/evals/operations/workflows.test.ts agents/reading/evals/storage/bootstrap.test.ts"
     ]
+  },
+  "published_skill": {
+    "status": "published_linux_fixture_verified",
+    "observed_at": "2026-10-19T10:17:34.948Z",
+    "default_branch": "main",
+    "commit": "de6cba6c9408ac532e5929282b3f14fc35a07f14",
+    "bundle_hash": "f0da7dd51e934a21624d81168fd6f85153e3d82c2822b339447958a3d3099a5a",
+    "model_query": "not_exercised",
+    "evidence": "agents/reading/evals/results/published-skill-verification.json",
+    "g2": "pending_readonly_cloud_identity"
   }
 }

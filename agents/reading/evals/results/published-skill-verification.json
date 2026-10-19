@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T10:17:34.948Z",
+  "repository": "unirain/obs-notes-hub",
+  "default_branch": "main",
+  "published_commit": "de6cba6c9408ac532e5929282b3f14fc35a07f14",
+  "skill_bundle_hash": "f0da7dd51e934a21624d81168fd6f85153e3d82c2822b339447958a3d3099a5a",
+  "skill_files": 92,
+  "cloud_contract": "passed",
+  "three_markers": "passed",
+  "note_skill_sha256": "38ab233f8b94c2a7bac775556668549b609dba7c54143c559f2f4e02b295f1df",
+  "diagram_playbook_sha256": "7789bb3b63d24f1aec5d4c21f0365810faa468bb995566b0398532edbf6bf177",
+  "graph_skill_sha256": "2884c0c9809c2c1ca3fa0a8123cdf4a0411b5c63a070975d84c874499e92919d",
+  "tools": {
+    "image_id": "sha256:66bc2e4d14f732be1da3e685e0337844c8c1dce01cbf3014094489e6561d1a7a",
+    "manifest_hash": "92d57bffdd511c2d44e20380d25ab1c285b96a9781b2a8a1fbe1dc51ecabefeb",
+    "manifest": {
+      "node_version": "v24.10.0",
+      "python_version": "Python 3.11.2",
+      "chromium_version": "Chromium 155.0.8059.39 built on Debian GNU/Linux 12 (bookworm)",
+      "poppler_version": "pdfinfo version 22.12.0",
+      "system_packages_hash": "825381112b5009d68861c26fedd12bb3d1133f6751cc74abd03293e03dace5a7",
+      "browser_worker_hash": "a9759645877260d4c93a6628981098da71a3f146735e4ae29cb6da6f68dfe09b",
+      "package_lock_hash": "33c6f293967784f04436a362ef7fa78d2a7b359b75c0e41b02ed608c7e04e771"
+    }
+  },
+  "installed_sdk": {
+    "sdk_version": "0.3.296",
+    "sdk_hash": "e8f1e99cef4332d6bc61cb15b5cac5d8ec094ab3d41230a5ebb25f0a03691bd5",
+    "node_version": "v24.19.0"
+  },
+  "linux_fixed_skill_version": "{\n  \"node_for_motion\": \">=22.12.0\",\n  \"schema_version\": 1,\n  \"skill_root\": \"/workspace/.agents/skills/fireworks-tech-graph\",\n  \"source\": \"installed-package\",\n  \"styles\": {\n    \"1\": \"Flat Icon\",\n    \"2\": \"Dark Terminal\",\n    \"3\": \"Blueprint\",\n    \"4\": \"Notion Clean\",\n    \"5\": \"Glassmorphism\",\n    \"6\": \"Claude Official\",\n    \"7\": \"OpenAI\",\n    \"8\": \"Dark Luxury\",\n    \"9\": \"C4 Review Canvas\",\n    \"10\": \"Cloud Fabric\",\n    \"11\": \"Event Transit\",\n    \"12\": \"Ops Pulse\"\n  },\n  \"version\": \"1.2.0\"\n}",
+  "linux_json_validate": {
+    "edges": 8,
+    "input_schema": "v1",
+    "mode": "agent",
+    "nodes": 8,
+    "ok": true,
+    "schema_version": 1,
+    "semantics": {
+      "details": {},
+      "ok": true,
+      "profile": "generic",
+      "style": 2,
+      "visual_theme": "Dark Terminal"
+    },
+    "style": {
+      "id": 2,
+      "name": "Dark Terminal"
+    }
+  },
+  "input_sha256": "c58fb65ae22be6efec4648be6f88aa370b17f1a2087a6303889fa3a3e059b466",
+  "network": "none",
+  "root_readonly": true,
+  "secrets_forwarded": false,
+  "model_query": "not_exercised",
+  "g2": "pending_real_preview",
+  "remaining": "Cloud preview Environment and read-only GitHub credential for private notes are not configured. Existing maintainer OAuth credential is not injected into preview.",
+  "cloud_preview_setup": {
+    "repository": "unirain/obs-auto-agent",
+    "environment": "reading-preview",
+    "environment_exists": false,
+    "dedicated_read_token_present": false,
+    "notes_repository_visibility": "PRIVATE",
+    "permissions_required": {
+      "Contents": "read",
+      "Pull requests": "read",
+      "Actions": "read",
+      "Metadata": "read"
+    },
+    "model_query_started": false,
+    "scope": "Published skills/isolated Linux fixture verified only; live cloud preview waits for dedicated readonly repository credential and environment setup"
+  }
+}
