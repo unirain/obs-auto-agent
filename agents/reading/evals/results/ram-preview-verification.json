@@ -1,0 +1,216 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T09:16:00.369Z",
+  "bucket": "obs-agent",
+  "region": "oss-cn-beijing",
+  "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+  "probe_sha256": "66ec78b500fcab5f3e67b4671e94bb4098c3081c4cb3ad1cf2bab6afc09556bd",
+  "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+  "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+  "node": "24.19.0",
+  "sdk": "ali-oss@6.23.0",
+  "workspace": "obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742",
+  "checks": [
+    {
+      "name": "private_never_versioned_preflight",
+      "kind": "read",
+      "key": "obs-agent",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_put_blob",
+      "kind": "write",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "6722e492a4d909cddc999760e5b07bb55d2927be6b9d019ba9f3d0278c19f6c6",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_get_blob",
+      "kind": "read",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "d42309bc74d47da84cd5e9f588a65551f1bd37558e2c242dccfcb6d35c0c7436",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_head_blob",
+      "kind": "read",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "edd27ea7036e6e187269d0061c37378d0ace29acb2fedb9b2a6d5669bae802f2",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_list_own_prefix",
+      "kind": "read",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "02a50315175bd93c324bffbb0911f2b95d20df185cafc025ece3216a7e63ef8c",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_forbid_overwrite",
+      "kind": "write",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 409,
+      "status": 409,
+      "code": "FileAlreadyExists",
+      "request_id_sha256": "262538fce468977bb04cc0c07ba74fde1f533c9c65c52e36f0a20adc225242cc",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_put_disposable_manifest",
+      "kind": "write",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/manifests/permission-canary-bfc5b8dc-dee9-4b99-952b-780b38cf0742",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "bd5033c68cd2967b22ed5c44196c54daac4dbfe7b22fdefba8da764aabd41936",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_delete_disposable_manifest",
+      "kind": "delete",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/manifests/permission-canary-bfc5b8dc-dee9-4b99-952b-780b38cf0742",
+      "expected": "allowed",
+      "status": 204,
+      "code": null,
+      "request_id_sha256": "b5f8a0e51c034a6483fc981b71858b004da4f747886ff6ed567b407080f61821",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_delete_commit_key_denied",
+      "kind": "delete",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/commits/not-a-real-commit-bfc5b8dc-dee9-4b99-952b-780b38cf0742",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "4f18d714b2e392c4af912b85d1f64b22ea37398692cdb6b349ea2f19f9f52715",
+      "outcome": "passed"
+    },
+    {
+      "name": "production_put_denied",
+      "kind": "write",
+      "key": "reading/production/obs-notes-hub/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "eb86cbb4d22d4c9bac1a34a8c096e6db6cc405210b00833bcbd6326bc0efa4fa",
+      "outcome": "passed"
+    },
+    {
+      "name": "production_get_denied",
+      "kind": "read",
+      "key": "reading/production/obs-notes-hub/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "200d2eaeb13d966c5937f44395be1580b3f4b7009e873a5bae33a29b346e9e61",
+      "outcome": "passed"
+    },
+    {
+      "name": "production_list_denied",
+      "kind": "read",
+      "key": "reading/production/obs-notes-hub/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "9c7fc044ff9836e6b4aa0ca59a22e3f5b2904f1a6ea8ee85931119130379651b",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_put_denied",
+      "kind": "write",
+      "key": "reading/integration/obs-notes-hub/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "3330491d86e25ba293a31efeb82ac2e775dace75cc04c1eac237e0d5feffeddf",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_get_denied",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "e6c4693d7892e730aee3218733c935265d011da93a33c90d8e7c4a5615bcd964",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_list_denied",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "a08d379f425a89b7bdfc4ffc4bac41addea8eedbb355056946e83f26806d97d6",
+      "outcome": "passed"
+    },
+    {
+      "name": "bucket_root_list_denied",
+      "kind": "read",
+      "key": "",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "d419cbb01ecfcc8f5f53152b0f62c91a798d48dc3209e883b1fc6b8a3a191843",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_immutable_initialize",
+      "kind": "write",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/commits/00000000000000000000.json",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_immutable_checkpoint",
+      "kind": "write",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/commits/00000000000000000001.json",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_cold_restore",
+      "kind": "read",
+      "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    }
+  ],
+  "status": "passed",
+  "assertions": 19,
+  "cold_restore": "passed",
+  "immutable_commits_preserved": 2,
+  "real_commit_delete_attempts": 0,
+  "scope": "reading-preview only; native HTTP allow/deny and real OSS immutable cold recovery",
+  "g1": "incomplete_other_identities_unprepared",
+  "intent_payload_hash_scope": "Local prepared payload_sha256 fields bind the fixed probe marker fixture; they are not exact HTTP body hashes for the conflict or Manager protocol operations. Exact operation logic is bound by probe_sha256. This receipt proves native RAM scopes and cold recovery, not unknown transport reconciliation.",
+  "principal": "reading-preview (bound to user-provided creation export; no RAM GetUser API performed)",
+  "evidence_layer": "Actual ali-oss native service requests with the newly authorized restricted credential; no local capability guard on 403 operations",
+  "other_identities": "test workspace, monitor, capacity, image upload and image GC remain unverified/unprepared"
+}

@@ -185,7 +185,17 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "User-confirmed restricted RAM identities remain unprepared; G1 blocks paid/live model integration. Later gates also require isolated GitHub/App/image identities, published skill and human quality labels.",
+    "reason": "Preview RAM scope passed19 checks/8 actual403; other restricted test/monitor/capacity/image identities remain unprepared. G1 still blocks paid/live model integration; later gates also need isolated GitHub/App/image resources, published skill and human labels.",
     "complete": false
+  },
+  "actual_native_preview_ram": {
+    "status": "passed",
+    "observed_at": "2026-10-19",
+    "checks": 19,
+    "native_403": 8,
+    "cold_restore": "passed",
+    "immutable_commits_preserved": 2,
+    "evidence": "agents/reading/evals/results/ram-preview-verification.json",
+    "scope": "New preview credential only; other identities and G1 remain unverified/incomplete"
   }
 }
