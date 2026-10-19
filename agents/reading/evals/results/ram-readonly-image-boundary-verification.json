@@ -1,0 +1,559 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T09:31:43.389Z",
+  "status": "partial",
+  "credentials_prepared": 4,
+  "checks_passed": 49,
+  "native_403": 38,
+  "receipts": [
+    {
+      "schema_version": 1,
+      "observed_at": "2026-10-19T09:31:43.333Z",
+      "principal": "reading-test-watchdog",
+      "probe_sha256": "9f299e427a6590478bc5635e24166c8deeff83d68801cf038f28397ea4207c51",
+      "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+      "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+      "node": "24.19.0",
+      "sdk": "ali-oss@6.23.0",
+      "bucket": "obs-agent",
+      "region": "oss-cn-beijing",
+      "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+      "checks": [
+        {
+          "name": "workspace_preflight",
+          "key": "obs-agent",
+          "expected": "allowed",
+          "status": null,
+          "error_code": null,
+          "request_id_sha256": null,
+          "outcome": "passed"
+        },
+        {
+          "name": "list_reading/integration/",
+          "key": "reading/integration/",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "5e9b4968c1ee4ee92233b220f24c86d477a24eeee08f59c834f65ed7d51a746a",
+          "outcome": "passed"
+        },
+        {
+          "name": "read_known_integration_blob",
+          "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "a69fecace52859749320a317624431fb2bd64d481c59c9a4c04a0db4e2b6cd57",
+          "outcome": "passed"
+        },
+        {
+          "name": "readonly_integration_cold_restore",
+          "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/",
+          "expected": "allowed",
+          "status": null,
+          "error_code": null,
+          "request_id_sha256": null,
+          "outcome": "passed"
+        },
+        {
+          "name": "outside_list_denied_reading/production/",
+          "key": "reading/production/",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "76a72f0d571cc2fcf4c18423a74ec8483079a38990ee9fd35033177b2a3bb67b",
+          "outcome": "passed"
+        },
+        {
+          "name": "outside_list_denied_reading/preview/",
+          "key": "reading/preview/",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "b9b741d57748a9fa323786ce71a28f5399f8551379f4edff43a2244782a5c82f",
+          "outcome": "passed"
+        },
+        {
+          "name": "preview_get_denied",
+          "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "88491432b03a0573a87d2355fd23a03b3b3e494e4d5df5133f844f5bc480340b",
+          "outcome": "passed"
+        },
+        {
+          "name": "bucket_root_list_denied",
+          "key": "",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "7f5e6e5f035ba55b12bb796d112d134957b0b18b77cfcfeef2fb33450e379789",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-b73a603e-6d0d-409b-9bbe-414d4cf70e7f/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "e04c227d7a96e903c2f9963d7fd8dd8589a3a3415c7ba8fda22d231c7a78363f",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-b73a603e-6d0d-409b-9bbe-414d4cf70e7f/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "acf54c7aac54f07d5c7619fbfd75db2c6942ae013becda91b064c5651e91bae3",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-b73a603e-6d0d-409b-9bbe-414d4cf70e7f/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "5acce8c03986385ada32deae0be006cfa468d9b67d1c4ae2e8241dfab4e8b8c5",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-b73a603e-6d0d-409b-9bbe-414d4cf70e7f/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "4a37e21ed25fd6d3c6d297999603ffdb5c275ca443ec3c7ee5d20d0159b78c71",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-b73a603e-6d0d-409b-9bbe-414d4cf70e7f/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "f9e2aa83bfbfd0046fb46f627eb059139d311ed683a5c6f1033a2a9cde1692c8",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-b73a603e-6d0d-409b-9bbe-414d4cf70e7f/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "719e077a87070d3f818ba78bd11a8c4d0fc9c33e28e350f6df658e9253d13556",
+          "outcome": "passed"
+        }
+      ],
+      "status": "passed",
+      "scope": "monitor integration readonly native scope",
+      "identity_acceptance": "passed",
+      "cold_restore": "passed",
+      "real_commit_delete_attempts": 0,
+      "successful_remote_writes": 0,
+      "failure": null,
+      "automatic_retry": false,
+      "g1": "incomplete_image_capacity_scope_unverified",
+      "principal_binding": "User-provided creation export; no RAM GetUser API performed",
+      "evidence_layer": "Native OSS responses; denial operations use SDK directly without a local scope guard"
+    },
+    {
+      "schema_version": 1,
+      "observed_at": "2026-10-19T09:31:43.389Z",
+      "principal": "reading-capacity-readonly",
+      "probe_sha256": "9f299e427a6590478bc5635e24166c8deeff83d68801cf038f28397ea4207c51",
+      "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+      "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+      "node": "24.19.0",
+      "sdk": "ali-oss@6.23.0",
+      "bucket": "obs-agent",
+      "region": "oss-cn-beijing",
+      "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+      "checks": [
+        {
+          "name": "workspace_preflight",
+          "key": "obs-agent",
+          "expected": "allowed",
+          "status": null,
+          "error_code": null,
+          "request_id_sha256": null,
+          "outcome": "passed"
+        },
+        {
+          "name": "list_reading/production/",
+          "key": "reading/production/",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "ec154a8e49ddb2eb84b0dddc0634806d6602eff179e664fb46838f8c992433c0",
+          "outcome": "passed"
+        },
+        {
+          "name": "list_reading/preview/",
+          "key": "reading/preview/",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "dba862adb39c03fb8a8390c5f272b75805019be5b6dbec235b274a6dd2e21de9",
+          "outcome": "passed"
+        },
+        {
+          "name": "list_reading/integration/",
+          "key": "reading/integration/",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "4367a12a18b7be4cb5f6d3bee1ad1cab431c23e5eaec51a8584560adfc3cf2c0",
+          "outcome": "passed"
+        },
+        {
+          "name": "read_known_integration_blob",
+          "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "ed10cd27f469d7495560308e7b2d4f4074dfb279c43ccaea7c10285ea14e1dd8",
+          "outcome": "passed"
+        },
+        {
+          "name": "read_known_preview_blob",
+          "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": "allowed",
+          "status": 200,
+          "error_code": null,
+          "request_id_sha256": "800712c9cccab4a3f80dc247a227215aa93bd778aa5befb632e0fec8b6ec6596",
+          "outcome": "passed"
+        },
+        {
+          "name": "readonly_integration_cold_restore",
+          "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/",
+          "expected": "allowed",
+          "status": null,
+          "error_code": null,
+          "request_id_sha256": null,
+          "outcome": "passed"
+        },
+        {
+          "name": "outside_list_denied_unmanaged/",
+          "key": "unmanaged/",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "a16eb773e0732292b2c3c5a1e8632712dd83565a73c385b49f9431db73a149cd",
+          "outcome": "passed"
+        },
+        {
+          "name": "bucket_root_list_denied",
+          "key": "",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "b4bf79f92c1b77f616fda775df3e9acb4694e5ff03397b2fc1323f8898991bd3",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-2311ef58-a25d-4f38-8507-4dfe46706195/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "413a3c5cd756ebd17a450ea93d841b4b70f1a61695787caf1112a0bd451f3567",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-2311ef58-a25d-4f38-8507-4dfe46706195/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "4561fb5ab33c83439b1957e2fc5be3e8db998f0efeb2d63b0fca1c4446e0c735",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-2311ef58-a25d-4f38-8507-4dfe46706195/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "837804bfae52a0b791097dda27bd5799ae93043e6eee23fdd156009acebd9e94",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-2311ef58-a25d-4f38-8507-4dfe46706195/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "177a05f3786009ed9e9eee6c251a61bc118f0c31a8eff0b74b93f32afc32712c",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-2311ef58-a25d-4f38-8507-4dfe46706195/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "a8efe97be4349ca9fe1b80c6c75815228190c5b41f0bc9c8a68f64cc4a2b2633",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-2311ef58-a25d-4f38-8507-4dfe46706195/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "15b8bd9eb2b7ddedf35bc992f890feb45a6264b15308f868771d8188c2d41a5a",
+          "outcome": "passed"
+        }
+      ],
+      "status": "passed",
+      "scope": "workspace subset only; image bucket configuration and permissions unverified",
+      "identity_acceptance": "partial",
+      "cold_restore": "passed",
+      "real_commit_delete_attempts": 0,
+      "successful_remote_writes": 0,
+      "failure": null,
+      "automatic_retry": false,
+      "g1": "incomplete_image_capacity_scope_unverified",
+      "principal_binding": "User-provided creation export; no RAM GetUser API performed",
+      "evidence_layer": "Native OSS responses; denial operations use SDK directly without a local scope guard"
+    },
+    {
+      "schema_version": 1,
+      "observed_at": "2026-10-19T09:31:42.708Z",
+      "principal": "reading-test-images",
+      "probe_sha256": "9f299e427a6590478bc5635e24166c8deeff83d68801cf038f28397ea4207c51",
+      "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+      "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+      "node": "24.19.0",
+      "sdk": "ali-oss@6.23.0",
+      "bucket": "obs-agent",
+      "region": "oss-cn-beijing",
+      "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+      "checks": [
+        {
+          "name": "private_integration_get_denied",
+          "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "c718380407d574486b6c0d6ab55164dfa8f52d753aca4d5dfd4a84c7d835b96c",
+          "outcome": "passed"
+        },
+        {
+          "name": "private_preview_get_denied",
+          "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "18c3de37c64ac3d74e25c75dcfff67406242a5cddbf1458ea30e49a0de32b13b",
+          "outcome": "passed"
+        },
+        {
+          "name": "private_bucket_metadata_denied",
+          "key": "obs-agent",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "d0041ca5861a3595c9afebd318bea25bb77e630fbdf834e94cb3ff03749f7e06",
+          "outcome": "passed"
+        },
+        {
+          "name": "bucket_root_list_denied",
+          "key": "",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "98381f9213a4c8bf4db86e3ff1ec782d6f63ac0222dbc0912ad7fa05d5a35be1",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-82a04657-e599-4472-963d-8b9582a20b01/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "6cbfe754ac4b03d62d31e37a5495bddc73ce878b8194f55da1b16869c25aadf4",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-82a04657-e599-4472-963d-8b9582a20b01/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "884983de4b18d3df3b115b72f49a201d267b34f7c099188d23fd0c728015474c",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-82a04657-e599-4472-963d-8b9582a20b01/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "d83b6e18349780ec7e12b45163aeab3b8e31acbeb804aea95a23a034e9aa0940",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-82a04657-e599-4472-963d-8b9582a20b01/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "c63d896856de530a903a1cb9ded006d5ddee161cf48211a771af7f4cd8781d87",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-82a04657-e599-4472-963d-8b9582a20b01/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "3de137e448d81549aff59103498724f690681c9b329a220ecd1e577b95662c1d",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-82a04657-e599-4472-963d-8b9582a20b01/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "b30f3eedf23dc3df757c0d8f8ac646fe5ca3842f3bc48e9036d79de2c138f7ec",
+          "outcome": "passed"
+        }
+      ],
+      "status": "passed",
+      "scope": "workspace subset only; image bucket configuration and permissions unverified",
+      "identity_acceptance": "partial",
+      "cold_restore": null,
+      "real_commit_delete_attempts": 0,
+      "successful_remote_writes": 0,
+      "failure": null,
+      "automatic_retry": false,
+      "g1": "incomplete_image_capacity_scope_unverified",
+      "principal_binding": "User-provided creation export; no RAM GetUser API performed",
+      "evidence_layer": "Native OSS responses; denial operations use SDK directly without a local scope guard"
+    },
+    {
+      "schema_version": 1,
+      "observed_at": "2026-10-19T09:31:42.628Z",
+      "principal": "reading-test-image-gc",
+      "probe_sha256": "9f299e427a6590478bc5635e24166c8deeff83d68801cf038f28397ea4207c51",
+      "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+      "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+      "node": "24.19.0",
+      "sdk": "ali-oss@6.23.0",
+      "bucket": "obs-agent",
+      "region": "oss-cn-beijing",
+      "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+      "checks": [
+        {
+          "name": "private_integration_get_denied",
+          "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "b69037c1acf1cd7cb162794977f9cd83031aa19b9772270f56f1a85443214828",
+          "outcome": "passed"
+        },
+        {
+          "name": "private_preview_get_denied",
+          "key": "reading/preview/obs-notes-hub/reading-preview/ram-bfc5b8dc-dee9-4b99-952b-780b38cf0742/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "3925746fa599729d0a4b0d756c6f0d118e4b237da98ec275bbdb9332ac66f2c3",
+          "outcome": "passed"
+        },
+        {
+          "name": "private_bucket_metadata_denied",
+          "key": "obs-agent",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "6733c72a8134c5344ab4359557d216cd65f0e8118f9a19f9d33dc96489b654f1",
+          "outcome": "passed"
+        },
+        {
+          "name": "bucket_root_list_denied",
+          "key": "",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "3a5b46d136690d770e65273fa6a757fb5ca79a882c79b88992094c776e1a03b2",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-8de8bf85-0f51-4f93-a49d-e55002e02d5c/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "45740487da51bff7d3de1b0658a39dd553a44c584a1d7c31b4ba0b83eefbd5ac",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_production",
+          "key": "reading/production/obs-notes-hub/ram-8de8bf85-0f51-4f93-a49d-e55002e02d5c/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "f55590462b6b66a4f3eb6713c6467562425b5b28fc0e157151bc8f2d48df6fb9",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-8de8bf85-0f51-4f93-a49d-e55002e02d5c/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "43ec19cd39b17be69290510ac18efb3d0fccedbbed9af9852bd7945559afddca",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_preview",
+          "key": "reading/preview/obs-notes-hub/ram-8de8bf85-0f51-4f93-a49d-e55002e02d5c/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "e1bc33058b2e9b0571e2e9043d6ce30c9638d2f128572ff955a1f3caf2ce54fa",
+          "outcome": "passed"
+        },
+        {
+          "name": "put_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-8de8bf85-0f51-4f93-a49d-e55002e02d5c/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "464e96e6299d051bb13c477b077d0d6285f1c7351177cd8e2e5708a9aea6a22b",
+          "outcome": "passed"
+        },
+        {
+          "name": "delete_nonexistent_denied_integration",
+          "key": "reading/integration/obs-notes-hub/ram-8de8bf85-0f51-4f93-a49d-e55002e02d5c/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe-never-created",
+          "expected": 403,
+          "status": 403,
+          "error_code": "AccessDenied",
+          "request_id_sha256": "a92cd36dc216b6c3f1ad87327901246cd61ae7c7c49366553ae514b66d0dd896",
+          "outcome": "passed"
+        }
+      ],
+      "status": "passed",
+      "scope": "workspace subset only; image bucket configuration and permissions unverified",
+      "identity_acceptance": "partial",
+      "cold_restore": null,
+      "real_commit_delete_attempts": 0,
+      "successful_remote_writes": 0,
+      "failure": null,
+      "automatic_retry": false,
+      "g1": "incomplete_image_capacity_scope_unverified",
+      "principal_binding": "User-provided creation export; no RAM GetUser API performed",
+      "evidence_layer": "Native OSS responses; denial operations use SDK directly without a local scope guard"
+    }
+  ],
+  "remaining": "Actual image bucket/region/public URL and complete managed capacity bindings are not supplied. Image upload/list-versions/GC permissions, public visibility and full capacity remain unverified.",
+  "g1": "incomplete",
+  "no_paid_calls": true,
+  "no_cloud_resource_creation": true
+}

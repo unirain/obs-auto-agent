@@ -35,7 +35,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | Gate | Status | Required evidence |
 | --- | --- | --- |
 | G0 | complete | Exact core DTO/UTC boundaries, shared states, 40 schema definitions and complete cross-module cold-recovery fixture locally verified; audit in docs/notes/g0-contract-audit.md |
-| G1 | blocked_external | Native OSS transport/cold reconciliation, preview RAM19/8 real403 and integration RAM21/8 real403 passed; readonly/image identities unprepared |
+| G1 | blocked_external | Native OSS/preview/integration/watchdog scopes passed; capacity workspace and image private-boundary checks passed; actual image target/capacity bindings and native image scope remain unverified |
 | G2 | pending | Live SDK isolation, five varied previews and recovery |
 | G3 | pending | Isolated GitHub/image delivery and fault reconciliation |
 | G4 | pending | Real sources, monitoring, capacity and human quality calibration |
@@ -54,7 +54,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | --- | --- | --- |
 | Implementation repository | unirain/obs-auto-agent, default master, Apache License preserved | Separate isolated delivery test repository/App |
 | Private OSS | Existing obs-agent, Beijing; native private/never-versioned/no-overwrite/pagination/chain probe passed | Native TLS transport loss now passed (2026-10-15); restricted RAM allow/deny still required. Broad test AK is not IAM proof |
-| Restricted credentials | Preview RAM19/8 real403 and integration RAM21/8 real403 verified with protected local credentials | Monitor/capacity/image identities and GitHub App remain required |
+| Restricted credentials | All6 RAM users have local credentials; preview/integration/watchdog native scopes verified, capacity/images partially verified | Real image bucket/public URL, complete capacity bindings and native image permissions; GitHub App still required |
 | Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | Live SDK only after complete G1; isolation/recovery and five varied previews |
 | Notes skills | [Draft PR #35](https://github.com/unirain/obs-notes-hub/pull/35), current head f1053b4829747667a5263a4a77a0d7bb092252da | Human review/merge and pin actual published default-branch commit; a draft head is not publication |
 | Quality corpus | 30 candidates / 10 holdout; 26 private bodies (9 holdout) prepared with SHA256; 4 video bodies unavailable and all labels unset | 4 accessible bodies or explicit new candidate choices, human labels/note exclusions, real evaluation/calibration and quality confirmation |
@@ -114,3 +114,11 @@ User confirmed ReadingTestWorkspace authorization. New restricted reading-test-w
 Local immutable intents preceded remote writes, SDK retryMax0; unknown results would stop without replacement. Intent probe_fixture_sha256 explicitly describes marker bytes rather than all generated HTTP bodies. The trusted integration Manager used a separate UUID namespace within the authorized integration root, fixed production scope and approved reading-integration identity; it did not touch or promote any preview state. Commits0/1 remain consecutive and intact; a fresh Manager cold-restored the exact revision and artifact bytes. No model call, IAM/bucket creation or production deployment change.
 
 Sanitized receipt: agents/reading/evals/results/ram-integration-verification.json. Private report/intent remain ignored and credentials outside Git. Preview and integration workspace identities now have native evidence; monitor, capacity, image upload/GC remain unprepared/unverified, so G1 remains blocked_external and G2–G5 pending. No application source changed; targeted native verification21/21 and diff check apply, prior558/102 local/LinuxCI implementation evidence is unchanged rather than rerun.
+
+## 2026-10-19 Remaining RAM credentials and native subset checks
+
+User supplied3 creation CSVs containing4 unique expected users and confirmed authorization: reading-test-watchdog, reading-capacity-readonly, reading-test-images, reading-test-image-gc. All credentials were saved outside Git (directory0700/files0600), preserving existing files; no values printed. No identity or bucket was created by the agent.
+
+ActualNode24.19.0/ali-oss6.23.0 isolated native verification passed49 scoped checks with38 realOSS403 and zero successful remote writes. Watchdog14/14: integration list/read and fresh readonly Manager cold restore of the prior immutable fixture; production/preview access and Put/Delete denied. Capacity15/15: workspace subset only, three managed private prefixes listable, known preview/integration fixture bytes readable and readonly cold restore passes; root/unmanaged listing and writes/deletes denied. Each image identity10/10: private-workspace reads/metadata, root listing and production/preview/integration writes/deletes denied. Native denial calls use SDK directly, local immutable intent checkpoints precede every negative write/delete, SDK retries0; no real commit deletion was attempted.
+
+Only watchdog acceptance is complete for its tested identity scope. Capacity and both image identities remain partial: actual image bucket/region/public URL and managed-capacity bindings are absent. No image upload, version inventory or GC on a real image prefix has occurred; missing image capacity remains unknown, neverzero. Requested only nonsecret bucket/domain information while independent checks ran. Sanitized receipt: agents/reading/evals/results/ram-readonly-image-boundary-verification.json. G1 stays blocked_external pending image/capacity scope evidence; G2–G5 and paid model generation remain unpassed/disabled. Application source/fingerprint and prior558/102 CI evidence are unchanged; this turn adds native diagnostic evidence only.

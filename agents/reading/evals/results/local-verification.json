@@ -185,7 +185,7 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "Preview RAM19 checks/8 real403 and integration RAM21 checks/8 real403 passed; restricted monitor/capacity/image identities remain unprepared. G1 still blocks paid/live models; later gates also need isolated GitHub/App/image resources, published skill and human labels.",
+    "reason": "All6 RAM users supplied. Preview/integration/watchdog scopes passed; capacity workspace and image private-boundary subset checks passed. Actual image bucket/public URL, complete managed capacity bindings and image upload/GC permissions remain unverified. G1 is incomplete; paid models remain disabled.",
     "complete": false
   },
   "actual_native_preview_ram": {
@@ -207,5 +207,18 @@
     "immutable_commits_preserved": 2,
     "evidence": "agents/reading/evals/results/ram-integration-verification.json",
     "scope": "New restricted integration credential only; readonly/image identities and G1 remain unverified/incomplete"
+  },
+  "actual_native_remaining_ram_subset": {
+    "status": "partial",
+    "observed_at": "2026-10-19",
+    "checks_passed": 49,
+    "native_403": 38,
+    "watchdog_scope": "passed",
+    "capacity_scope": "workspace_subset_passed_image_unverified",
+    "image_scope": "private_workspace_boundary_passed_actual_image_target_unverified",
+    "credentials_prepared": 4,
+    "successful_remote_writes": 0,
+    "evidence": "agents/reading/evals/results/ram-readonly-image-boundary-verification.json",
+    "g1": "incomplete"
   }
 }
