@@ -1,0 +1,391 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T09:43:09.707Z",
+  "probe_sha256": "e4603e84433a468732c129ad7328b88aa62aa2f0773517283e7f77d1ed4fc0a1",
+  "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+  "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+  "node": "24.19.0",
+  "sdk": "ali-oss@6.23.0",
+  "bucket": "osb-reading-public-imgs",
+  "region": "oss-cn-beijing",
+  "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+  "public_url": "https://osb-reading-public-imgs.oss-cn-beijing.aliyuncs.com",
+  "prefix": "reading-agent/integration/",
+  "key": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+  "status": "partial_blocked_gc_explicit_deny",
+  "checks": [
+    {
+      "name": "image_bucket_configuration",
+      "principal": "images",
+      "target": "osb-reading-public-imgs",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "images_list_managed_prefix",
+      "principal": "images",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "924f88a81f8cd75ed750f427d75617fcfcddae83cae60ffe0f7cd4ae6a606451",
+      "outcome": "passed"
+    },
+    {
+      "name": "images_list_all_versions",
+      "principal": "images",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "image-gc_list_managed_prefix",
+      "principal": "image-gc",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "a9ef543d3b422ce231026a82b9d3dd245b49297030daa345a8933ac2f822a15a",
+      "outcome": "passed"
+    },
+    {
+      "name": "image-gc_list_all_versions",
+      "principal": "image-gc",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "capacity_list_managed_prefix",
+      "principal": "capacity",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "529391a0deb75d042a70b5e018383a70c0b1d5f1cdb28144155233eb6f9277a1",
+      "outcome": "passed"
+    },
+    {
+      "name": "capacity_list_all_versions",
+      "principal": "capacity",
+      "target": "reading-agent/integration/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "uploader_outside_prefix_put_denied",
+      "principal": "images",
+      "target": "reading-agent/ram-outside-ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/never.png",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "475b4cc45d4c0259f1f16c30a75ea34516ac0034ea509c78ca25e37e64265b32",
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_outside_prefix_delete_denied",
+      "principal": "image-gc",
+      "target": "reading-agent/ram-outside-ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/never.png",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "5cd3f42324bb78621438d29cc296d936778de10bf560726073e6372fe89cc078",
+      "outcome": "passed"
+    },
+    {
+      "name": "capacity_image_root_list_denied",
+      "principal": "capacity",
+      "target": "",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "541c4d131ab67c5ccbf8c1c8aa69f9be89ec870f9866d8f58f5be583db01203f",
+      "outcome": "passed"
+    },
+    {
+      "name": "upload_unique_canary",
+      "principal": "images",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "c581d040a80ad7f379090857833198979eb61febc81b33df5b60ee2260d7ff0a",
+      "outcome": "passed"
+    },
+    {
+      "name": "image_adapter_get_hash",
+      "principal": "images",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "anonymous_exact_image_hash",
+      "principal": "anonymous",
+      "target": "https://osb-reading-public-imgs.oss-cn-beijing.aliyuncs.com/reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "uploader_forbid_overwrite409",
+      "principal": "images",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": 409,
+      "status": 409,
+      "code": "FileAlreadyExists",
+      "request_id_sha256": "9d71197f00fdd99f63ebc404e7fe9bae92df5f247a1f1e6f3c03b96293f93fd7",
+      "outcome": "passed"
+    },
+    {
+      "name": "uploader_delete_denied",
+      "principal": "images",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "97992631e4cdf4838d07e80fa276670e486c847e8a1408bd226c30ffa52bd3e0",
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_upload_denied",
+      "principal": "image-gc",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png.never",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "32aa80d678f33e7daad82b63ad762e270b74b6cbcd5218de7bf1f34388e610fe",
+      "outcome": "passed"
+    },
+    {
+      "name": "capacity_upload_denied",
+      "principal": "capacity",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png.capacity-never",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "66cd9cc6be8adb89ce220aaed81085f3dd5e2b32fc7410c4ae1815c775abeeda",
+      "outcome": "passed"
+    },
+    {
+      "name": "capacity_delete_denied",
+      "principal": "capacity",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "71e6e5311e4caa7946318d5ad6a01bd40c93f375360b994116dfc44f0bcce33e",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_cannot_upload_image",
+      "principal": "preview",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png.preview-never",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "07ae225602d1be641a93f3eacc82fbb72957e38e85aa2e4f0d011e958f9cbc83",
+      "outcome": "passed"
+    },
+    {
+      "name": "test-workspace_cannot_upload_image",
+      "principal": "test-workspace",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png.test-workspace-never",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "6d025f8ba7a6f906de49594c1ec90d66101cc7d11073c1886f225fe09b4ec069",
+      "outcome": "passed"
+    },
+    {
+      "name": "watchdog_cannot_upload_image",
+      "principal": "watchdog",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png.watchdog-never",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "5c5ff086ee9ae7e827dfb8c598767ee472da3b855c5585d0f1cfc045cac263ab",
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_exact_version_read",
+      "principal": "image-gc",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "capacity_broker_all_declared_bindings",
+      "principal": "capacity",
+      "target": "four declared managed prefixes",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "gc_delete_exact_canary_version",
+      "principal": "image-gc",
+      "target": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+      "expected": "allowed",
+      "status": null,
+      "code": "permission",
+      "request_id_sha256": null,
+      "outcome": "unknown"
+    }
+  ],
+  "version": null,
+  "configuration": {
+    "versioning": "never",
+    "acl": "public-read",
+    "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+    "lifecycle": [],
+    "anonymous_readable": false
+  },
+  "capacity_before": {
+    "complete_for_declared_bindings": true,
+    "bindings": [
+      {
+        "kind": "workspace",
+        "scope": "production",
+        "bucket": "obs-agent",
+        "region": "oss-cn-beijing",
+        "endpoint": "oss-cn-beijing.aliyuncs.com",
+        "prefix": "reading/production/"
+      },
+      {
+        "kind": "workspace",
+        "scope": "preview",
+        "bucket": "obs-agent",
+        "region": "oss-cn-beijing",
+        "endpoint": "oss-cn-beijing.aliyuncs.com",
+        "prefix": "reading/preview/"
+      },
+      {
+        "kind": "workspace",
+        "scope": "integration",
+        "bucket": "obs-agent",
+        "region": "oss-cn-beijing",
+        "endpoint": "oss-cn-beijing.aliyuncs.com",
+        "prefix": "reading/integration/"
+      },
+      {
+        "kind": "image",
+        "scope": "images",
+        "bucket": "osb-reading-public-imgs",
+        "region": "oss-cn-beijing",
+        "endpoint": "oss-cn-beijing.aliyuncs.com",
+        "prefix": "reading-agent/integration/"
+      }
+    ],
+    "object_count": 13,
+    "reservation_count": 0,
+    "occupied_bytes": 4992,
+    "reserved_bytes": 0,
+    "image_key_versions": 1,
+    "shared_limit_bytes": 50000000000
+  },
+  "capacity_after": null,
+  "failure": "gc_delete_exact_canary_version",
+  "remote_object_policy": "Only isolated exact diagnostic key may be deleted; no protocol commits targeted",
+  "scope": "Native identity permissions and adapter inventory/public-read/delete diagnostics only; not full Publisher/maintenance/model/G3 acceptance",
+  "checks_passed": 23,
+  "reconciliation": {
+    "schema_version": 1,
+    "actor": "trusted_local_diagnostic",
+    "reason": "Reconcile fixed canary before one diagnostic retry of definitively permission-rejected DELETE",
+    "prior_report_sha256": "896da4875e79e63fc48e34285266ba9cb0a460c026c55f64312ce18e1d51af49",
+    "classification_evidence": "Bound classifyOssError maps permission only from native403 or AccessDenied; prior helper lacked wrapped HTTP status and labelled it unknown. Historical observation remains unchanged.",
+    "key": "reading-agent/integration/ram-8ac5987d-c71c-4cb4-81a3-92b7d5501de2/d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406.png",
+    "version": null,
+    "automatic_retry": false,
+    "probe_sha256": "806a9eccf7a604fd784e61d62c03fd660a0b78b4823f786460b4d122b61eb225",
+    "steps": [
+      {
+        "operation": "GET_fixed_key_before_retry",
+        "status": 200,
+        "sha256": "d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406",
+        "outcome": "present_unchanged"
+      },
+      {
+        "operation": "DELETE_fixed_key",
+        "state": "prepared",
+        "version": null,
+        "attempt": 2,
+        "total_sdk_automatic_retries": 0
+      },
+      {
+        "operation": "DELETE_fixed_key",
+        "state": "observed",
+        "status": 403,
+        "code": "AccessDenied",
+        "ec_code": "0003-00000201",
+        "request_id_sha256": "f4f0c4adac3f3213514e50912e6e2b5612580542b92f9cc548a9b55619533486",
+        "diagnostic": {
+          "PolicyType": "AccountLevelIdentityBasedPolicy",
+          "NoPermissionType": "ExplicitDeny",
+          "AuthAction": "oss:DeleteObject",
+          "message_category": "service_permission_denied"
+        },
+        "outcome": "known_rejected"
+      },
+      {
+        "operation": "GET_fixed_key_after_retry",
+        "status": 200,
+        "sha256": "d7beb3d5a42fad439d0fd4b356b02f035864be16c852496be92afa0bdeba5406",
+        "outcome": "present"
+      }
+    ],
+    "observed_at": "2026-10-19T09:45:16.376Z"
+  },
+  "reconciled_delete_outcome": "known_rejected403_AccountLevelIdentityBasedPolicy_ExplicitDeny",
+  "cleanup_status": "fixed canary retained, hash verified; no new upload or key on retry",
+  "g1": "incomplete_delete_identity_scope",
+  "metadata_after_policy_update": [
+    {
+      "principal": "images",
+      "operation": "GetBucketAcl",
+      "status": 200,
+      "outcome": "allowed",
+      "acl": "public-read",
+      "request_id_sha256": "b6f0bd12eaa9af681e03a748f183b33c7c893a02c1e0005201a15a74b2ba0757"
+    },
+    {
+      "principal": "capacity",
+      "operation": "GetBucketAcl",
+      "status": 200,
+      "outcome": "allowed",
+      "acl": "public-read",
+      "request_id_sha256": "6e54714496e0b0b771500764f09e0e16c7378ac1cb10cf4e405f3c1db8ea916d"
+    },
+    {
+      "principal": "image-gc",
+      "operation": "GetBucketAcl",
+      "status": 200,
+      "outcome": "allowed",
+      "acl": "public-read",
+      "request_id_sha256": "d1edf4eb1cf80fe9e9d00a1cb598eceebaa14aaf1238a33ea7e82b4f60b0b6d7"
+    }
+  ]
+}

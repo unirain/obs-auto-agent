@@ -185,7 +185,7 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "All6 RAM credentials and real image bucket/public URL supplied. Preview/integration/watchdog scopes pass; all3 image/capacity identities receive native403 on required image GetBucketAcl. Effective image authorization/capacity is unresolved; G1 incomplete and paid models remain disabled.",
+    "reason": "Workspace/watchdog, image upload/anonymous hash/no-overwrite and real capacity broker over four declared bindings pass. GC identity Delete is rejected by AccountLevelIdentityBasedPolicy ExplicitDeny; fixed canary remains for operator permission repair. G1 incomplete; paid models disabled.",
     "complete": false
   },
   "actual_native_preview_ram": {
@@ -231,6 +231,20 @@
     "remote_writes": 0,
     "image_upload_gc": "not_attempted",
     "evidence": "agents/reading/evals/results/ram-image-target-preflight.json",
+    "g1": "incomplete"
+  },
+  "actual_native_image_upload_capacity": {
+    "status": "partial_blocked_gc_explicit_deny",
+    "observed_at": "2026-10-19",
+    "checks_passed": 23,
+    "image_upload_public_read": "passed",
+    "versioning": "never",
+    "capacity_declared_bindings": "passed",
+    "occupied_bytes_at_observation": 4992,
+    "reserved_bytes_at_observation": 0,
+    "gc_delete": "403_AccountLevelIdentityBasedPolicy_ExplicitDeny",
+    "same_canary_readback": "present_unchanged",
+    "evidence": "agents/reading/evals/results/ram-image-upload-capacity-verification.json",
     "g1": "incomplete"
   }
 }
