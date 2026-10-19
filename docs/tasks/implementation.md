@@ -35,7 +35,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | Gate | Status | Required evidence |
 | --- | --- | --- |
 | G0 | complete | Exact core DTO/UTC boundaries, shared states, 40 schema definitions and complete cross-module cold-recovery fixture locally verified; audit in docs/notes/g0-contract-audit.md |
-| G1 | blocked_external | Native OSS transport/cold reconciliation and preview RAM19 checks/8 real403 passed; other restricted test/readonly/image identities unprepared |
+| G1 | blocked_external | Native OSS transport/cold reconciliation, preview RAM19/8 real403 and integration RAM21/8 real403 passed; readonly/image identities unprepared |
 | G2 | pending | Live SDK isolation, five varied previews and recovery |
 | G3 | pending | Isolated GitHub/image delivery and fault reconciliation |
 | G4 | pending | Real sources, monitoring, capacity and human quality calibration |
@@ -54,7 +54,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | --- | --- | --- |
 | Implementation repository | unirain/obs-auto-agent, default master, Apache License preserved | Separate isolated delivery test repository/App |
 | Private OSS | Existing obs-agent, Beijing; native private/never-versioned/no-overwrite/pagination/chain probe passed | Native TLS transport loss now passed (2026-10-15); restricted RAM allow/deny still required. Broad test AK is not IAM proof |
-| Restricted credentials | Preview native RAM verified19 checks/8 real403 with protected local credentials | Other test workspace/monitor/capacity/image identities and GitHub App remain required |
+| Restricted credentials | Preview RAM19/8 real403 and integration RAM21/8 real403 verified with protected local credentials | Monitor/capacity/image identities and GitHub App remain required |
 | Model | DEEPSEEK_API_KEY present; readonly catalog confirms deepseek-flash | Live SDK only after complete G1; isolation/recovery and five varied previews |
 | Notes skills | [Draft PR #35](https://github.com/unirain/obs-notes-hub/pull/35), current head f1053b4829747667a5263a4a77a0d7bb092252da | Human review/merge and pin actual published default-branch commit; a draft head is not publication |
 | Quality corpus | 30 candidates / 10 holdout; 26 private bodies (9 holdout) prepared with SHA256; 4 video bodies unavailable and all labels unset | 4 accessible bodies or explicit new candidate choices, human labels/note exclusions, real evaluation/calibration and quality confirmation |
@@ -102,3 +102,15 @@ User supplied the RAM creation-result CSV. Local parsing found one expected read
 User confirmed ReadingPreviewWorkspace authorization. Explicit isolated native probe using only the new reading-preview credential passed19 checks on Node24.19.0/ali-oss6.23.0 against existing private obs-agent/Beijing. Preview canary Put/Get/Head/List,409 immutable overwrite refusal and disposable-manifest deletion passed.8 actual OSS403 responses covered production/integration Put/Get/List, bucket-root List and Delete of a nonexistent commits canary key; no real commit deletion was attempted. Native denial calls used the SDK directly without an adapter scope guard. Local immutable intent checkpoints preceded remote writes, zero SDK automatic retries. The local pending marker hash describes probe fixture bytes rather than all SDK-generated HTTP bodies; exact operation logic binds the private probe source hash. This is RAM scope evidence, not new transport-loss evidence.
 
 Actual preview Manager initialized commit0, checkpointed commit1, and a fresh Manager cold-restored matching revision/artifact bytes. Both immutable commit records remain; no protocol commits were deleted or skipped. Sanitized19-check receipt: agents/reading/evals/results/ram-preview-verification.json. Private raw report/intent stay ignored; credentials stay outside Git. No paid model/cloud-resource creation/production configuration change. This completes the tested preview identity layer only; test workspace, monitor, capacity and image upload/GC identities remain unprepared/unverified, so G1 remains blocked_external and G2–G5 pending.
+
+## 2026-10-19 Test workspace credential preparation
+
+User supplied a second RAM creation export. Local parsing found exactly one expected reading-test-workspace principal and nonempty AccessKey ID/Secret; no credential values were printed. Credentials were saved outside Git in a host-only file (directory0700/file0600). No existing credential file was overwritten. Policy binding/native permission checks remain unverified; next operator action is attaching ReadingTestWorkspace from deploy/ram/test-workspace.json. The previously verified preview identity is unchanged. G1 remains blocked_external; no cloud API, model call or production change occurred in this preparation step.
+
+## 2026-10-19 Integration RAM native permission verification
+
+User confirmed ReadingTestWorkspace authorization. New restricted reading-test-workspace credential passed21 native checks on actualNode24.19.0/ali-oss6.23.0 against existing private obs-agent/Beijing. Allowed integration Put/Get/Head/List,409 forbid-overwrite followed by unchanged-byte readback, disposable-manifest Delete followed by actual404 readback passed.8 real OSS403 covered production/preview Put/Get/List, bucket-root List and a nonexistent commit-key Delete. No real protocol commit deletion attempted, and denial requests use SDK directly without adapter scope checks.
+
+Local immutable intents preceded remote writes, SDK retryMax0; unknown results would stop without replacement. Intent probe_fixture_sha256 explicitly describes marker bytes rather than all generated HTTP bodies. The trusted integration Manager used a separate UUID namespace within the authorized integration root, fixed production scope and approved reading-integration identity; it did not touch or promote any preview state. Commits0/1 remain consecutive and intact; a fresh Manager cold-restored the exact revision and artifact bytes. No model call, IAM/bucket creation or production deployment change.
+
+Sanitized receipt: agents/reading/evals/results/ram-integration-verification.json. Private report/intent remain ignored and credentials outside Git. Preview and integration workspace identities now have native evidence; monitor, capacity, image upload/GC remain unprepared/unverified, so G1 remains blocked_external and G2–G5 pending. No application source changed; targeted native verification21/21 and diff check apply, prior558/102 local/LinuxCI implementation evidence is unchanged rather than rerun.

@@ -185,7 +185,7 @@
   },
   "goal_status": {
     "status": "blocked_external",
-    "reason": "Preview RAM scope passed19 checks/8 actual403; other restricted test/monitor/capacity/image identities remain unprepared. G1 still blocks paid/live model integration; later gates also need isolated GitHub/App/image resources, published skill and human labels.",
+    "reason": "Preview RAM19 checks/8 real403 and integration RAM21 checks/8 real403 passed; restricted monitor/capacity/image identities remain unprepared. G1 still blocks paid/live models; later gates also need isolated GitHub/App/image resources, published skill and human labels.",
     "complete": false
   },
   "actual_native_preview_ram": {
@@ -197,5 +197,15 @@
     "immutable_commits_preserved": 2,
     "evidence": "agents/reading/evals/results/ram-preview-verification.json",
     "scope": "New preview credential only; other identities and G1 remain unverified/incomplete"
+  },
+  "actual_native_integration_ram": {
+    "status": "passed",
+    "observed_at": "2026-10-19",
+    "checks": 21,
+    "native_403": 8,
+    "cold_restore": "passed",
+    "immutable_commits_preserved": 2,
+    "evidence": "agents/reading/evals/results/ram-integration-verification.json",
+    "scope": "New restricted integration credential only; readonly/image identities and G1 remain unverified/incomplete"
   }
 }

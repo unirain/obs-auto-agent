@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T09:22:15.649Z",
+  "bucket": "obs-agent",
+  "region": "oss-cn-beijing",
+  "endpoint": "https://oss-cn-beijing.aliyuncs.com",
+  "probe_sha256": "8496f7668887f394f89581c8efe397cedaf878c440e90be62d5dd7f4efab3530",
+  "sdk_client_sha256": "a7d821f6ee5b877423f4880a1771000b46aeacd3385738f754b16484f16f9e41",
+  "node_binary_sha256": "613be50c90e83aa8da58dd9ed393d0b39914a3b8ef4123fe817b46c2679cebe2",
+  "node": "24.19.0",
+  "sdk": "ali-oss@6.23.0",
+  "workspace": "obs-notes-hub/reading-integration",
+  "checks": [
+    {
+      "name": "private_never_versioned_preflight",
+      "kind": "read",
+      "key": "obs-agent",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_put_blob",
+      "kind": "write",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "d2a76f14a73e0efaaa5ad17be7aec969c7c5934e61e3837cad4b3448122dc95f",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_get_blob",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "dbf0d16b00e8a037cd89e4f876553dd38f2aaf950644ad328a53c817be649d04",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_head_blob",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "3dd67fbcf4c696649c7d8965e705b52db2bec46dd3e859db3ce8acf365091c4d",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_list_own_prefix",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "4c90ab158e515b56acdadeef24f10a34d633ff2e711f531fcaa675ad9c58ec6b",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_forbid_overwrite",
+      "kind": "write",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 409,
+      "status": 409,
+      "code": "FileAlreadyExists",
+      "request_id_sha256": "eb57c482cc585e5e8a5ce7ecaf6381295c333a6c13554dc071f3d951eca92a4a",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_conflict_readback",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "4dab0978c5d88df2c3820fc6efae153eee3f216b8bbdc9ce0f79252967ef42c4",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_put_disposable_manifest",
+      "kind": "write",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/manifests/permission-canary-63511681-0e67-4c27-bf18-b26f87e221b5",
+      "expected": "allowed",
+      "status": 200,
+      "code": null,
+      "request_id_sha256": "e32a62be1943484f9587f63299b1edb26b3d41e6e2c1f5445311a7be12a9f4ec",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_delete_disposable_manifest",
+      "kind": "delete",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/manifests/permission-canary-63511681-0e67-4c27-bf18-b26f87e221b5",
+      "expected": "allowed",
+      "status": 204,
+      "code": null,
+      "request_id_sha256": "05b5f51919d5d5c4581c0d9c560a945c7e32aa49f89cadb101e03735da53fd59",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_deleted_manifest_readback",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/manifests/permission-canary-63511681-0e67-4c27-bf18-b26f87e221b5",
+      "expected": 404,
+      "status": 404,
+      "code": "NoSuchKey",
+      "request_id_sha256": "125659acc0d2f6ddd90b2508d88137920aa11e64d15fbad6fbf02dab77aea237",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_delete_commit_key_denied",
+      "kind": "delete",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/commits/not-a-real-commit-63511681-0e67-4c27-bf18-b26f87e221b5",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "c07d0ced207b2779ff001f16ef96827c570327fdff963c87becdb43da04cf1df",
+      "outcome": "passed"
+    },
+    {
+      "name": "production_put_denied",
+      "kind": "write",
+      "key": "reading/production/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "5f15ee5362fc4f71aaf004679233aaccdb2d330860be63d53d2bfc45ebe60cbc",
+      "outcome": "passed"
+    },
+    {
+      "name": "production_get_denied",
+      "kind": "read",
+      "key": "reading/production/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "1452abf6eee75f5d44eeb51841ed1f0d7a30f41745d5cb6800a1a8ddffbfc779",
+      "outcome": "passed"
+    },
+    {
+      "name": "production_list_denied",
+      "kind": "read",
+      "key": "reading/production/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "7cb8d04dd30c6a1095199abc7406c3ea2afc7198f8b5a9aad0145dc43d60a9ac",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_put_denied",
+      "kind": "write",
+      "key": "reading/preview/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "bd44aa8df2485208ff895a8ace21e0c55bca1d923db5ce8317ee01385df8038f",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_get_denied",
+      "kind": "read",
+      "key": "reading/preview/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/blobs/7357a70a3690d4f7877dc9ccc85804465cafcc001030839e3813ce872b5fc1fe",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "d4e293df7067b903b42ecba87a7519d8fa08d5b0ccee2a883c72e439aaf9a6ed",
+      "outcome": "passed"
+    },
+    {
+      "name": "preview_list_denied",
+      "kind": "read",
+      "key": "reading/preview/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "5c7b597fb7bda0effc7b31c8d93133382d452e9064e2257e9946a9270c9d0252",
+      "outcome": "passed"
+    },
+    {
+      "name": "bucket_root_list_denied",
+      "kind": "read",
+      "key": "",
+      "expected": 403,
+      "status": 403,
+      "code": "AccessDenied",
+      "request_id_sha256": "1470ab5e986100885b48bd331d0996d907223d4bdebae964becd17f6aa81988b",
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_immutable_initialize",
+      "kind": "write",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/commits/00000000000000000000.json",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_immutable_checkpoint",
+      "kind": "write",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/commits/00000000000000000001.json",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    },
+    {
+      "name": "integration_cold_restore",
+      "kind": "read",
+      "key": "reading/integration/obs-notes-hub/ram-63511681-0e67-4c27-bf18-b26f87e221b5/obs-notes-hub/reading-integration/",
+      "expected": "allowed",
+      "status": null,
+      "code": null,
+      "request_id_sha256": null,
+      "outcome": "passed"
+    }
+  ],
+  "status": "passed",
+  "assertions": 21,
+  "cold_restore": "passed",
+  "immutable_commits_preserved": 2,
+  "real_commit_delete_attempts": 0,
+  "scope": "reading-test-workspace only; native HTTP allow/deny and isolated production-scope integration immutable cold recovery",
+  "intent_fixture_hash_scope": "probe_fixture_sha256 identifies the fixed marker fixture, not all SDK-generated HTTP request bodies",
+  "g1": "incomplete_other_identities_unprepared",
+  "principal": "reading-test-workspace (bound to user-provided creation export; no RAM GetUser API performed)",
+  "evidence_layer": "Actual ali-oss native service; denial operations have no adapter scope guard",
+  "other_identities": "monitor, capacity, image upload and image GC remain unprepared/unverified"
+}
