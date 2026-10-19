@@ -15,13 +15,17 @@ export function isPublicAddress(raw:string):boolean {
 export type GatewayReply={status:number;headers:Record<string,string>;body:Uint8Array};
 /** Host-only admission and payload observation; never serialized into a model input. */
 export type GatewayDownloadBudget={begin():Promise<void>;consume(bytes:number):Promise<void>;remaining():number};
-export type GatewayTransport=(url:URL,address:DnsAddress,options:{max_bytes:number;timeout_ms:number;signal?:AbortSignal;on_body_bytes?:(bytes:number)=>Promise<void>})=>Promise<GatewayReply>;
+export type GatewayTransport=(url:URL,address:DnsAddress,options:{max_bytes:number;timeout_ms:number;deadline?:number;signal?:AbortSignal;on_body_bytes?:(bytes:number)=>Promise<void>})=>Promise<GatewayReply>;
 const nativeTransport:GatewayTransport=(url,address,options)=>new Promise((resolve,reject)=>{
   let responseStream:import('node:http').IncomingMessage|undefined,finished=false,failure:unknown;
-  const pending=new Set<Promise<void>>();let deadlineTimer:ReturnType<typeof setTimeout>|undefined;
+  const pending=new Set<Promise<void>>();let deadlineTimer:ReturnType<typeof setTimeout>|undefined,networkTimer:ReturnType<typeof setTimeout>|undefined;
+  let networkRemaining=options.timeout_ms,networkStarted:number|undefined;
+  const pauseNetwork=()=>{clearTimeout(networkTimer);if(networkStarted!==undefined){networkRemaining-=Date.now()-networkStarted;networkStarted=undefined;}request.setTimeout(0);};
+  const clearTimers=()=>{clearTimeout(deadlineTimer);clearTimeout(networkTimer);request.setTimeout(0);};
+  const resumeNetwork=()=>{if(finished||failure)return;if(networkRemaining<=0){fail(new Error('source_timeout'));return;}networkStarted=Date.now();networkTimer=setTimeout(()=>fail(new Error('source_timeout')),networkRemaining);networkTimer.unref();};
   const drain=async()=>{while(pending.size)await Promise.allSettled([...pending]);};
-  const settle=()=>{if(finished)return;void drain().then(()=>{if(finished)return;if(failure){finished=true;clearTimeout(deadlineTimer);reject(failure);}});};
-  const fail=(error:unknown)=>{failure??=error;responseStream?.destroy();request.destroy();settle();};
+  const settle=()=>{if(finished)return;void drain().then(()=>{if(finished)return;if(failure){finished=true;clearTimers();reject(failure);}});};
+  const fail=(error:unknown)=>{failure??=error;clearTimers();responseStream?.destroy();request.destroy();settle();};
   const request=(url.protocol==='https:'?httpsRequest:httpRequest)(url,{method:'GET',headers:{'User-Agent':'obs-reading-agent/1.0','Accept':'text/html,application/pdf,text/plain,application/json,image/png,image/jpeg,image/webp','Accept-Encoding':'identity'},
     // DNS is pinned. Each payload callback completes before resuming the response.
     lookup:(_host,lookupOptions,callback)=>{
@@ -30,13 +34,17 @@ const nativeTransport:GatewayTransport=(url,address,options)=>new Promise((resol
     if(finished||failure){response.destroy();return;}responseStream=response;const headers:Record<string,string>={};for(const [key,value] of Object.entries(response.headers))if(value!==undefined)headers[key]=Array.isArray(value)?value.join(','):value;
     const chunks:Buffer[]=[];let total=0;
     response.on('data',(chunk:Buffer)=>{
-      if(finished)return;response.pause();total+=chunk.length;const observedTotal=total;
+      if(finished||failure)return;response.pause();pauseNetwork();total+=chunk.length;const observedTotal=total;
       const task=(async()=>{await options.on_body_bytes?.(chunk.length);if(observedTotal>options.max_bytes)throw new Error('download_size_limit');chunks.push(chunk);})();
-      pending.add(task);void task.then(()=>{if(!failure)response.resume();},fail).finally(()=>pending.delete(task));
+      pending.add(task);void task.then(()=>{if(!failure){resumeNetwork();if(!failure)response.resume();}},fail).finally(()=>pending.delete(task));
     });
     response.on('error',fail);response.on('aborted',()=>fail(new Error('truncated_download')));
-    response.on('end',()=>{void drain().then(()=>{if(finished)return;finished=true;clearTimeout(deadlineTimer);if(failure)reject(failure);else resolve({status:response.statusCode??0,headers,body:Buffer.concat(chunks)});});});
-  });request.on('error',fail);request.setTimeout(options.timeout_ms,()=>fail(new Error('source_timeout')));deadlineTimer=setTimeout(()=>fail(new Error('source_timeout')),options.timeout_ms);deadlineTimer.unref();request.end();
+    response.on('end',()=>{pauseNetwork();void drain().then(()=>{if(finished)return;finished=true;clearTimers();if(failure)reject(failure);else resolve({status:response.statusCode??0,headers,body:Buffer.concat(chunks)});});});
+  });request.on('error',fail);
+  // Persistent host accounting applies backpressure. It is not network wait time;
+  // the independent absolute project deadline still includes every checkpoint.
+  if(options.deadline!==undefined){deadlineTimer=setTimeout(()=>fail(new Error('run_deadline')),Math.max(0,options.deadline-Date.now()));deadlineTimer.unref();}
+  resumeNetwork();request.end();
 });
 export class UrlGateway {
   constructor(private readonly authorize:(url:string)=>Promise<void>,private readonly resolve:(host:string)=>Promise<DnsAddress[]>=host=>lookup(host,{all:true}),private readonly transport:GatewayTransport=nativeTransport,
@@ -53,7 +61,7 @@ export class UrlGateway {
       let observed=0,observationError:unknown,accounting=Promise.resolve(),accepting=true;
       const observe=(bytes:number)=>{if(!accepting)return Promise.reject(new Error('transport_observation_after_completion'));if(!Number.isSafeInteger(bytes)||bytes<0)return Promise.reject(new Error('download_bytes_invalid'));observed+=bytes;const work=accounting.then(()=>options.download?.consume(bytes));accounting=work.then(()=>{},error=>{observationError??=error;});return work;};
       let response:GatewayReply|undefined,transportError:unknown;
-      try{response=await this.transport(url,addresses.find(address=>address.family===4)??addresses[0]!,{max_bytes:Math.min(this.config.max_bytes,remaining()),timeout_ms:Math.min(this.config.timeout_ms,(options.deadline??Infinity)-Date.now()),...(options.signal?{signal:options.signal}:{}),on_body_bytes:observe});}catch(error){transportError=error;}
+      try{response=await this.transport(url,addresses.find(address=>address.family===4)??addresses[0]!,{max_bytes:Math.min(this.config.max_bytes,remaining()),timeout_ms:this.config.timeout_ms,...(options.deadline!==undefined?{deadline:options.deadline}:{}),...(options.signal?{signal:options.signal}:{}),on_body_bytes:observe});}catch(error){transportError=error;}
       accepting=false;await accounting;if(observationError)throw observationError;if(transportError)throw transportError;if(!response)throw new Error('source_response_missing');
       // Existing complete-response transports need no streaming hook. Account their
       // unreported body exactly once; streaming transports may only omit a suffix.

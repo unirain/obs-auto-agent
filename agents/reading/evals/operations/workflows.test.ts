@@ -46,6 +46,22 @@ describe("Actions capability boundaries", () => {
       if (profile !== "preview") expect(steps[host]?.env?.[imageKey]).toContain("inputs.mode != 'publish-only'");
     }
   });
+  it("retains a fresh exact runtime before preview generation and never rebuilds a restored binding", () => {
+    const steps=load("reading-agent").jobs.preview!.steps;
+    const restore=steps.findIndex(s=>s.name==="Restore exact tool image for cold preview recovery");
+    const build=steps.findIndex(s=>s.name==="Build fixed tool container without credentials");
+    const retain=steps.findIndex(s=>s.name==="Retain exact runtime for subsequent preview runs");
+    const host=steps.findIndex(s=>s.name==="Run isolated preview");
+    expect(restore).toBeGreaterThan(steps.findIndex(s=>s.name==="Verify trusted checked-in G1 evidence before generation"));
+    expect(build).toBeGreaterThan(restore);expect(retain).toBeGreaterThan(build);expect(host).toBeGreaterThan(retain);
+    expect(steps[build]?.if).toContain("steps.tools_restore.outputs.status == 'cache_miss'");
+    expect(steps[retain]?.if).toBe(steps[build]?.if);
+    expect(steps[restore]?.run).toContain("previewToolBindingCli");
+    expect(steps[restore]?.run).toContain("'--fixed-image',binding.fixed.image_id,'--fixed-manifest',binding.fixed.manifest_hash");
+    expect(steps[host]?.env?.READING_TOOLS_IMAGE).toBe("${{ steps.tools_restore.outputs.image_id || steps.tools_prepare.outputs.image_id }}");
+    for(const step of [steps[build],steps[retain]])expect(JSON.stringify(step?.env??{})).not.toContain('CREDENTIAL');
+    expect(JSON.stringify(steps[restore]?.env)).not.toContain('DEEPSEEK');
+  });
   it("executes the actual workflow evidence check against committed, changed, untracked and incomplete files", async () => {
     const step = load("reading-agent").jobs.preview!.steps.find(s => s.name === "Verify trusted checked-in G1 evidence before generation")!;
     const script = step.run!.split("<<'NODE'\n")[1]!.replace(/\nNODE\s*$/, "")

@@ -1,23 +1,23 @@
 {
-  "recorded_at": "2026-10-19T09:53:33.911Z",
-  "implementation_sha256": "963610bd7040eed86afc9cc26c18ee3ba823bf8f52f4ca93c5040c445d8fa091",
-  "fingerprint_files": 337,
+  "recorded_at": "2026-10-19T11:24:25.689712+00:00",
+  "implementation_sha256": "9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49",
+  "fingerprint_files": 341,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "new559 full CI/workflow pending; injected-clock targeted bootstrap8 passed",
+    "npm test": "full local601/602; one15s persistent-I/O fixture timeout, scoped60s repair then targeted58/58 passed; full LinuxCI pending",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
     "git diff --check": "passed",
     "npx tsx agents/reading/evals/generate-schemas.ts --check": "passed",
-    "npm test -- --no-file-parallelism": "prior558 baseline only; no new full sequential run"
+    "npm test -- --no-file-parallelism": "not rerun"
   },
   "local_tests": {
-    "files": 1,
-    "passed": 8,
+    "files": 5,
+    "passed": 58,
     "failed": 0,
     "runtime": "Node24.19.0",
-    "scope": "Targeted bootstrap file with injected parent Actions clock; full559 regression pending"
+    "scope": "Targeted native stream accounting, tool cache/binding, workflow and material-chain persistent recovery; unchanged assertions after fixture time-budget alignment"
   },
   "live_tests": {
     "default_command": {
@@ -35,24 +35,22 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Current test/AGENTS fingerprint963610b has targeted8/typecheck/build/schema40/spec mapping passed; full559 CI and repaired real workflow pending. Product runtime unchanged, G1 remains complete. Prior cloud run failed before any SDK/model request.",
+  "scope": "Source timeout accounting fix and exact preview tool artifact preservation; targeted58/typecheck/build/schema40/spec mapping passed. Native GitHub cache/Docker and new full LinuxCI pending; original actual preview has0 invocations and unavailable fixed tool image.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
     "status": "pending",
-    "implementation_commit": null,
     "environment": "Linux / Node24.10.0 / four workers",
-    "expected_tests": 559,
-    "scope": "Fixture-owned clock environment and trusted Actions-origin precedence; production runtime unchanged"
+    "scope": "Current runtime fixes and exact preview tool image retention; expected602 assertions"
   },
   "previous_ci": {
     "status": "passed",
-    "implementation_commit": "a4d19da2eb9b7d06397bf86df1b17b69fae9e9cb",
+    "implementation_commit": "2490aec59a932d386e31fbc805ec2112b06cc926",
     "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Project stage redirect/chunk payload accounting and cold pinned-repository/tree recovery; no new native/model acceptance",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/38694162330",
+    "scope": "Fixture clock environment isolation; full559 assertions passed; product runtime unchanged",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39240574071",
     "tests": {
       "files": 102,
-      "passed": 558,
+      "passed": 559,
       "failed": 0,
       "workers": 4
     }
@@ -322,7 +320,7 @@
     "evidence": "agents/reading/evals/results/cloud-preview-startup-failure.json"
   },
   "latest_clock_fix": {
-    "status": "local_verified_ci_pending",
+    "status": "local_verified_linux_ci_passed",
     "bootstrap_tests": 8,
     "parent_job_clock": "injected fresh for reproduction",
     "production_clock_changed": false,
@@ -335,5 +333,19 @@
     "failed": 0,
     "runtime": "Node24.19.0",
     "file_parallelism": false
-  }
+  },
+  "local_full_attempts": [
+    {
+      "files": 104,
+      "passed": 600,
+      "failed": 1,
+      "reason": "preview build workflow condition assertion; explicit publish-only guard restored"
+    },
+    {
+      "files": 104,
+      "passed": 601,
+      "failed": 1,
+      "reason": "cold pinned-tree persistent I/O exceeded15s; aligned scoped budget with sibling60s cases; targeted repair passed"
+    }
+  ]
 }

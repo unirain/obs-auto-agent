@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-19T11:17:00Z",
+  "run_id": 39240721564,
+  "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39240721564",
+  "implementation_commit": "2490aec59a932d386e31fbc805ec2112b06cc926",
+  "outcome": "deferred_work",
+  "reason": "source_timeout",
+  "workspace_sequence": 14,
+  "workspace_revision": "50b05407-0a65-43fa-a28d-46fb81acdd9d",
+  "snapshot_bound": true,
+  "sdk_invocations": 0,
+  "usage": null,
+  "persistent_counters": {
+    "download_bytes": 3929,
+    "total_download_bytes": 3929,
+    "download_resources": 1,
+    "tool_calls": 1,
+    "total_tool_calls": 1
+  },
+  "pending_query": null,
+  "artifacts": {
+    "total_count": 0,
+    "verified_by": "GitHub native REST run artifacts endpoint"
+  },
+  "fixed_runtime": {
+    "tools_image_id": "sha256:7f10ebe0d0cfc5423b44b6defd59e89edd95c16b4b874ee007df3d62ddb18032",
+    "tools_manifest_hash": "ba67c847284ce0ef2c38defd78940abd0273ac3ebe83c3989360a4efa0518fe3"
+  },
+  "recovery": "fixed image unavailable; no replacement runtime/query or state reset authorized implicitly",
+  "gate_status": {
+    "G1": "complete",
+    "G2": "in_progress",
+    "G3": "pending",
+    "G4": "pending",
+    "G5": "pending"
+  },
+  "recorded_at": "2026-10-19T11:21:54.824173+00:00",
+  "runtime_reconciliation": {
+    "observed_at": "2026-10-19T11:18:35.840Z",
+    "result": "fixed_tools_image_archive_unavailable",
+    "adapter": "actual readonly preview chain + native GitHub artifact listing",
+    "remote_writes": 0,
+    "sdk_invocations": 0
+  }
+}

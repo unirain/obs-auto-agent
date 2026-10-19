@@ -3,7 +3,7 @@ import {EventEmitter} from 'node:events';
 const native=vi.hoisted(()=>({request:vi.fn()}));
 vi.mock('node:https',()=>({request:native.request}));
 import {UrlGateway,type GatewayDownloadBudget} from '../../src/tools/fetch.js';
-afterEach(()=>{vi.restoreAllMocks();native.request.mockReset();});
+afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();native.request.mockReset();});
 
 // The actual nativeTransport state machine consumes mocked Node response events.
 // These are stream/persistence-order unit assertions, never live socket evidence.
@@ -29,4 +29,24 @@ it('native response failure waits for an already-started accounting checkpoint b
 it('an observed oversized native chunk remains accounted and destroys the request before additional payload delivery',async()=>{
  const f=responseFixture(['abcdefg','never']);let bytes=0;const download:GatewayDownloadBudget={begin:async()=>{},remaining:()=>Math.max(0,5-bytes),consume:async count=>{bytes+=count;if(bytes>5)throw new Error('batch_yield');}};
  await expect(gateway().read('https://example.org/a',{download})).rejects.toThrow('batch_yield');expect(bytes).toBe(7);expect(f.request.destroy).toHaveBeenCalled();expect(f.response.resume).not.toHaveBeenCalled();
+});
+
+it('host checkpoint backpressure does not spend the cumulative native network timeout',async()=>{
+ vi.useFakeTimers();const f=responseFixture(['abc']);let bytes=0;
+ const transport=new UrlGateway(async()=>{},async()=>[{address:'8.8.8.8',family:4}],undefined,{max_bytes:100,timeout_ms:20,max_redirects:5});
+ const result=transport.read('https://example.org/a',{deadline:Date.now()+500,download:{begin:async()=>{},remaining:()=>100,consume:async count=>{await new Promise(resolve=>setTimeout(resolve,100));bytes+=count;}}});
+ await vi.advanceTimersByTimeAsync(100);expect(Buffer.from((await result).bytes).toString()).toBe('abc');expect(bytes).toBe(3);expect(f.request.destroy).not.toHaveBeenCalled();
+});
+it('absolute project deadline still expires during host accounting and joins the observed-byte checkpoint',async()=>{
+ vi.useFakeTimers();const f=responseFixture(['abc']);let bytes=0,returned=false;
+ const result=gateway().read('https://example.org/a',{deadline:Date.now()+30,download:{begin:async()=>{},remaining:()=>100,consume:async count=>{await new Promise(resolve=>setTimeout(resolve,100));bytes+=count;}}}).catch(error=>{returned=true;return error;});
+ await vi.advanceTimersByTimeAsync(30);expect(returned).toBe(false);expect(bytes).toBe(0);expect(f.request.destroy).toHaveBeenCalled();
+ await vi.advanceTimersByTimeAsync(70);expect((await result).message).toBe('run_deadline');expect(bytes).toBe(3);expect(f.response.resume).not.toHaveBeenCalled();
+});
+it('network waiting across chunks spends one cumulative budget rather than restarting it',async()=>{
+ vi.useFakeTimers();const f=responseFixture(['abc','def']);const resume=f.response.resume.getMockImplementation()!;
+ f.response.resume.mockImplementation(()=>{setTimeout(()=>resume(),12);return f.response;});let bytes=0;
+ const transport=new UrlGateway(async()=>{},async()=>[{address:'8.8.8.8',family:4}],undefined,{max_bytes:100,timeout_ms:20,max_redirects:5});
+ const result=transport.read('https://example.org/a',{download:{begin:async()=>{},remaining:()=>100,consume:async count=>{await new Promise(resolve=>setTimeout(resolve,50));bytes+=count;}}}).catch(error=>error);
+ await vi.advanceTimersByTimeAsync(120);expect((await result).message).toBe('source_timeout');expect(bytes).toBe(6);expect(f.request.destroy).toHaveBeenCalled();
 });

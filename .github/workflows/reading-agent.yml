@@ -129,9 +129,52 @@ jobs:
           path: .reading-local/notes
           token: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           persist-credentials: false
+      - name: Restore exact tool image for cold preview recovery
+        id: tools_restore
+        env:
+          OSS_PREVIEW_CREDENTIALS: ${{ secrets.OSS_PREVIEW_CREDENTIALS }}
+          GITHUB_TOKEN: ${{ github.token }}
+          CACHE_REPOSITORY: ${{ github.repository }}
+          CACHE_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {appendFile} from 'node:fs/promises';
+          import {join} from 'node:path';
+          import {previewToolBindingCli} from './dist/agents/reading/src/tools/runtime-cache-binding.js';
+          import {runtimeCacheCli} from './dist/agents/reading/src/tools/runtime-cache.js';
+          const binding=await previewToolBindingCli('agents/reading/deploy/examples/preview.json');
+          const args=['restore','--root',process.cwd(),'--output-dir',join(process.env.RUNNER_TEMP,'tool-image-restore'),'--repository',process.env.CACHE_REPOSITORY,'--branch',process.env.CACHE_BRANCH];
+          if(binding.fixed)args.push('--fixed-image',binding.fixed.image_id,'--fixed-manifest',binding.fixed.manifest_hash);
+          const result=await runtimeCacheCli(args);
+          await appendFile(process.env.GITHUB_OUTPUT,`status=${result.status}\nimage_id=${result.image_id??''}\n`);
+          console.log(JSON.stringify(result));
+          NODE
       - name: Build fixed tool container without credentials
-        if: github.event_name == 'schedule' || inputs.mode != 'publish-only'
+        if: inputs.mode != 'publish-only' && steps.tools_restore.outputs.status == 'cache_miss'
         run: docker build --pull=false -t reading-tools:local -f agents/reading/tools/Dockerfile .
+      - name: Prepare immutable tool image archive before generation
+        if: inputs.mode != 'publish-only' && steps.tools_restore.outputs.status == 'cache_miss'
+        id: tools_prepare
+        run: |
+          node --input-type=module <<'NODE'
+          import {appendFile} from 'node:fs/promises';
+          import {join} from 'node:path';
+          import {runtimeCacheCli} from './dist/agents/reading/src/tools/runtime-cache.js';
+          const result=await runtimeCacheCli(['prepare','--root',process.cwd(),'--image','reading-tools:local','--output-dir',join(process.env.RUNNER_TEMP,'tool-image-prepare')]);
+          await appendFile(process.env.GITHUB_OUTPUT,`artifact_name=${result.artifact_name}\narchive_path=${result.archive_path}\nmanifest_path=${result.manifest_path}\nimage_id=${result.image_id}\n`);
+          console.log(JSON.stringify(result));
+          NODE
+      - name: Retain exact runtime for subsequent preview runs
+        if: inputs.mode != 'publish-only' && steps.tools_restore.outputs.status == 'cache_miss'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ steps.tools_prepare.outputs.artifact_name }}
+          path: |
+            ${{ steps.tools_prepare.outputs.archive_path }}
+            ${{ steps.tools_prepare.outputs.manifest_path }}
+          if-no-files-found: error
+          compression-level: 6
+          retention-days: 90
       - name: Run isolated preview
         run: npm run reading -- run --from-actions --deployment agents/reading/deploy/examples/preview.json
         env:
@@ -141,7 +184,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           READING_REPOSITORY_READ_TOKEN: ${{ secrets.READING_REPOSITORY_READ_TOKEN }}
           READING_NOTES_REPOSITORY: ${{ github.workspace }}/.reading-local/notes
-          READING_TOOLS_IMAGE: ${{ inputs.mode != 'publish-only' && 'reading-tools:local' || '' }}
+          READING_TOOLS_IMAGE: ${{ steps.tools_restore.outputs.image_id || steps.tools_prepare.outputs.image_id }}
           READING_G1_EVIDENCE_PATH: ${{ vars.READING_G1_EVIDENCE_PATH }}
           READING_G1_EVIDENCE_SHA256: ${{ vars.READING_G1_EVIDENCE_SHA256 }}
   production:

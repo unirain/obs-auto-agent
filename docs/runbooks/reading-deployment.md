@@ -1,6 +1,6 @@
 # Reading Agent 部署与权限
 
-状态：实现入口已提供；真实 RAM、GitHub App、模型实际 query 与图床未验证。示例配置不是已上线证据。用户已提供私有 Standard bucket `obs-agent`，北京公网 endpoint `oss-cn-beijing.aliyuncs.com`、公共访问阻止开启；生命周期、版本控制从未开启和凭据权限仍必须通过真实探针验证。
+状态：G1 已通过真实 OSS、RAM 边界及隔离图床探针，证据见 `agents/reading/evals/results/g1-evidence.json`；G2 正在真实 preview 排障，尚无实际模型成功或质量验收。GitHub App 交付与 G3–G5 未完成，正式 cron 禁用。具体状态以 `docs/tasks/implementation.md` 为准。
 
 ## 三个可信绑定
 
@@ -37,3 +37,11 @@ RAM 由用户在现有账号配置，不由程序创建资源。每个身份需�
 官方 API 行为需要真实服务 spike；安装包声明和原生 Git 哈希测试只证明本地类型及对象构造。本地核对依赖为 `@octokit/rest`、`@octokit/auth-app`、`ali-oss` 的固定 lockfile。工作流 action 已按来源固定：[checkout 4.2.2 commit](https://github.com/actions/checkout/commit/11bd71901bbe5b1630ceea73d27597364c9af683)、[setup-node commit](https://github.com/actions/setup-node/commit/49933ea5288caeca8642d1e84afbd3f7d6820020)。
 
 环境准备分步操作见 [test-environment-setup.md](test-environment-setup.md)，包含现有 bucket 的限定 RAM 策略生成器、测试 GitHub App 和 DeepSeek 可信兼容 endpoint。
+
+## Preview 工具镜像冷恢复
+
+preview 在读取已验证 OSS 提交链后，从非终态项目取得固定镜像 ID 和工具清单 hash。镜像归档仅接受本仓库默认分支的 `reading-agent.yml` 手动任务；先核对 GitHub ZIP digest、归档内容和 hash，再加载 Docker 并核对实际运行版本。读取失败或清单不完整时停止，不能当成缓存未命中。
+
+新上下文可以构建镜像；在任何生成调用前，必须将 `image.tar` 和 schema1 `manifest.json` 保存到 Actions artifact。当前保留期90天，受仓库限制；它不保证永久可恢复。固定镜像未归档、已过期或无法下载时停止，错误为 `fixed_tools_image_archive_unavailable`。不要重建后替换固定版本、重置 namespace 或丢弃费用记录。管理新生成版本须遵循 [reading-recovery.md](reading-recovery.md) 的 `new_generation` 契约：实际改变操作员输入、归档旧版本，明确 `refresh_runtime`，保留历史调用与费用。
+
+该缓存目前只接入 preview，原生 GitHub artifact/Docker 往返验收仍待云端验证；本地 archive/mock 测试不代表真实冷恢复已通过。

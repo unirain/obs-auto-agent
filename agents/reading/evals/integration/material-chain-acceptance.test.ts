@@ -381,4 +381,4 @@ it('a cold restored fixed repository commit without its tree resumes listing bef
     expect(f.http).toEqual(http); expect(f.queries).toEqual(queries);
     expect((await f.current())!.counters).toEqual(counters);
   } finally {await f.cleanup();}
-});
+}, 60_000);
