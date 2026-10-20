@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-19T11:39:26.619144+00:00",
-  "implementation_sha256": "9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49",
-  "fingerprint_files": 341,
+  "recorded_at": "2026-10-20T08:13:25.805366+00:00",
+  "implementation_sha256": "7c9da7f749573b33cfa011886eb23b33bcbf8b855f67ff8d97dbec5df2abaf79",
+  "fingerprint_files": 344,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "LinuxCI602/104 passed; local attempts and targeted58 repair evidence retained separately",
+    "npm test": "LinuxCI612/105 passed; local targeted24/3files passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -13,11 +13,11 @@
     "npm test -- --no-file-parallelism": "not rerun"
   },
   "local_tests": {
-    "files": 5,
-    "passed": 58,
+    "files": 3,
+    "passed": 24,
     "failed": 0,
     "runtime": "Node24.19.0",
-    "scope": "Targeted native stream accounting, tool cache/binding, workflow and material-chain persistent recovery; unchanged assertions after fixture time-budget alignment"
+    "scope": "protected input, workflow boundaries and persistent generation/batch management"
   },
   "live_tests": {
     "default_command": {
@@ -35,6 +35,12 @@
       "sdk_invocations": 0,
       "evidence": "agents/reading/evals/results/cloud-tool-image-cache.json",
       "scope": "source-free producer and fresh consumer; no actual project-context resume/SDK quality claim"
+    },
+    "native_preview_regeneration": {
+      "executed": 1,
+      "status": "passed",
+      "evidence": "agents/reading/evals/results/preview-regeneration.json",
+      "scope": "atomic archival/new generation and cold readback only; resumed article pending"
     }
   },
   "spec_cases": {
@@ -42,9 +48,22 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Current341-file fingerprint9ac2aa42 has targeted58/typecheck/build/schema40/spec mapping plus exact602/104 four-worker LinuxCI passed. Native GitHub OCI archive/fresh Docker restore passed in2 source-free previews with0SDK invocations. Original article runtime remains unavailable; real article/SDK/quality acceptance remains pending.",
+  "scope": "Current344-file fingerprint7c9da7 has targeted24/typecheck/build/schema40/spec mapping plus exact612/105 LinuxCI. Native management confirmed exact prior archive, actor/request audit and version2 runtime binding; article resume dispatched, model/quality outcome pending.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "passed",
+    "implementation_commit": "00c3c9441d923269e845c0df2e3610080f4f7179",
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "Protected preview generation transport plus existing complete suite",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39390915925",
+    "tests": {
+      "files": 105,
+      "passed": 612,
+      "failed": 0,
+      "workers": 4
+    }
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "d0ffe1db03f69b83019c9dc14c7021d6db8d06ea",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -53,19 +72,6 @@
     "tests": {
       "files": 104,
       "passed": 602,
-      "failed": 0,
-      "workers": 4
-    }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "2490aec59a932d386e31fbc805ec2112b06cc926",
-    "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Fixture clock environment isolation; full559 assertions passed; product runtime unchanged",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39240574071",
-    "tests": {
-      "files": 102,
-      "passed": 559,
       "failed": 0,
       "workers": 4
     }

@@ -22,7 +22,7 @@ const nativeTransport:GatewayTransport=(url,address,options)=>new Promise((resol
   let networkRemaining=options.timeout_ms,networkStarted:number|undefined;
   const pauseNetwork=()=>{clearTimeout(networkTimer);if(networkStarted!==undefined){networkRemaining-=Date.now()-networkStarted;networkStarted=undefined;}request.setTimeout(0);};
   const clearTimers=()=>{clearTimeout(deadlineTimer);clearTimeout(networkTimer);request.setTimeout(0);};
-  const resumeNetwork=()=>{if(finished||failure)return;if(networkRemaining<=0){fail(new Error('source_timeout'));return;}networkStarted=Date.now();networkTimer=setTimeout(()=>fail(new Error('source_timeout')),networkRemaining);networkTimer.unref();};
+  const resumeNetwork=()=>{if(finished||failure||networkStarted!==undefined)return;if(networkRemaining<=0){fail(new Error('source_timeout'));return;}networkStarted=Date.now();networkTimer=setTimeout(()=>fail(new Error('source_timeout')),networkRemaining);networkTimer.unref();};
   const drain=async()=>{while(pending.size)await Promise.allSettled([...pending]);};
   const settle=()=>{if(finished)return;void drain().then(()=>{if(finished)return;if(failure){finished=true;clearTimers();reject(failure);}});};
   const fail=(error:unknown)=>{failure??=error;clearTimers();responseStream?.destroy();request.destroy();settle();};
@@ -33,11 +33,19 @@ const nativeTransport:GatewayTransport=(url,address,options)=>new Promise((resol
     },signal:options.signal},response=>{
     if(finished||failure){response.destroy();return;}responseStream=response;const headers:Record<string,string>={};for(const [key,value] of Object.entries(response.headers))if(value!==undefined)headers[key]=Array.isArray(value)?value.join(','):value;
     const chunks:Buffer[]=[];let total=0;
-    response.on('data',(chunk:Buffer)=>{
-      if(finished||failure)return;response.pause();pauseNetwork();total+=chunk.length;const observedTotal=total;
+    let accounting=false;
+    // Pull the available readable buffer only after the preceding checkpoint.
+    // Packet framing is not an application observation; every pulled byte is
+    // still checkpointed before another read or a successful response.
+    const pull=()=>{
+      if(finished||failure||accounting)return;
+      let chunk:unknown;try{chunk=response.read();}catch(error){fail(error);return;}if(chunk===null){resumeNetwork();return;}
+      if(!Buffer.isBuffer(chunk)){fail(new Error('source_payload_invalid'));return;}
+      response.pause();pauseNetwork();accounting=true;total+=chunk.length;const observedTotal=total;
       const task=(async()=>{await options.on_body_bytes?.(chunk.length);if(observedTotal>options.max_bytes)throw new Error('download_size_limit');chunks.push(chunk);})();
-      pending.add(task);void task.then(()=>{if(!failure){resumeNetwork();if(!failure)response.resume();}},fail).finally(()=>pending.delete(task));
-    });
+      pending.add(task);void task.then(()=>{accounting=false;if(!failure){resumeNetwork();pull();}},fail).finally(()=>pending.delete(task));
+    };
+    response.on('readable',pull);
     response.on('error',fail);response.on('aborted',()=>fail(new Error('truncated_download')));
     response.on('end',()=>{pauseNetwork();void drain().then(()=>{if(finished)return;finished=true;clearTimers();if(failure)reject(failure);else resolve({status:response.statusCode??0,headers,body:Buffer.concat(chunks)});});});
   });request.on('error',fail);

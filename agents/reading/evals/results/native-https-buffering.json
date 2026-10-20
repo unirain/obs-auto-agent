@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "scope": "actual HTTPS + local immutable checkpoints with100ms backpressure; not live OSS performance or model evidence",
+  "observed_at": "2026-10-20T08:29:06.042Z",
+  "source_code_sha256": "e8794ff20bb427673892315221f536e44026073804c434bb2f6804d79dfcd032",
+  "bytes": 172740,
+  "pulls": 4,
+  "begins": 1,
+  "body_hash": "2cd1088c29b553841c66491b759d6267d3a64e7458c5c6932378abf1c58b679a",
+  "elapsed_ms": 1031,
+  "cold_sequence": "00000000000000000006",
+  "sdk_invocations": 0,
+  "node_version": "v24.19.0",
+  "source_url": "https://www.langchain.com/blog/how-to-build-a-model-router-in-the-harness"
+}

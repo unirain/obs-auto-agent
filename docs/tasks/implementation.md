@@ -1,6 +1,6 @@
 # Reading Agent implementation tasks
 
-Updated: 2026-10-19. Objective: implement and verify all five plans without narrowing live validation requirements.
+Updated: 2026-10-20. Objective: implement and verify all five plans without narrowing live validation requirements.
 
 Statuses: pending, in_progress, implemented, local_verified, live_unverified, blocked_external, complete. A work package is complete only when its required evidence exists. Gate evidence is tracked separately.
 
@@ -13,7 +13,7 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 | S5 | storage | local_verified | Scope/file views/sealing |
 | S6 | storage | local_verified | Invocation journal and counters |
 | S7 | storage | live_unverified | Global capacity, reservations and GC |
-| S8 | storage/root | local_verified | Audited inspect/recover, fixed-input unknown replacement, receipt import, changed-input generation and atomic feedback management; live remote management remains unverified |
+| S8 | storage/root | live_unverified | Native preview changed-input generation/atomic archive/cold readback passed; other inspect/recover/unknown/feedback and delivery management live scenarios remain pending |
 | A1 | runtime/root | local_verified | Domain schemas, modes and stage routing |
 | A2 | runtime | local_verified | Latest policy and restricted classification |
 | A3 | runtime | live_unverified | Manual URL and source collection |
@@ -43,11 +43,11 @@ Statuses: pending, in_progress, implemented, local_verified, live_unverified, bl
 
 ## Current verification
 
-- Current implementation `d0ffe1db03f69b83019c9dc14c7021d6db8d06ea`: [Linux Node24.10 four-worker CI39244416943](https://github.com/unirain/obs-auto-agent/actions/runs/39244416943) passed npm ci/typecheck/test/build/spec mapping, **602tests/104files**. Local Node24.19 targeted58/5files, typecheck/build,40schema checks and diff check passed. Two earlier full local failures and their repairs are retained below; they are not reported as successful full local runs.
-- Current341-file fingerprint `9ac2aa42d83bd535e63d026f5c8a4099428a73b802f6a15fe92b796147a90a49`; scoped evidence: agents/reading/evals/results/local-verification.json.
-- Local case audit:87 covered/0partial/0missing, with named assertions. All87full-layer cases remain pending/0complete; local coverage is not native service or human acceptance.
-- G0/G1 complete; G2 in_progress, G3–G5 pending. Real preview39240721564 reached committed source fetching but stopped source_timeout with0SDK invocations. Its fixed runtime is unavailable; state and counters are preserved. Native GitHub tool-archive upload and fresh-runner exact Docker restore passed in two separate empty previews, not a successful article/project-context/SDK preview.
-- Production cron remains disabled. No paid model query, actual article PR or human-quality acceptance has occurred.
+- Implementation `00c3c9441d923269e845c0df2e3610080f4f7179`: [Linux Node24.10 four-worker CI39390915925](https://github.com/unirain/obs-auto-agent/actions/runs/39390915925) passed npm ci/typecheck/test/build/spec mapping, **612tests/105files**. Local Node24.19 targeted24/3files, typecheck/build,40schema checks and diff check passed. Current344-file fingerprint `7c9da7f749573b33cfa011886eb23b33bcbf8b855f67ff8d97dbec5df2abaf79`.
+- Local case audit:87covered/0partial/0missing; all87 full-layer cases pending/0complete. Native service, SDK and human quality remain distinct layers.
+- G0/G1 complete; G2 in_progress, G3–G5 pending. Original article version1 source_timeout is archived exactly, including3929bytes/1tool, without substituting its unavailable image. User-approved version2 was committed atomically at sequence15 with actual actor/audit and retained history, confirmed by cold restore. Native evidence: agents/reading/evals/results/preview-regeneration.json.
+- Actual version2 article preview39391728878 is dispatched at the same original preview identity and bound runtime. Its model/usage/output facts are pending until committed inspection; source-free archive diagnostics do not count as article or SDK acceptance.
+- Production cron remains disabled. No article PR or human-quality acceptance is claimed.
 
 ## External resources and remaining acceptance
 
@@ -217,3 +217,17 @@ User explicitly confirmed “用新版本继续”. Fresh readonly native restor
 Existing Actions recovery accepts only three metadata operations and cannot apply this protected new_generation request. Added a preview-only regeneration workflow using the same reading-workspace-writer concurrency. It imports an encrypted Environment envelope bound to canonical SHA256, actual GitHub actor and exact preview identity, validates schema1/new_generation/refresh_runtime=true, restores the explicitly approved image+manifest from trusted immutable artifact, then invokes the existing audited recover CLI. Guidance/body never enters public workflow inputs; only preview_id and payload hash do. No model, image uploader, App or production credentials are available. Existing metadata recovery stays unchanged. New helper writes the validated request to an exclusive private fsynced file and never prints the body.
 
 This is a trusted-host transport for the existing generation management contract, not source/model-provided configuration. Negative helper assertions reject mismatched hash/actor/scope, unknown schema/fields, other recovery actions, absent refresh and skill changes before file creation. Actual generation archival/charges/classification preservation remains covered by the existing persistent batch-management tests. Native application and resumed article execution remain pending.
+
+## 2026-10-20 Approved native regeneration applied and article resumed
+
+Exact implementation00c3c9441d923269e845c0df2e3610080f4f7179 passed612tests/105files in LinuxNode24.10 four-worker CI39390915925, plus local24/typecheck/build/schema40/spec mapping. Native protected management run39391023866 succeeded without model/delivery credentials. Actual actorunirain and approved request were committed with archiveg1, context/version2 and input file atomically at sequence15/revisionc5b98984-4ef7-41dc-b371-9551f70ec92a. A fresh validated Manager cold-read original revision and current head, proving archived project hash928e8629df3189db64686b338d710a0b010946806150a0535a1930cb826debbb is exactly the prior full project, all old3929byte/1tool facts and invocation history retained. New generation2/discovered has contextb70b62ff164055131a4b362ec5a26309181b831e2929836208a7f436c181a987, actual SDK0.3.296/native hash34381f124fbe1b773e81562fd58335ae9d232fbc2fd636fe835090bf6bda0fd6, Node24.10 and approved archived imagefdc1374…/manifestba67c847…. Management invocation count0. Sanitized receipt: agents/reading/evals/results/preview-regeneration.json.
+
+An immutable local intent then preceded one actual article preview dispatch39391728878 at the same preview_id, with no new URL/candidate or namespace. Input URL remains the original LangChain model-router article; this is not frozen human quality evaluation. Run https://github.com/unirain/obs-auto-agent/actions/runs/39391728878. Actual model/usage/output is pending until persisted records can be inspected. G2 in_progress, remaining gates/quality in scope; production cron disabled.
+
+## 2026-10-20 Native source framing/checkpoint amplification
+
+Article run39391728878 is progressing after the timeout fix but slowly: validated snapshots at sequence30/08:22UTC retained12146bytes and sequence53/08:30UTC retained43633bytes,1fetch/1tool, no source snapshot or SDK invocation. An independent bounded anonymous diagnostic fetched the current same URL200/172740bytes in0.8seconds. This identifies per-frame checkpoint amplification rather than source network throughput; the current run is still active and these are snapshot-bound facts, not current-head/zero-future-query claims.
+
+Changed only the host HTTP reader to pull the currently available Readable buffer after each awaited accounting checkpoint. Each actual observed pull remains fully charged and committed before any next pull or successful response; unread internally buffered frames are not prematurely observed or charged. Cumulative active-network timeout and separate absolute deadline remain, with failure draining. Real Node Readable assertions prove100small frames buffered during a blocked checkpoint become one subsequent100byte pull and a stream error joins the first observed checkpoint without charging unread bytes. Existing redirect/over-limit/failure/cold accounting assertions remain.
+
+Actual HTTPS plus local immutable FileStore checkpoints with deliberate100ms backpressure read the full172740bytes in4pulls/1031ms; cold sequence6 exactly matched total and one logical resource. Source hash and result: agents/reading/evals/results/native-https-buffering.json. This is native HTTP/local persistence evidence, not OSS throughput or model/quality proof. Node24 targeted35/4files, typecheck/build/schema40/spec mapping passed. Full614assertion LinuxCI pending. The SDK/native/approved tool image and generation2 context are unchanged; no implicit new_generation or counter reset is needed for this host transport repair. Before a new run, stop/reconcile the slow current run and prove no unknown model call; retain all partial download facts.

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-20T08:11:18.756Z",
+  "status": "new_generation_confirmed",
+  "revision": "c5b98984-4ef7-41dc-b371-9551f70ec92a",
+  "sequence": "00000000000000000015",
+  "workspace_id": "obs-notes-hub/reading-preview/g2-router-55a7ff0c-27c6-4e5f-8866-c818d654706b",
+  "project_id": "project_candidate_378de5b0a4ef1ffb1912cd",
+  "generation_version": 2,
+  "state": "discovered",
+  "reason": "operator_changed_input",
+  "original_revision": "50b05407-0a65-43fa-a28d-46fb81acdd9d",
+  "archived_project_sha256": "928e8629df3189db64686b338d710a0b010946806150a0535a1930cb826debbb",
+  "archive_exact_prior_project": true,
+  "archived_counters": {
+    "download_bytes": 3929,
+    "download_resources": 1,
+    "revisions": 0,
+    "stalled_batches": 0,
+    "supplementary_materials": 0,
+    "tool_calls": 1,
+    "total_download_bytes": 3929,
+    "total_materials": 0,
+    "total_tool_calls": 1
+  },
+  "prior_invocations_preserved": true,
+  "sdk_invocations": 0,
+  "recovery_id": "g2-runtime-refresh-7b46bc04-f98e-4932-86e3-8519dda0568d",
+  "actor": "unirain",
+  "context_id": "b70b62ff164055131a4b362ec5a26309181b831e2929836208a7f436c181a987",
+  "runtime_versions": {
+    "model_version_status": "requested_alias",
+    "node_version": "v24.10.0",
+    "sdk_hash": "34381f124fbe1b773e81562fd58335ae9d232fbc2fd636fe835090bf6bda0fd6",
+    "sdk_version": "0.3.296",
+    "tools_image_id": "sha256:fdc1374bb1c910f61322454e3f9e44c30a05e470f9e927c83abb78e734719496",
+    "tools_manifest_hash": "ba67c847284ce0ef2c38defd78940abd0273ac3ebe83c3989360a4efa0518fe3"
+  },
+  "snapshot_bound": true,
+  "native_management_run": {
+    "run_id": 39391023866,
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39391023866",
+    "status": "success",
+    "implementation_commit": "00c3c9441d923269e845c0df2e3610080f4f7179",
+    "payload_sha256": "027aea8310e1d97032754d4097edcb2304b9b664e73d3a9bcfffbccfd040e489"
+  },
+  "scope": "native preview management only; no model query during regeneration",
+  "user_approval": "\u7528\u65b0\u7248\u672c\u7ee7\u7eed / 2026-10-20",
+  "resumed_preview": {
+    "run_id": 39391728878,
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39391728878",
+    "status": "dispatched_pending_inspection"
+  },
+  "production_cron_enabled": false
+}
