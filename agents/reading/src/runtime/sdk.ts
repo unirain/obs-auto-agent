@@ -30,7 +30,7 @@ export function mcpToolContent(result:unknown):CallToolResult {
 }
 export function normalizeSdkMessage(message:SDKMessage):RuntimeMessage {
   const raw=message as unknown as Record<string,unknown>;const message_id=typeof raw.uuid==='string'?raw.uuid:`${message.type}:${String(raw.subtype??'')}:${String(raw.session_id??'')}`;
-  const actualModel=(raw.message as {model?:unknown}|undefined)?.model;const lifecycle={actual_models:raw.modelUsage&&typeof raw.modelUsage==='object'?Object.keys(raw.modelUsage):typeof actualModel==='string'?[actualModel]:[],session_id:typeof raw.session_id==='string'?raw.session_id:null,provider_request_id:typeof raw.request_id==='string'?raw.request_id:null};
+  const actualModel=(raw.message as {model?:unknown}|undefined)?.model;const providerId=(raw.message as {id?:unknown}|undefined)?.id;const lifecycle={provider_message_id:typeof providerId==='string'?providerId:null,actual_models:raw.modelUsage&&typeof raw.modelUsage==='object'?Object.keys(raw.modelUsage):typeof actualModel==='string'?[actualModel]:[],session_id:typeof raw.session_id==='string'?raw.session_id:null,provider_request_id:typeof raw.request_id==='string'?raw.request_id:null};
   if(message.type==='result'){const usage=summarizeModelUsage(message.modelUsage);const zeroedError=message.subtype!=='success'&&usage.input_tokens===0&&usage.output_tokens===0;
     return {message_id,type:'result',summary:!zeroedError,usage:zeroedError?{...usage,cost_usd:null,cost_status:'unknown'}:usage,success:message.subtype==='success'&&!message.is_error,
     ...(message.subtype==='success'?{result:message.structured_output??message.result}:{}),observable:{...lifecycle,subtype:message.subtype,num_turns:message.num_turns,duration_ms:message.duration_ms,
@@ -39,6 +39,20 @@ export function normalizeSdkMessage(message:SDKMessage):RuntimeMessage {
   let usage=unavailableUsage();const step=(raw.message as {usage?:Record<string,unknown>}|undefined)?.usage;
   if(message.type==='assistant'&&step){const number=(key:string)=>typeof step[key]==='number'&&Number.isFinite(step[key])?step[key] as number:0;usage={input_tokens:number('input_tokens')+number('cache_creation_input_tokens')+number('cache_read_input_tokens'),output_tokens:number('output_tokens'),cost_usd:null,cost_status:'unknown'};}
   return {message_id,type:message.type,summary:false,usage,observable:{...lifecycle,type:message.type,...(typeof raw.subtype==='string'?{subtype:raw.subtype}:{})}};
+}
+/** Tool progress has no usage fields in pinned SDK0.3.296. Coalesce only these
+ * diagnostic frames onto the next durable event; never drop/reorder usage or results.
+ * Progress left at stream interruption is unavailable diagnostic detail, not zero usage.
+ */
+export async function* normalizeSdkStream(messages:AsyncIterable<SDKMessage>):AsyncIterable<RuntimeMessage>{
+ let progress:{schema_version:1;count:number;first_sdk_message_id:string;last_sdk_message_id:string;tool_use_id:string;tool_name:string;elapsed_time_seconds:number}|undefined;
+ for await(const message of messages){
+  if(message.type==='tool_progress'){
+   const count=(progress?.count??0)+1;if(!Number.isSafeInteger(count))throw new Error('sdk_progress_count_invalid');
+   progress={schema_version:1,count,first_sdk_message_id:progress?.first_sdk_message_id??message.uuid,last_sdk_message_id:message.uuid,tool_use_id:message.tool_use_id,tool_name:message.tool_name,elapsed_time_seconds:message.elapsed_time_seconds};continue;
+  }
+  const normalized=normalizeSdkMessage(message);if(progress){normalized.observable={...normalized.observable,coalesced_tool_progress:progress};progress=undefined;}yield normalized;
+ }
 }
 export type SdkSecrets={api_key:string;base_url?:string;provider?:'anthropic'|'deepseek'};
 export function modelProvider(secrets:SdkSecrets):'anthropic'|'deepseek'{return secrets.provider??(secrets.base_url&&new URL(secrets.base_url).hostname==='api.deepseek.com'?'deepseek':'anthropic');}
@@ -75,6 +89,6 @@ export class ClaudeSdkAdapter implements ModelAdapter {
     const options=sdkOptions(request,this.secrets,this.home);if(compatible)options.env={...options.env,ANTHROPIC_MODEL:request.model,ANTHROPIC_SMALL_FAST_MODEL:request.model,ANTHROPIC_DEFAULT_HAIKU_MODEL:request.model,ANTHROPIC_DEFAULT_SONNET_MODEL:request.model,ANTHROPIC_DEFAULT_OPUS_MODEL:request.model};
     const prompt=compatible?`${request.prompt}\nReturn JSON only matching this exact schema. No Markdown fences or additional text.\n${JSON.stringify(request.schema)}`:request.prompt;
     const session=query({prompt,options});
-    try{for await(const message of session){const normalized=normalizeSdkMessage(message);if(compatible){normalized.usage={...normalized.usage,cost_usd:null,cost_status:'unknown'};normalized.observable={...normalized.observable,provider:'deepseek',pricing_status:'unknown',requested_model:request.model};}yield normalized;}}finally{session.close();}
+    try{for await(const normalized of normalizeSdkStream(session)){if(compatible){normalized.usage={...normalized.usage,cost_usd:null,cost_status:'unknown'};normalized.observable={...normalized.observable,provider:'deepseek',pricing_status:'unknown',requested_model:request.model};}yield normalized;}}finally{session.close();}
   }
 }
