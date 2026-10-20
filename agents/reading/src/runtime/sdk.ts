@@ -40,18 +40,24 @@ export function normalizeSdkMessage(message:SDKMessage):RuntimeMessage {
   if(message.type==='assistant'&&step){const number=(key:string)=>typeof step[key]==='number'&&Number.isFinite(step[key])?step[key] as number:0;usage={input_tokens:number('input_tokens')+number('cache_creation_input_tokens')+number('cache_read_input_tokens'),output_tokens:number('output_tokens'),cost_usd:null,cost_status:'unknown'};}
   return {message_id,type:message.type,summary:false,usage,observable:{...lifecycle,type:message.type,...(typeof raw.subtype==='string'?{subtype:raw.subtype}:{})}};
 }
-/** Tool progress has no usage fields in pinned SDK0.3.296. Coalesce only these
- * diagnostic frames onto the next durable event; never drop/reorder usage or results.
+/** Tool progress and system/thinking_tokens have no billing usage fields in
+ * pinned SDK0.3.296. Thinking estimates are explicitly approximate progress.
+ * Coalesce only these diagnostics onto the next durable event; never drop/reorder usage or results.
  * Progress left at stream interruption is unavailable diagnostic detail, not zero usage.
  */
 export async function* normalizeSdkStream(messages:AsyncIterable<SDKMessage>):AsyncIterable<RuntimeMessage>{
  let progress:{schema_version:1;count:number;first_sdk_message_id:string;last_sdk_message_id:string;tool_use_id:string;tool_name:string;elapsed_time_seconds:number}|undefined;
+ let thinking:{schema_version:1;count:number;first_sdk_message_id:string;last_sdk_message_id:string;last_estimated_tokens:number;last_estimated_tokens_delta:number;billing_status:'not_billing'}|undefined;
  for await(const message of messages){
   if(message.type==='tool_progress'){
    const count=(progress?.count??0)+1;if(!Number.isSafeInteger(count))throw new Error('sdk_progress_count_invalid');
    progress={schema_version:1,count,first_sdk_message_id:progress?.first_sdk_message_id??message.uuid,last_sdk_message_id:message.uuid,tool_use_id:message.tool_use_id,tool_name:message.tool_name,elapsed_time_seconds:message.elapsed_time_seconds};continue;
   }
-  const normalized=normalizeSdkMessage(message);if(progress){normalized.observable={...normalized.observable,coalesced_tool_progress:progress};progress=undefined;}yield normalized;
+  if(message.type==='system'&&message.subtype==='thinking_tokens'&&Number.isFinite(message.estimated_tokens)&&message.estimated_tokens>=0&&Number.isFinite(message.estimated_tokens_delta)&&message.estimated_tokens_delta>=0){
+   const count=(thinking?.count??0)+1;if(!Number.isSafeInteger(count))throw new Error('sdk_thinking_progress_count_invalid');
+   thinking={schema_version:1,count,first_sdk_message_id:thinking?.first_sdk_message_id??message.uuid,last_sdk_message_id:message.uuid,last_estimated_tokens:message.estimated_tokens,last_estimated_tokens_delta:message.estimated_tokens_delta,billing_status:'not_billing'};continue;
+  }
+  const normalized=normalizeSdkMessage(message);if(progress){normalized.observable={...normalized.observable,coalesced_tool_progress:progress};progress=undefined;}if(thinking){normalized.observable={...normalized.observable,coalesced_thinking_progress:thinking};thinking=undefined;}yield normalized;
  }
 }
 export type SdkSecrets={api_key:string;base_url?:string;provider?:'anthropic'|'deepseek'};

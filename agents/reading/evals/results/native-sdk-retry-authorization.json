@@ -24,7 +24,7 @@
   "prior_cost_remains_unknown": true,
   "pending_input_unchanged": true,
   "counters_unchanged": true,
-  "replacement_invocation_id": null,
+  "replacement_invocation_id": "inv_7cd9eade-8b8c-461e-bef0-fdec1c6c6e7c",
   "management_model_calls": 0,
   "maximum_authorized_retries": 1,
   "authorization_workflow_run": 39406916710,
@@ -32,10 +32,26 @@
   "retry_workflow_run": 39407380862,
   "retry_workflow_url": "https://github.com/unirain/obs-auto-agent/actions/runs/39407380862",
   "retry_workflow_head": "41aae18da1f6aac663b756e25f318b7dd2adfdd6",
-  "retry_execution_status": "dispatched_terminal_unverified",
+  "retry_execution_status": "actual_fixed_input_query_running_terminal_unverified",
   "terminal_response_present": false,
   "g2_complete": false,
   "production_cron_enabled": false,
   "human_quality_acceptance": false,
-  "verification_scope": "Native immutable recovery/archived prior records and fixed input; dispatch is not successful model execution evidence."
+  "verification_scope": "Native immutable recovery/archived prior records and fixed input; dispatch is not successful model execution evidence.",
+  "retry_execution_observed_at": "2026-10-20T10:31:51.310Z",
+  "retry_execution_revision": "beafcbad-4278-4923-9580-4acc5e2bde48",
+  "retry_execution_sequence": "00000000000000000159",
+  "fixed_input_hash_verified": true,
+  "fixed_context_hash_verified": true,
+  "native_model_tool_communication_observed": true,
+  "new_query_summary_present": false,
+  "new_complete_token_total": null,
+  "new_complete_cost_usd": null,
+  "new_partial_usage_observations": {
+    "cost_status": "unknown",
+    "cost_usd": null,
+    "input_tokens": 26930,
+    "output_tokens": 0
+  },
+  "old_unknown_usage_preserved": true
 }
