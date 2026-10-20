@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-20T08:38:06.128817+00:00",
-  "implementation_sha256": "7964cc5f9ca01b69e30c3056525836daea8b81db1d44caaf6d7b719042114e9e",
-  "fingerprint_files": 344,
+  "recorded_at": "2026-10-20T09:59:38.720678+00:00",
+  "implementation_sha256": "2e0c63e162e9539273465f845df10e13c0878709a62c9abad1944441b24dc97c",
+  "fingerprint_files": 346,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "LinuxCI614/105 passed; local targeted35/4files passed",
+    "npm test": "LinuxCI620/107 passed; targeted SDK10/3files and26/3files passed (overlapping sdk-progress tests)",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -13,11 +13,11 @@
     "npm test -- --no-file-parallelism": "not rerun"
   },
   "local_tests": {
-    "files": 4,
-    "passed": 35,
+    "files": 3,
+    "passed": 26,
     "failed": 0,
     "runtime": "Node24.19.0",
-    "scope": "payload streams, tool/browser byte budgets and full material-chain cold persistence"
+    "scope": "latest SDK normalization/executor/runtime version regression; separate10/3file progress/spawn/active recovery also passed"
   },
   "live_tests": {
     "default_command": {
@@ -41,6 +41,12 @@
       "status": "passed",
       "evidence": "agents/reading/evals/results/preview-regeneration.json",
       "scope": "atomic archival/new generation and cold readback only; resumed article pending"
+    },
+    "native_sdk_classification_interruption": {
+      "executed": 1,
+      "status": "outcome_unknown",
+      "evidence": "agents/reading/evals/results/native-sdk-interruption.json",
+      "retry_executed": false
     }
   },
   "spec_cases": {
@@ -48,9 +54,22 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Current344-file fingerprint7964cc5f: targeted35/typecheck/build/schema40/spec mapping plus614/105 LinuxCI. ActualHTTPS/local-checkpoint pull proof passed; prior slow source run cancelled and cold-reconciled with zero SDK invocations and54585 committed byte lower bound. Same generation/context resumed; current SDK/quality outcome pending.",
+  "scope": "Current346file fingerprint2e0c63: typecheck/build/schema40/spec mapping, targeted10 and26 overlapping cases, and exact620/107 LinuxCI passed. Native source/SDK tool communication observed, but the one stopped classification query has no terminal or whole-query receipt; outcome, complete tokens and USD unknown. No retry executed; G2 waits explicit duplicate-charge acknowledgement. Progress coalescing is not yet native-model verified.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "passed",
+    "implementation_commit": "c17799dc350c11a8729cd0c4cbdc64bc2609e846",
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "SDK no-usage progress coalescing, provider IDs, retained result/late usage/error semantics plus full suite",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39403961908",
+    "tests": {
+      "files": 107,
+      "passed": 620,
+      "failed": 0,
+      "workers": 4
+    }
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "0797e4f50f36b75fc6b5da9a309997ce77e2f6d9",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -59,19 +78,6 @@
     "tests": {
       "files": 105,
       "passed": 614,
-      "failed": 0,
-      "workers": 4
-    }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "00c3c9441d923269e845c0df2e3610080f4f7179",
-    "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Protected preview generation transport plus existing complete suite",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39390915925",
-    "tests": {
-      "files": 105,
-      "passed": 612,
       "failed": 0,
       "workers": 4
     }
