@@ -68,7 +68,14 @@
       "failure_kind": "test timeouts",
       "duration_seconds": 447.93
     },
-    "timeout_file_replay": "pending single-worker diagnostic; does not replace four-worker CI"
+    "timeout_file_replay": {
+      "status": "passed",
+      "files": 7,
+      "tests": 43,
+      "workers": 1,
+      "duration_seconds": 380.85,
+      "scope": "Diagnostic replay of all timeout files after full-suite completion; does not replace the four-worker Linux CI or erase local full-suite timeouts."
+    }
   },
   "native_effect_of_fix": "unverified",
   "g2_complete": false,
