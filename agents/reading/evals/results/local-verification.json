@@ -1,10 +1,10 @@
 {
-  "recorded_at": "2026-10-20T08:13:25.805366+00:00",
-  "implementation_sha256": "7c9da7f749573b33cfa011886eb23b33bcbf8b855f67ff8d97dbec5df2abaf79",
+  "recorded_at": "2026-10-20T08:38:06.128817+00:00",
+  "implementation_sha256": "7964cc5f9ca01b69e30c3056525836daea8b81db1d44caaf6d7b719042114e9e",
   "fingerprint_files": 344,
   "commands": {
     "npm run typecheck": "passed",
-    "npm test": "LinuxCI612/105 passed; local targeted24/3files passed",
+    "npm test": "LinuxCI614/105 passed; local targeted35/4files passed",
     "npm run build": "passed",
     "npm run coverage:spec": "passed",
     "npm run test:live": "skipped",
@@ -13,11 +13,11 @@
     "npm test -- --no-file-parallelism": "not rerun"
   },
   "local_tests": {
-    "files": 3,
-    "passed": 24,
+    "files": 4,
+    "passed": 35,
     "failed": 0,
     "runtime": "Node24.19.0",
-    "scope": "protected input, workflow boundaries and persistent generation/batch management"
+    "scope": "payload streams, tool/browser byte budgets and full material-chain cold persistence"
   },
   "live_tests": {
     "default_command": {
@@ -48,9 +48,22 @@
     "complete": 0,
     "pending": 87
   },
-  "scope": "Current344-file fingerprint7c9da7 has targeted24/typecheck/build/schema40/spec mapping plus exact612/105 LinuxCI. Native management confirmed exact prior archive, actor/request audit and version2 runtime binding; article resume dispatched, model/quality outcome pending.",
+  "scope": "Current344-file fingerprint7964cc5f: targeted35/typecheck/build/schema40/spec mapping plus614/105 LinuxCI. ActualHTTPS/local-checkpoint pull proof passed; prior slow source run cancelled and cold-reconciled with zero SDK invocations and54585 committed byte lower bound. Same generation/context resumed; current SDK/quality outcome pending.",
   "fingerprint_rule": "Sorted relative path + NUL + bytes + NUL; src, schemas, prompts, deploy, workflows, evals excluding results, agent Markdown/YAML, package/lock/tsconfigs/Vitest/Node/AGENTS/spec.",
   "ci": {
+    "status": "passed",
+    "implementation_commit": "0797e4f50f36b75fc6b5da9a309997ce77e2f6d9",
+    "environment": "Linux / Node24.10.0 / four workers",
+    "scope": "Pull readable buffers while preserving per-read durable payload accounting and deadlines",
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39394052104",
+    "tests": {
+      "files": 105,
+      "passed": 614,
+      "failed": 0,
+      "workers": 4
+    }
+  },
+  "previous_ci": {
     "status": "passed",
     "implementation_commit": "00c3c9441d923269e845c0df2e3610080f4f7179",
     "environment": "Linux / Node24.10.0 / four workers",
@@ -59,19 +72,6 @@
     "tests": {
       "files": 105,
       "passed": 612,
-      "failed": 0,
-      "workers": 4
-    }
-  },
-  "previous_ci": {
-    "status": "passed",
-    "implementation_commit": "d0ffe1db03f69b83019c9dc14c7021d6db8d06ea",
-    "environment": "Linux / Node24.10.0 / four workers",
-    "scope": "Source active-network timeout and exact preview runtime artifact preservation; package install, typecheck/test/build/spec mapping",
-    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39244416943",
-    "tests": {
-      "files": 104,
-      "passed": 602,
       "failed": 0,
       "workers": 4
     }

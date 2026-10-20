@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "observed_at": "2026-10-20T08:56:37.427Z",
+  "scope": "native readonly OSS fixed commit-key comparison; no cache or write; serial-first observational timings are not an SLA",
+  "node_version": "v24.19.0",
+  "source_code_sha256": "d9ea1d0ac37d90f5140e1411d839f952edbad92f1314669693ae2aa02321b2f1",
+  "keys": 88,
+  "adapter_reads": 176,
+  "max_active": 8,
+  "all_key_hashes_identical": true,
+  "head_revision": "bed44286-1933-4a71-bf0c-260a33ef902a",
+  "head_sequence": "00000000000000000087",
+  "serial_ms": 4629,
+  "parallel_ms": 847,
+  "remote_writes": 0,
+  "model_calls_by_probe": 0
+}

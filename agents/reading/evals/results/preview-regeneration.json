@@ -49,7 +49,8 @@
   "resumed_preview": {
     "run_id": 39391728878,
     "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39391728878",
-    "status": "dispatched_pending_inspection"
+    "status": "cancelled_before_sdk_after_source_framing_diagnosis",
+    "reconciliation": "agents/reading/evals/results/source-pull-recovery.json"
   },
   "production_cron_enabled": false
 }

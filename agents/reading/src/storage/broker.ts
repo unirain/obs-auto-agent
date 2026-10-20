@@ -3,6 +3,7 @@ import {
   sha256,
   type CommitRecord,
   type WorkspaceManifest,
+  type ObjectStore,
 } from "../contracts/index.js";
 import { OssObjectStore, type OssStoreOptions } from "./oss.js";
 import { listAll, preflight } from "./preflight.js";
@@ -31,6 +32,24 @@ export interface BrokerInventory {
   complete: boolean;
   objects: InventoryObject[];
   reservations: StorageReservation[];
+}
+/** Fetch bounded independent immutable rows, then validate every parent in exact sequence order.
+ * No cache: every call rereads the complete listed chain. Failed windows are fully joined.
+ */
+export async function readCapacityCommitChain(store:Pick<ObjectStore,'read'>,prefix:string,keys:readonly string[]):Promise<CommitRecord>{
+ for(let i=0;i<keys.length;i++)if(keys[i]!==`${prefix}commits/${BigInt(i).toString().padStart(20,'0')}.json`)throw new AgentError('corrupt','Capacity commit chain gap');
+ let priorKey:string|null=null,priorHash:string|null=null,head:CommitRecord|null=null;
+ for(let offset=0;offset<keys.length;offset+=8){
+  const window=keys.slice(offset,offset+8),results=await Promise.allSettled(window.map(key=>store.read(key)));
+  const failure=results.find((result):result is PromiseRejectedResult=>result.status==='rejected');if(failure)throw failure.reason;
+  for(let index=0;index<window.length;index++){
+   const key=window[index]!,result=results[index]!;if(result.status!=='fulfilled')throw new AgentError('unknown','Capacity read unavailable');
+   const bytes=result.value,c=decode<CommitRecord>(bytes,'checkpoint');validateCommit(c);
+   if(c.parent_commit_key!==priorKey||c.parent_commit_sha256!==priorHash||c.manifest_key!==`${prefix}manifests/${c.revision}.json`||(head&&(head.workspace_id!==c.workspace_id||head.execution_scope!==c.execution_scope)))throw new AgentError('corrupt','Capacity chain identity mismatch');
+   priorKey=key;priorHash=sha256(bytes);head=c;
+  }
+ }
+ if(!head)throw new AgentError('corrupt','Capacity HEAD unavailable');return head;
 }
 /** This broker reads control chains and reservation state only. The preview receives summaries, never this adapter. */
 export function capacityBrokerFromEnvironment(
@@ -138,33 +157,7 @@ export function capacityBrokerFromEnvironment(
       }
       for (const [prefix, keys] of groups) {
         keys.sort();
-        let priorKey: string | null = null;
-        let priorHash: string | null = null;
-        let head: CommitRecord | null = null;
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i]!;
-          if (
-            key !==
-            `${prefix}commits/${BigInt(i).toString().padStart(20, "0")}.json`
-          )
-            throw new AgentError("corrupt", "Capacity commit chain gap");
-          const bytes = await store.read(key);
-          const c = decode<CommitRecord>(bytes, "checkpoint");
-          validateCommit(c);
-          if (
-            c.parent_commit_key !== priorKey ||
-            c.parent_commit_sha256 !== priorHash ||
-            c.manifest_key !== `${prefix}manifests/${c.revision}.json` ||
-            (head &&
-              (head.workspace_id !== c.workspace_id ||
-                head.execution_scope !== c.execution_scope))
-          )
-            throw new AgentError("corrupt", "Capacity chain identity mismatch");
-          priorKey = key;
-          priorHash = sha256(bytes);
-          head = c;
-        }
-        if (!head) throw new AgentError("corrupt", "Capacity HEAD unavailable");
+        const head = await readCapacityCommitChain(store,prefix,keys);
         const manifestBytes = await store.read(head.manifest_key);
         assertBytes(manifestBytes, head.manifest_sha256);
         const manifest = decode<WorkspaceManifest>(manifestBytes, "workspace");

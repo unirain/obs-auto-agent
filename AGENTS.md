@@ -70,3 +70,5 @@ Before reporting completion, run the applicable typecheck, tests and build, insp
 - Preview runtime regeneration may use reading-preview-regenerate.yml with an operator-approved encrypted schema1 envelope bound to canonical SHA256, actual GitHub actor and preview identity. Restore its exact approved image before audited recover; no model/production/delivery credentials enter that job, and public inputs never contain guidance/body. Preserve the existing metadata-only recovery workflow.
 
 - Native HTTP consumes available Readable buffers in pull mode after each checkpoint; unobserved buffered packet frames are not individual application reads. Persist every byte of each actual pull before the next read or success, preserve cumulative active-network/project deadlines, and drain an observed pull checkpoint on failure without charging unread buffers.
+
+- Capacity chain reads may use bounded windows of eight independent immutable GETs; reread the full fresh listed chain on every call, join all started reads on failure, and validate every schema/parent/hash/identity in exact sequence order. Do not replace validation with caching or inferred absence.

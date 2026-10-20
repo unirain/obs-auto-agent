@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-20T08:33:52.062Z",
+  "run_id": 39391728878,
+  "outcome": "cancelled",
+  "reason": "measured per-frame checkpoint amplification; host pull repair available",
+  "last_validated_revision": "823d1eda-ec38-4a25-9be6-37986f9638e0",
+  "last_validated_sequence": "00000000000000000061",
+  "generation_version": 2,
+  "context_id": "b70b62ff164055131a4b362ec5a26309181b831e2929836208a7f436c181a987",
+  "committed_download_lower_bound": 54585,
+  "source_snapshot_count": 0,
+  "sdk_invocations": 0,
+  "pending_query": null,
+  "run_final_report": "unavailable",
+  "duration_ms": null,
+  "usage": null,
+  "uncommitted_or_wire_observations": "unknown",
+  "next_run": {
+    "run_id": 39394503171,
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39394503171",
+    "implementation_commit": "0797e4f50f36b75fc6b5da9a309997ce77e2f6d9",
+    "same_generation": true,
+    "same_context": true,
+    "status": "dispatched_pending_inspection"
+  },
+  "scope": "post-cancellation validated persistent state, not zero wire/cost/duration inference"
+}
