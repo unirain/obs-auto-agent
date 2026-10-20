@@ -1,0 +1,67 @@
+name: Reading Preview Regeneration
+on:
+  workflow_dispatch:
+    inputs:
+      preview_id:
+        description: Existing isolated preview identity
+        type: string
+        required: true
+      payload_sha256:
+        description: SHA256 of canonical approved protected envelope (no body in inputs)
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: reading-workspace-writer
+  cancel-in-progress: false
+jobs:
+  regenerate:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: reading-preview
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.10.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck && npm test && npm run build
+      - name: Validate approved protected input and restore its exact runtime
+        id: prepared
+        env:
+          APPROVED_PREVIEW_ID: ${{ inputs.preview_id }}
+          APPROVED_PAYLOAD_SHA256: ${{ inputs.payload_sha256 }}
+          READING_PREVIEW_RECOVERY_REQUEST: ${{ secrets.READING_PREVIEW_RECOVERY_REQUEST }}
+          GITHUB_TOKEN: ${{ github.token }}
+          CACHE_REPOSITORY: ${{ github.repository }}
+          CACHE_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {appendFile} from 'node:fs/promises';
+          import {join} from 'node:path';
+          import {prepareProtectedRegeneration} from './dist/agents/reading/src/app/protected-regeneration.js';
+          import {runtimeCacheCli} from './dist/agents/reading/src/tools/runtime-cache.js';
+          const e=process.env;
+          const request=await prepareProtectedRegeneration(e.READING_PREVIEW_RECOVERY_REQUEST??'',{payload_sha256:e.APPROVED_PAYLOAD_SHA256,preview_id:e.APPROVED_PREVIEW_ID,actor:e.GITHUB_ACTOR},join(e.RUNNER_TEMP,'protected-regeneration'));
+          const restored=await runtimeCacheCli(['restore','--root',process.cwd(),'--output-dir',join(e.RUNNER_TEMP,'regeneration-runtime'),'--repository',e.CACHE_REPOSITORY,'--branch',e.CACHE_BRANCH,'--fixed-image',request.image_id,'--fixed-manifest',request.manifest_hash]);
+          if(restored.status!=='restored'||restored.image_id!==request.image_id)throw new Error('approved_runtime_not_restored');
+          await appendFile(e.GITHUB_OUTPUT,`request_file=${request.request_file}\nimage_id=${request.image_id}\n`);
+          console.log(JSON.stringify({status:'approved_runtime_restored',image_id:request.image_id,manifest_hash:request.manifest_hash,recovery_id:request.recovery_id}));
+          NODE
+      - name: Apply audited preview generation without model or delivery credentials
+        env:
+          READING_SHARED_MUTEX_HELD: 'true'
+          APPROVED_PREVIEW_ID: ${{ inputs.preview_id }}
+          APPROVED_REQUEST_FILE: ${{ steps.prepared.outputs.request_file }}
+          READING_TOOLS_IMAGE: ${{ steps.prepared.outputs.image_id }}
+          OSS_PREVIEW_CREDENTIALS: ${{ secrets.OSS_PREVIEW_CREDENTIALS }}
+          READING_CAPACITY_VIEW_CREDENTIALS: ${{ secrets.READING_CAPACITY_VIEW_CREDENTIALS }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run reading -- recover --deployment agents/reading/deploy/examples/preview.json --mode preview --preview-id "$APPROVED_PREVIEW_ID" --request-file "$APPROVED_REQUEST_FILE"

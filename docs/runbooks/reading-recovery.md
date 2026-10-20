@@ -91,3 +91,9 @@ enabled/suspended bucket 的旧 `null` version 必须使用显式 `versionId=nul
 可信 Root 管理入口的 `new_generation` 必须先用 `checkGenerationReadiness` 核对全部历史 seals/records 和实际 GitHub 项目范围，不只看当前 generation。任何历史 PR（包括已关闭和已合并）、未决写入、未知 API 结果、额外或人工修改分支均拒绝。匹配原 expected commit 的旧枝只保留；不强推或删除。只读 readiness audit 必须与新版本请求原子记录；下一发布仍重新核验所有历史，不能把一次旧允许当永久授权。
 
 反馈管理入口使用 `prepareHumanReviewFeedback` 的原子 bundle，与请求回执同一 checkpoint 保存。它重新读取真实 PR 当前状态/HEAD，并绑定已确认的 PR ID 和可信操作人；普通评论不执行管理动作，反馈也不修改 prefs。不能先调用旧 standalone feedback helper 再另存请求成功回执，否则中断会留下无法一致重放的部分结果。
+
+## 受保护的 preview 新生成版本（云端）
+
+`reading-preview-regenerate.yml` 只处理已经批准的 preview `new_generation` 与 `refresh_runtime=true`，共用全仓库 writer mutex，不持有模型、图床、App 或正式存储身份。操作员将 schema1 信封放入现有 reading-preview Environment 的 `READING_PREVIEW_RECOVERY_REQUEST` Secret，公开 inputs 仅给 `preview_id` 与规范 JSON 的 SHA256。信封含 `actor`、`preview_id`、`runtime`（image_id/manifest_hash）和原有 `request`。必须绑定真实 GitHub actor、精确 revision、reason、evidence_reference 和已改变的 guidance；此入口拒绝 skill 变更及其他恢复动作。
+
+宿主验证信封后写入0600的排他文件，按批准的 image/manifest 精确恢复已归档镜像，随后调用既有 `recover --request-file`。无法恢复镜像时停止，不重建替代；原 revision 漂移或不确定调用未核对时，原管理契约继续拒绝。结果未知先只读检查 recovery_id/归档/新版本，不能另造请求重试。该入口本身不发起模型调用；确认原子归档和新版本后，再使用原 preview_id 续跑。
