@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "implementation_commit": "aa9abb24ae4a02c5d2a17d3ecf20971a2ea83238",
+  "implementation_sha256": "6d4a229e3904aab5a4ea87440e79af4a578219bc02365d63abe1a7e8041cd672",
+  "fingerprint_files": 347,
+  "sdk_version": "0.3.296",
+  "sdk_contract": "SDKThinkingTokensMessage in installed sdk.d.ts: per-block estimates and diagnostic increments, not authoritative billed output_tokens; no billing usage fields.",
+  "native_observation": {
+    "run_id": 39407380862,
+    "observed_at": "2026-10-20T10:38:02.105Z",
+    "sequence": "00000000000000000184",
+    "revision": "08f2f97b-dc89-45cf-9399-237d7bceb8d1",
+    "replacement_invocation_id": "inv_7cd9eade-8b8c-461e-bef0-fdec1c6c6e7c",
+    "retained_events": 17,
+    "thinking_progress_events": 10,
+    "assistant_events": 4,
+    "user_events": 2,
+    "system_init_events": 1,
+    "terminal_response_present": false,
+    "snapshot_bound": true
+  },
+  "change_scope": "Host observation normalization only; no SDK options, model prompt, fixed input, skills, native SDK or tool image change. Active run is not hot-reloaded.",
+  "coalesced_metadata": {
+    "schema_version": 1,
+    "billing_status": "not_billing",
+    "bounded_samples": "count, first/last message IDs, last estimate and delta; cumulative estimates never added to billing"
+  },
+  "focused_tests": {
+    "passed": 8,
+    "files": 2,
+    "persistence": "Actual FileObjectStore and ApplicationInvocationJournal cold restore after success/interruption; same invocation reused or blocked, no duplicate simulated external call."
+  },
+  "linux_ci": {
+    "run_id": 39410859911,
+    "url": "https://github.com/unirain/obs-auto-agent/actions/runs/39410859911",
+    "conclusion": "success",
+    "node": "v24.10.0",
+    "workers": 4,
+    "tests_passed": 625,
+    "files_passed": 108,
+    "checks": [
+      "npm ci",
+      "typecheck",
+      "test",
+      "build",
+      "coverage:spec"
+    ]
+  },
+  "local_verification": {
+    "typecheck": "passed",
+    "build": "passed",
+    "schemas_checked": 40,
+    "spec_mapping": {
+      "mapped": 87,
+      "local_covered": 87,
+      "full_layer_complete": 0
+    },
+    "prior_full_run": {
+      "passed": 623,
+      "files": 107,
+      "before_two_new_cold_tests": true
+    },
+    "latest_full_run": {
+      "passed": 615,
+      "failed": 10,
+      "files": 108,
+      "failed_files": 7,
+      "failure_kind": "test timeouts",
+      "duration_seconds": 447.93
+    },
+    "timeout_file_replay": "pending single-worker diagnostic; does not replace four-worker CI"
+  },
+  "native_effect_of_fix": "unverified",
+  "g2_complete": false,
+  "human_quality_acceptance": false,
+  "production_cron_enabled": false
+}
